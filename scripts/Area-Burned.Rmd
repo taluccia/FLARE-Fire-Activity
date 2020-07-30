@@ -1,0 +1,423 @@
+---
+title: "Area burned"
+author: "Anna Talucci"
+date: "5/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+# Packages
+
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+```
+
+# Define graph Theme and color Palette 
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+# Data 
+
+Read in shape files
+
+
+```{r}
+f01 = st_read("../data/clean-shapefile/fires2001.shp", "fires2001") 
+f02 = st_read("../data/clean-shapefile/fires2002.shp", "fires2002") 
+f03 = st_read("../data/clean-shapefile/fires2003.shp", "fires2003")
+f04 = st_read("../data/clean-shapefile/fires2004.shp", "fires2004") 
+f05 = st_read("../data/clean-shapefile/fires2005.shp", "fires2005") 
+```
+
+```{r}
+f06 = st_read("../data/clean-shapefile/fires2006.shp", "fires2006") 
+f07 = st_read("../data/clean-shapefile/fires2007.shp", "fires2007") 
+f08 = st_read("../data/clean-shapefile/fires2008.shp", "fires2008")
+f09 = st_read("../data/clean-shapefile/fires2009.shp", "fires2009") 
+f10 = st_read("../data/clean-shapefile/fires2010.shp", "fires2010") 
+```
+
+```{r}
+f11 = st_read("../data/clean-shapefile/fires2011.shp", "fires2011") 
+f12 = st_read("../data/clean-shapefile/fires2012.shp", "fires2012") 
+f13 = st_read("../data/clean-shapefile/fires2013.shp", "fires2013")
+f14 = st_read("../data/clean-shapefile/fires2014.shp", "fires2014") 
+f15 = st_read("../data/clean-shapefile/fires2015.shp", "fires2015") 
+```
+
+```{r}
+f16 = st_read("../data/clean-shapefile/fires2016.shp", "fires2016") 
+f17 = st_read("../data/clean-shapefile/fires2017.shp", "fires2017") 
+f18 = st_read("../data/clean-shapefile/fires2018.shp", "fires2018")
+f19 = st_read("../data/clean-shapefile/fires2019.shp", "fires2019")
+f20 = st_read("../data/clean-shapefile/fires2020.shp", "fires2020")
+
+```
+
+
+```{r}
+head(f18)
+```
+
+
+
+
+# Data prep
+- pull attributes out into a data frame
+- create unique id [e.g. mutate(ID =  paste(site, burn_year, transect, plot, sep = '_'))]
+- combine all data tables
+
+```{r}
+st_geometry(f01) <- NULL
+st_geometry(f02) <- NULL
+st_geometry(f03) <- NULL
+st_geometry(f04) <- NULL
+st_geometry(f05) <- NULL
+st_geometry(f06) <- NULL
+st_geometry(f07) <- NULL
+st_geometry(f08) <- NULL
+st_geometry(f09) <- NULL
+st_geometry(f10) <- NULL
+st_geometry(f11) <- NULL
+st_geometry(f12) <- NULL
+st_geometry(f13) <- NULL
+st_geometry(f14) <- NULL
+st_geometry(f15) <- NULL
+st_geometry(f16) <- NULL
+st_geometry(f17) <- NULL
+st_geometry(f18) <- NULL
+st_geometry(f19) <- NULL
+st_geometry(f20) <- NULL
+```
+
+```{r}
+head(f18)
+```
+
+```{r}
+f01_df = as.data.frame(f01)
+f02_df = as.data.frame(f02)
+f03_df = as.data.frame(f03)
+f04_df = as.data.frame(f04)
+f05_df = as.data.frame(f05)
+f06_df = as.data.frame(f06)
+f07_df = as.data.frame(f07)
+f08_df = as.data.frame(f08)
+f09_df = as.data.frame(f09)
+f10_df = as.data.frame(f10)
+f11_df = as.data.frame(f11)
+f12_df = as.data.frame(f12)
+f13_df = as.data.frame(f13)
+f14_df = as.data.frame(f14)
+f15_df = as.data.frame(f15)
+f16_df = as.data.frame(f16)
+f17_df = as.data.frame(f17)
+f18_df = as.data.frame(f18)
+f19_df = as.data.frame(f19)
+f20_df = as.data.frame(f20)
+```
+
+
+```{r}
+f01_uni = f01_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f02_uni = f02_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f03_uni = f03_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f04_uni = f04_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f05_uni = f05_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f06_uni = f06_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f07_uni = f07_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f08_uni = f08_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f09_uni = f09_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f10_uni = f10_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f11_uni = f11_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f12_uni = f12_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f13_uni = f13_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f14_uni = f14_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f15_uni = f15_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f16_uni = f16_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f17_uni = f17_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f18_uni = f18_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f19_uni = f19_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+f20_uni = f20_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+```
+
+
+```{r}
+head(f01_uni)
+head(f18_uni)
+```
+
+```{r}
+f01_uni
+f02_uni
+```
+
+
+```{r}
+c01_02 = rbind(f01_uni, f02_uni)
+c03_04 = rbind(f03_uni, f04_uni)
+c05_06 = rbind(f05_uni, f06_uni)
+c07_08 = rbind(f07_uni, f08_uni)
+c09_10 = rbind(f09_uni, f10_uni)
+c11_12 = rbind(f11_uni, f12_uni)
+c13_14 = rbind(f13_uni, f14_uni)
+c15_16 = rbind(f15_uni, f16_uni)
+c17_18 = rbind(f17_uni, f18_uni)
+
+```
+
+```{r}
+d1_4 = rbind(c01_02, c03_04)
+d5_8 = rbind(c05_06, c07_08)
+d9_12 = rbind(c09_10, c11_12)
+d13_16 = rbind(c13_14, c15_16)
+d13_18 = rbind(d13_16, c17_18)
+d13_19 = rbind(d13_18, f19_uni)
+d9_19 = rbind(d9_12, d13_19) 
+d5_19 = rbind(d5_8, d9_19) 
+d1_19 = rbind(d1_4, d5_19) 
+```
+
+```{r}
+head(d1_19)
+```
+```{r}
+d1_19
+```
+
+# Summary Data
+
+```{r}
+fire_frq = d1_19 %>% count(fire_yr, name='n_fires')
+fire_frq = as.data.frame(fire_frq)
+```
+
+
+```{r}
+( sumdat2 = summarise( group_by(d1_19, "Fire Year" = fire_yr),
+n = n(),
+Mean = mean(area_ha),
+SD = sd(area_ha),
+Median = median(area_ha),
+Minimum = min(area_ha),
+Maximum = max(area_ha) ) )
+```
+
+```{r}
+summarise(d1_19, 
+n = n(),
+Total = sum(area_ha),
+Mean = mean(area_ha),
+SD = sd(area_ha),
+Median = median(area_ha),
+Minimum = min(area_ha),
+Maximum = max(area_ha) ) 
+```
+## Fire size class
+
+Fire Size classes in hectares
+1.  400-999
+2.  1,000 - 1,999
+3.  2,000 - 4,999
+4.  5,000 - 9,999
+5.  10,000 - 19,999
+6.  20,000 - 49,999
+7.  50,000 - 99,999
+8.  100,000 +
+
+```{r}
+head(d1_19)
+```
+
+```{r}
+d1_19 %>% mutate(area_ha_round = round(area_ha, 0))
+```
+
+
+```{r}
+
+fire_class = d1_19  %>% mutate(area_ha_round = round(area_ha, 0)) %>% 
+  mutate(fire_size_class = ifelse(area_ha_round %in% 400:999, "1",
+                                     ifelse(area_ha_round %in% 1000:1999, "2",
+                                            ifelse(area_ha_round %in% 2000:4999, "3",
+                                                   ifelse(area_ha_round %in% 5000:9999, "4",
+                                                          ifelse(area_ha_round %in% 10000:19999, "5",
+                                                                 ifelse(area_ha_round %in% 20000:49999, "6",
+                                                   ifelse(area_ha_round %in% 50000:99999, "7", "8"))))))))
+
+fire_class
+```
+
+```{r}
+fire_class_ct = fire_class %>% count(fire_size_class, name='count')
+fire_class_ct = as.data.frame(fire_class_ct)
+fire_class_ct
+```
+
+
+# Figures
+
+```{r}
+plot_frq = ggplot(fire_frq, aes(fire_yr, n_fires)) +
+  geom_bar(stat="identity", width = 0.5, fill="tomato2") +
+  xlab('Year') +
+  ylab("Fire frequency (count)") +
+  comp_theme + 
+      theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+
+plot_frq
+```
+
+```{r}
+plot_frq_line = ggplot(fire_frq, aes(x=fire_yr, y=n_fires)) +
+  geom_line(color = "grey" , size=2) +
+  xlab('') +
+  ylab("Fire frequency \n(count)") +
+  comp_theme + 
+      theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+
+plot_frq_line
+```
+
+```{r}
+head(d1_19)
+```
+
+```{r}
+fire_area = d1_19 %>% group_by(fire_yr) %>%
+  summarise(total_area_ha = sum(area_ha))
+fire_area = as.data.frame(fire_area)
+fire_area
+```
+
+```{r}
+plot_area = ggplot(fire_area, aes(fire_yr, total_area_ha)) +
+  geom_bar(stat="identity", width = 0.5, fill="tomato2") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000), labels = c(0, 2, 4, 6)) + 
+  xlab('') +
+  comp_theme + theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+
+plot_area
+```
+
+```{r}
+head(fire_area)
+head(fire_frq)
+```
+
+
+```{r}
+fire_area_frq = merge(fire_area, fire_frq, by="fire_yr")
+fire_area_frq
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggplot(head(fire_area_frq), aes(x=fire_yr)) +
+  geom_bar( aes(y=total_area_ha), stat="identity", size=.1, fill="tomato2", alpha=.4) + 
+  geom_line( aes(y=n_fires), size=2, color="black") +
+  scale_y_continuous(name = "Area burned", sec.axis = sec_axis(name="Frequency")) 
+```
+
+
+
+
+
+
+
+
+```{r}
+plot_class1 = ggplot(fire_class_ct, aes(fire_size_class, count)) +
+  geom_bar(stat="identity", width = 0.5, fill="tomato2") + 
+      labs(title="Fire Size Class") +
+  xlab('Fire Size Class')  +
+  ylab("Frequency") +
+  comp_theme + theme(axis.text.x = element_text(vjust=0.6)) 
+plot_class1
+```
+
+
+
+
+scale_fill_brewer(palette = "Spectral")
+
+- 400-999
+- 1,000-1,999
+- 2,000-4,999
+- 5,000-9,999
+- 10,000-19,999
+- 20,000-49,999
+- 50,000-99,999
+- 100,000 +
+
+```{r}
+plot_class = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
+      geom_bar(aes(fill=fire_size_class), width = 0.5) + 
+  xlab("Fire year") +
+  ylab("Fire frequency \n(count)") +
+
+  theme_bw() + theme(legend.position = "bottom") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_class
+```
+
+
+bottom_row <- plot_grid(p1, p2, labels = c('B', 'C'), label_size = 12)
+p3 <- ggplot(mtcars, aes(x = qsec, y = disp)) + geom_point() + facet_wrap(~gear)
+
+plot_grid(p3, bottom_row, labels = c('A', ''), label_size = 12, ncol = 1)
+
+
+```{r fig.height=7, fig.width=6}
+
+top_row = cowplot:: plot_grid(plot_area, plot_frq_line, labels = c('A', 'B'), label_size = 12)
+grid_plot = cowplot::plot_grid(top_row, plot_class, labels = c('', 'C'), label_size = 12, ncol = 1)
+grid_plot
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-05-02_area-frequency-fireyear.png", plot = grid_plot, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+

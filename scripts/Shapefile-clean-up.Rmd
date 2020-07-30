@@ -1,0 +1,543 @@
+---
+title: "Clean Polygon data"
+author: "Anna Talucci"
+date: "2/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+What is included in this script:
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+```
+
+
+
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+
+# Read in shapefile
+
+```{r}
+f01 = readOGR("../data/shapefile/2001_fires.shp", "2001_fires") 
+f02 = readOGR("../data/shapefile/2002_fires.shp", "2002_fires") 
+f03 = readOGR("../data/shapefile/2003_fires.shp", "2003_fires")
+f04 = readOGR("../data/shapefile/2004_fires.shp", "2004_fires") 
+f05 = readOGR("../data/shapefile/2005_fires.shp", "2005_fires") 
+```
+
+```{r}
+f06 = readOGR("../data/shapefile/2006_fires.shp", "2006_fires") 
+f07 = readOGR("../data/shapefile/2007_fires.shp", "2007_fires") 
+f08 = readOGR("../data/shapefile/2008_fires.shp", "2008_fires")
+f09 = readOGR("../data/shapefile/2009_fires.shp", "2009_fires") 
+f10 = readOGR("../data/shapefile/2010_fires.shp", "2010_fires") 
+```
+
+```{r}
+f11 = readOGR("../data/shapefile/2011_fires.shp", "2011_fires") 
+f12 = readOGR("../data/shapefile/2012_fires.shp", "2012_fires") 
+f13 = readOGR("../data/shapefile/2013_fires.shp", "2013_fires")
+f14 = readOGR("../data/shapefile/2014_fires.shp", "2014_fires") 
+f15 = readOGR("../data/shapefile/2015_fires.shp", "2015_fires") 
+```
+
+```{r}
+f16 = readOGR("../data/shapefile/2016_fires.shp", "2016_fires") 
+f17 = readOGR("../data/shapefile/2017_fires.shp", "2017_fires") 
+f18 = readOGR("../data/shapefile/2018_fires.shp", "2018_fires")
+
+f19 = readOGR("../data/shapefile/2019_fires.shp", "2019_fires")
+f20 = readOGR("../data/shapefile/2020_fires.shp", "2020_fires")
+ 
+```
+
+```{r}
+plot(f03)
+```
+
+# Reproject in Equal area
+
+```{r}
+f01_ee = spTransform(f01, CRS(ee_russia))
+f02_ee = spTransform(f02, CRS(ee_russia))
+f03_ee = spTransform(f03, CRS(ee_russia))
+f04_ee = spTransform(f04, CRS(ee_russia))
+f05_ee = spTransform(f05, CRS(ee_russia))
+```
+
+```{r}
+f06_ee = spTransform(f06, CRS(ee_russia))
+f07_ee = spTransform(f07, CRS(ee_russia))
+f08_ee = spTransform(f08, CRS(ee_russia))
+f09_ee = spTransform(f09, CRS(ee_russia))
+f10_ee = spTransform(f10, CRS(ee_russia))
+```
+
+
+```{r}
+f11_ee = spTransform(f11, CRS(ee_russia))
+f12_ee = spTransform(f12, CRS(ee_russia))
+f13_ee = spTransform(f13, CRS(ee_russia))
+f14_ee = spTransform(f14, CRS(ee_russia))
+f15_ee = spTransform(f15, CRS(ee_russia))
+```
+
+```{r}
+f16_ee = spTransform(f16, CRS(ee_russia))
+f17_ee = spTransform(f17, CRS(ee_russia))
+f18_ee = spTransform(f18, CRS(ee_russia))
+f19_ee = spTransform(f19, CRS(ee_russia))
+f20_ee = spTransform(f20, CRS(ee_russia))
+```
+
+# Remove holes inside polygons
+```{r}
+f01_nh = remove.holes(f01_ee)
+f02_nh = remove.holes(f02_ee)
+f03_nh = remove.holes(f03_ee)
+f04_nh = remove.holes(f04_ee)
+f05_nh = remove.holes(f05_ee)
+```
+
+
+```{r}
+f06_nh = remove.holes(f06_ee)
+f07_nh = remove.holes(f07_ee)
+f08_nh = remove.holes(f08_ee)
+f09_nh = remove.holes(f09_ee)
+f10_nh = remove.holes(f10_ee)
+```
+
+```{r}
+f11_nh = remove.holes(f11_ee)
+f12_nh = remove.holes(f12_ee)
+f13_nh = remove.holes(f13_ee)
+f14_nh = remove.holes(f14_ee)
+f15_nh = remove.holes(f15_ee)
+```
+
+```{r}
+f16_nh = remove.holes(f16_ee)
+f17_nh = remove.holes(f17_ee)
+f18_nh = remove.holes(f18_ee)
+
+f19_nh = remove.holes(f19_ee)
+f20_nh = remove.holes(f20_ee)
+```
+
+# Convert from sp to sf
+```{r}
+f01_sf = st_as_sf(f01_nh)
+f02_sf = st_as_sf(f02_nh)
+f03_sf = st_as_sf(f03_nh)
+f04_sf = st_as_sf(f04_nh)
+f05_sf = st_as_sf(f05_nh)
+```
+
+```{r}
+f06_sf = st_as_sf(f06_nh)
+f07_sf = st_as_sf(f07_nh)
+f08_sf = st_as_sf(f08_nh)
+f09_sf = st_as_sf(f09_nh)
+f10_sf = st_as_sf(f10_nh)
+```
+
+```{r}
+f11_sf = st_as_sf(f11_nh)
+f12_sf = st_as_sf(f12_nh)
+f13_sf = st_as_sf(f13_nh)
+f14_sf = st_as_sf(f14_nh)
+f15_sf = st_as_sf(f15_nh)
+```
+
+```{r}
+f16_sf = st_as_sf(f16_nh)
+f17_sf = st_as_sf(f17_nh)
+f18_sf = st_as_sf(f18_nh)
+
+
+f19_sf = st_as_sf(f19_nh)
+f20_sf = st_as_sf(f20_nh)
+```
+
+
+# Covert from Multipolygon to Polygon
+
+```{r}
+f01_sf = st_cast(f01_sf,"POLYGON")
+f02_sf = st_cast(f02_sf,"POLYGON")
+f03_sf = st_cast(f03_sf,"POLYGON")
+f04_sf = st_cast(f04_sf,"POLYGON")
+f05_sf = st_cast(f05_sf,"POLYGON")
+```
+
+```{r}
+f06_sf = st_cast(f06_sf,"POLYGON")
+f07_sf = st_cast(f07_sf,"POLYGON")
+f08_sf = st_cast(f08_sf,"POLYGON")
+f09_sf = st_cast(f09_sf,"POLYGON")
+f10_sf = st_cast(f10_sf,"POLYGON")
+```
+
+```{r}
+f11_sf = st_cast(f11_sf,"POLYGON")
+f12_sf = st_cast(f12_sf,"POLYGON")
+f13_sf = st_cast(f13_sf,"POLYGON")
+f14_sf = st_cast(f14_sf,"POLYGON")
+f15_sf = st_cast(f15_sf,"POLYGON")
+```
+
+```{r}
+f16_sf = st_cast(f16_sf,"POLYGON")
+f17_sf = st_cast(f17_sf,"POLYGON")
+f18_sf = st_cast(f18_sf,"POLYGON")
+f19_sf = st_cast(f19_sf,"POLYGON")
+f20_sf = st_cast(f20_sf,"POLYGON")
+```
+
+```{r}
+dim(f03_sf)
+head(f03_sf)
+```
+
+
+
+# Create attributes
+- ID based on row number
+- area in meters squared, area_m
+- area in Hectares, area_ha
+- Year of the burn, fire_yr
+
+```{r}
+f01_at = f01_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f01_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2001) 
+f02_at = f02_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f02_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2002) 
+f03_at = f03_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f03_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2003) 
+f04_at = f04_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f04_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2004) 
+f05_at = f05_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f05_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2005) 
+```
+
+```{r}
+f06_at = f06_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f06_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2006) 
+f07_at = f07_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f07_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2007) 
+f08_at = f08_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f08_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2008) 
+f09_at = f09_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f09_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2009) 
+f10_at = f10_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f10_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2010) 
+```
+
+
+```{r}
+f11_at = f11_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f11_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2011) 
+f12_at = f12_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f12_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2012) 
+f13_at = f13_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f13_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2013) 
+f14_at = f14_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f14_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2014) 
+f15_at = f15_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f15_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2015) 
+```
+
+```{r}
+f16_at = f16_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f16_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2016) 
+f17_at = f17_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f17_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2017) 
+f18_at = f18_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f18_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2018) 
+f19_at = f19_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f19_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2019) 
+f20_at = f20_sf %>% dplyr::mutate(ID_obj = row_number()) %>% dplyr::mutate(area_m = round(st_area(f20_sf),1)) %>% dplyr::mutate(area_ha = round(area_m*0.0001, 1)) %>% dplyr::mutate(fire_yr = 2020) 
+```
+
+```{r}
+
+head(f03_at$area_ha)
+min(f03_at$area_ha)
+max(f03_at$area_ha)
+```
+
+## Removed fires less than 400 ha
+
+```{r}
+f01_ha = filter(f01_at, as.numeric(f01_at$area_ha) >= 400)
+f02_ha = filter(f02_at, as.numeric(f02_at$area_ha) >= 400)
+f03_ha = filter(f03_at, as.numeric(f03_at$area_ha) >= 400)
+f04_ha = filter(f04_at, as.numeric(f04_at$area_ha) >= 400)
+f05_ha = filter(f05_at, as.numeric(f05_at$area_ha) >= 400)
+```
+
+```{r}
+f06_ha = filter(f06_at, as.numeric(f06_at$area_ha) >= 400)
+f07_ha = filter(f07_at, as.numeric(f07_at$area_ha) >= 400)
+f08_ha = filter(f08_at, as.numeric(f08_at$area_ha) >= 400)
+f09_ha = filter(f09_at, as.numeric(f09_at$area_ha) >= 400)
+f10_ha = filter(f10_at, as.numeric(f10_at$area_ha) >= 400)
+```
+
+
+```{r}
+f11_ha = filter(f11_at, as.numeric(f11_at$area_ha) >= 400)
+f12_ha = filter(f12_at, as.numeric(f12_at$area_ha) >= 400)
+f13_ha = filter(f13_at, as.numeric(f13_at$area_ha) >= 400)
+f14_ha = filter(f14_at, as.numeric(f14_at$area_ha) >= 400)
+f15_ha = filter(f15_at, as.numeric(f15_at$area_ha) >= 400)
+```
+
+```{r}
+f16_ha = filter(f16_at, as.numeric(f16_at$area_ha) >= 400)
+f17_ha = filter(f17_at, as.numeric(f17_at$area_ha) >= 400)
+f18_ha = filter(f18_at, as.numeric(f18_at$area_ha) >= 400)
+
+f19_ha = filter(f19_at, as.numeric(f19_at$area_ha) >= 400)
+f20_ha = filter(f20_at, as.numeric(f20_at$area_ha) >= 400)
+
+```
+
+```{r}
+min(f03_ha$area_ha)
+max(f03_ha$area_ha)
+
+```
+
+# Reproject to WGS 84
+
+```{r}
+f01_wgs = st_transform(f01_ha, CRS( wgs_proj))
+f02_wgs = st_transform(f02_ha, CRS( wgs_proj))
+f03_wgs = st_transform(f03_ha, CRS( wgs_proj))
+f04_wgs = st_transform(f04_ha, CRS( wgs_proj))
+f05_wgs = st_transform(f05_ha, CRS( wgs_proj))
+```
+
+```{r}
+f06_wgs = st_transform(f06_ha, CRS( wgs_proj))
+f07_wgs = st_transform(f07_ha, CRS( wgs_proj))
+f08_wgs = st_transform(f08_ha, CRS( wgs_proj))
+f09_wgs = st_transform(f09_ha, CRS( wgs_proj))
+f10_wgs = st_transform(f10_ha, CRS( wgs_proj))
+```
+
+```{r}
+f11_wgs = st_transform(f11_ha, CRS( wgs_proj))
+f12_wgs = st_transform(f12_ha, CRS( wgs_proj))
+f13_wgs = st_transform(f13_ha, CRS( wgs_proj))
+f14_wgs = st_transform(f14_ha, CRS( wgs_proj))
+f15_wgs = st_transform(f15_ha, CRS( wgs_proj))
+```
+
+```{r}
+f16_wgs = st_transform(f16_ha, CRS( wgs_proj))
+f17_wgs = st_transform(f17_ha, CRS( wgs_proj))
+f18_wgs = st_transform(f18_ha, CRS( wgs_proj))
+f19_wgs = st_transform(f19_ha, CRS( wgs_proj))
+f20_wgs = st_transform(f20_ha, CRS( wgs_proj))
+```
+
+# Write to shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(f01_wgs, "../outputs/clean-shapefile/fires2001.shp", driver="ESRI Shapefile") 
+st_write(f02_wgs, "../outputs/clean-shapefile/fires2002.shp", driver="ESRI Shapefile")  
+st_write(f03_wgs, "../outputs/clean-shapefile/fires2003.shp", driver="ESRI Shapefile")  
+st_write(f04_wgs, "../outputs/clean-shapefile/fires2004.shp", driver="ESRI Shapefile")  
+st_write(f05_wgs, "../outputs/clean-shapefile/fires2005.shp", driver="ESRI Shapefile")  
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(f06_wgs, "../outputs/clean-shapefile/fires2006.shp", driver="ESRI Shapefile") 
+st_write(f07_wgs, "../outputs/clean-shapefile/fires2007.shp", driver="ESRI Shapefile")  
+st_write(f08_wgs, "../outputs/clean-shapefile/fires2008.shp", driver="ESRI Shapefile")  
+st_write(f09_wgs, "../outputs/clean-shapefile/fires2009.shp", driver="ESRI Shapefile")  
+st_write(f10_wgs, "../outputs/clean-shapefile/fires2010.shp", driver="ESRI Shapefile")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f11_wgs, "../outputs/clean-shapefile/fires2011.shp", driver="ESRI Shapefile") 
+st_write(f12_wgs, "../outputs/clean-shapefile/fires2012.shp", driver="ESRI Shapefile")  
+st_write(f13_wgs, "../outputs/clean-shapefile/fires2013.shp", driver="ESRI Shapefile")  
+st_write(f14_wgs, "../outputs/clean-shapefile/fires2014.shp", driver="ESRI Shapefile")  
+st_write(f15_wgs, "../outputs/clean-shapefile/fires2015.shp", driver="ESRI Shapefile")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f16_wgs, "../outputs/clean-shapefile/fires2016.shp", driver="ESRI Shapefile") 
+st_write(f17_wgs, "../outputs/clean-shapefile/fires2017.shp", driver="ESRI Shapefile")  
+st_write(f18_wgs, "../outputs/clean-shapefile/fires2018.shp", driver="ESRI Shapefile")  
+
+st_write(f19_wgs, "../outputs/clean-shapefile/fires2019.shp", driver="ESRI Shapefile") 
+st_write(f20_wgs, "../outputs/clean-shapefile/fires2020.shp", driver="ESRI Shapefile") 
+```
+
+# Write to KML
+
+```{r eval=FALSE, include=FALSE}
+st_write(f01_wgs, "../outputs/clean-kml/fires2001.kml", driver="KML") 
+st_write(f02_wgs, "../outputs/clean-kml/fires2002.kml", driver="KML")  
+st_write(f03_wgs, "../outputs/clean-kml/fires2003.kml", driver="KML")  
+st_write(f04_wgs, "../outputs/clean-kml/fires2004.kml", driver="KML")  
+st_write(f05_wgs, "../outputs/clean-kml/fires2005.kml", driver="KML")  
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(f06_wgs, "../outputs/clean-kml/fires2006.kml", driver="KML") 
+st_write(f07_wgs, "../outputs/clean-kml/fires2007.kml", driver="KML")  
+st_write(f08_wgs, "../outputs/clean-kml/fires2008.kml", driver="KML")  
+st_write(f09_wgs, "../outputs/clean-kml/fires2009.kml", driver="KML")  
+st_write(f10_wgs, "../outputs/clean-kml/fires2010.kml", driver="KML")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f11_wgs, "../outputs/clean-kml/fires2011.kml", driver="KML") 
+st_write(f12_wgs, "../outputs/clean-kml/fires2012.kml", driver="KML")  
+st_write(f13_wgs, "../outputs/clean-kml/fires2013.kml", driver="KML")  
+st_write(f14_wgs, "../outputs/clean-kml/fires2014.kml", driver="KML")  
+st_write(f15_wgs, "../outputs/clean-kml/fires2015.kml", driver="KML")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f16_wgs, "../outputs/clean-kml/fires2016.kml", driver="KML") 
+st_write(f17_wgs, "../outputs/clean-kml/fires2017.kml", driver="KML")  
+st_write(f18_wgs, "../outputs/clean-kml/fires2018.kml", driver="KML")  
+```
+
+# Subset to Yakutsk BBox
+
+
+```{r}
+yak_bbox = readOGR("../data/bbox/yakutsk_bbox.shp", "yakutsk_bbox") 
+```
+
+```{r}
+plot(yak_bbox, axes = TRUE)
+```
+
+```{r warning=FALSE}
+f01_yak = st_crop(f01_wgs, yak_bbox)
+f02_yak = st_crop(f02_wgs, yak_bbox)
+f03_yak = st_crop(f03_wgs, yak_bbox)
+f04_yak = st_crop(f04_wgs, yak_bbox)
+f05_yak = st_crop(f05_wgs, yak_bbox)
+
+```
+```{r warning=FALSE}
+f06_yak = st_crop(f06_wgs, yak_bbox)
+f07_yak = st_crop(f07_wgs, yak_bbox)
+f08_yak = st_crop(f08_wgs, yak_bbox)
+f09_yak = st_crop(f09_wgs, yak_bbox)
+f10_yak = st_crop(f10_wgs, yak_bbox)
+```
+
+```{r warning=FALSE}
+f11_yak = st_crop(f11_wgs, yak_bbox)
+f12_yak = st_crop(f12_wgs, yak_bbox)
+f13_yak = st_crop(f13_wgs, yak_bbox)
+f14_yak = st_crop(f14_wgs, yak_bbox)
+f15_yak = st_crop(f15_wgs, yak_bbox)
+```
+
+```{r warning=FALSE}
+f16_yak = st_crop(f16_wgs, yak_bbox)
+f17_yak = st_crop(f17_wgs, yak_bbox)
+f18_yak = st_crop(f18_wgs, yak_bbox)
+```
+
+```{r}
+plot(yak_bbox, axes = TRUE)
+plot(f01_yak, add=TRUE)
+```
+
+# Write to shapefile
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+st_write(f01_yak, "../outputs/yakutsk-shape/fires2001.shp", driver="ESRI Shapefile") 
+st_write(f02_yak, "../outputs/yakutsk-shape/fires2002.shp", driver="ESRI Shapefile")  
+st_write(f03_yak, "../outputs/yakutsk-shape/fires2003.shp", driver="ESRI Shapefile")  
+st_write(f04_yak, "../outputs/yakutsk-shape/fires2004.shp", driver="ESRI Shapefile")  
+st_write(f05_yak, "../outputs/yakutsk-shape/fires2005.shp", driver="ESRI Shapefile")  
+```
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+st_write(f06_yak, "../outputs/yakutsk-shape/fires2006.shp", driver="ESRI Shapefile") 
+st_write(f07_yak, "../outputs/yakutsk-shape/fires2007.shp", driver="ESRI Shapefile")  
+st_write(f08_yak, "../outputs/yakutsk-shape/fires2008.shp", driver="ESRI Shapefile")  
+st_write(f09_yak, "../outputs/yakutsk-shape/fires2009.shp", driver="ESRI Shapefile")  
+st_write(f10_yak, "../outputs/yakutsk-shape/fires2010.shp", driver="ESRI Shapefile")  
+```
+
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+st_write(f11_yak, "../outputs/yakutsk-shape/fires2011.shp", driver="ESRI Shapefile") 
+st_write(f12_yak, "../outputs/yakutsk-shape/fires2012.shp", driver="ESRI Shapefile")  
+st_write(f13_yak, "../outputs/yakutsk-shape/fires2013.shp", driver="ESRI Shapefile")  
+st_write(f14_yak, "../outputs/yakutsk-shape/fires2014.shp", driver="ESRI Shapefile")  
+st_write(f15_yak, "../outputs/yakutsk-shape/fires2015.shp", driver="ESRI Shapefile")  
+```
+
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+st_write(f16_yak, "../outputs/yakutsk-shape/fires2016.shp", driver="ESRI Shapefile") 
+st_write(f17_yak, "../outputs/yakutsk-shape/fires2017.shp", driver="ESRI Shapefile")  
+st_write(f18_yak, "../outputs/yakutsk-shape/fires2018.shp", driver="ESRI Shapefile")  
+```
+
+# Write to KML
+
+```{r eval=FALSE, include=FALSE}
+st_write(f01_yak, "../outputs/yakutsk-kml/fires2001.kml", driver="KML") 
+st_write(f02_yak, "../outputs/yakutsk-kml/fires2002.kml", driver="KML")  
+st_write(f03_yak, "../outputs/yakutsk-kml/fires2003.kml", driver="KML")  
+st_write(f04_yak, "../outputs/yakutsk-kml/fires2004.kml", driver="KML")  
+st_write(f05_yak, "../outputs/yakutsk-kml/fires2005.kml", driver="KML")  
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(f06_yak, "../outputs/yakutsk-kml/fires2006.kml", driver="KML") 
+st_write(f07_yak, "../outputs/yakutsk-kml/fires2007.kml", driver="KML")  
+st_write(f08_yak, "../outputs/yakutsk-kml/fires2008.kml", driver="KML")  
+st_write(f09_yak, "../outputs/yakutsk-kml/fires2009.kml", driver="KML")  
+st_write(f10_yak, "../outputs/yakutsk-kml/fires2010.kml", driver="KML")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f11_yak, "../outputs/yakutsk-kml/fires2011.kml", driver="KML") 
+st_write(f12_yak, "../outputs/yakutsk-kml/fires2012.kml", driver="KML")  
+st_write(f13_yak, "../outputs/yakutsk-kml/fires2013.kml", driver="KML")  
+st_write(f14_yak, "../outputs/yakutsk-kml/fires2014.kml", driver="KML")  
+st_write(f15_yak, "../outputs/yakutsk-kml/fires2015.kml", driver="KML")  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(f16_yak, "../outputs/yakutsk-kml/fires2016.kml", driver="KML") 
+st_write(f17_yak, "../outputs/yakutsk-kml/fires2017.kml", driver="KML")  
+st_write(f18_yak, "../outputs/yakutsk-kml/fires2018.kml", driver="KML")  
+```

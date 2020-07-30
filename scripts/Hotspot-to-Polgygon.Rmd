@@ -1,0 +1,358 @@
+---
+title: "Hotspot point data to polygon"
+author: "Anna Talucci"
+date: "2/6/2020"
+output: html_document
+---
+
+# Overview
+
+What is included in this script:
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Creat Bounding Box for FLARE
+coords = matrix(c(118.94, 72.26,
+               171.0, 72.26,
+               171.0, 60.0, 
+               118.94, 60.0), 
+             ncol = 2, byrow = TRUE)
+```{r}
+
+
+coords = matrix(c(118.0, 74.26,
+               190.25, 74.26,
+               190.25, 60.0, 
+               118.0, 60.0), 
+             ncol = 2, byrow = TRUE)
+
+
+P1 = Polygon(coords)
+Ps1 = SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot(Ps1)
+```
+
+```{r}
+Ps1_sp_ee = spTransform(Ps1, CRS( ee_russia))
+```
+
+# Read in hotspot data
+
+```{r}
+hs2001 = readOGR("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+hs2002 = readOGR("../data/hotspot_data/DL_FIRE_M6_2002/fire_archive_2002.shp", "fire_archive_2002") 
+hs2003 = readOGR("../data/hotspot_data/DL_FIRE_M6_2003/fire_archive_2003.shp", "fire_archive_2003") 
+hs2004 = readOGR("../data/hotspot_data/DL_FIRE_M6_2004/fire_archive_2004.shp", "fire_archive_2004") 
+hs2005 = readOGR("../data/hotspot_data/DL_FIRE_M6_2005/fire_archive_2005.shp", "fire_archive_2005") 
+```
+
+```{r}
+hs2006 = readOGR("../data/hotspot_data/DL_FIRE_M6_2006/fire_archive_2006.shp", "fire_archive_2006") 
+hs2007 = readOGR("../data/hotspot_data/DL_FIRE_M6_2007/fire_archive_2007.shp", "fire_archive_2007") 
+hs2008 = readOGR("../data/hotspot_data/DL_FIRE_M6_2008/fire_archive_2008.shp", "fire_archive_2008") 
+hs2009 = readOGR("../data/hotspot_data/DL_FIRE_M6_2009/fire_archive_2009.shp", "fire_archive_2009") 
+hs2010 = readOGR("../data/hotspot_data/DL_FIRE_M6_2010/fire_archive_2010.shp", "fire_archive_2010") 
+```
+
+```{r}
+hs2011 = readOGR("../data/hotspot_data/DL_FIRE_M6_2011/fire_archive_2011.shp", "fire_archive_2011") 
+hs2012 = readOGR("../data/hotspot_data/DL_FIRE_M6_2012/fire_archive_2012.shp", "fire_archive_2012") 
+hs2013 = readOGR("../data/hotspot_data/DL_FIRE_M6_2013/fire_archive_2013.shp", "fire_archive_2013") 
+hs2014 = readOGR("../data/hotspot_data/DL_FIRE_M6_2014/fire_archive_2014.shp", "fire_archive_2014") 
+hs2015 = readOGR("../data/hotspot_data/DL_FIRE_M6_2015/fire_archive_2015.shp", "fire_archive_2015") 
+```
+
+
+```{r}
+hs2016 = readOGR("../data/hotspot_data/DL_FIRE_M6_2016/fire_archive_2016.shp", "fire_archive_2016") 
+hs2017 = readOGR("../data/hotspot_data/DL_FIRE_M6_2017/fire_archive_2017.shp", "fire_archive_2017") 
+hs2018 = readOGR("../data/hotspot_data/DL_FIRE_M6_2018/fire_archive_2018.shp", "fire_archive_2018") 
+hs2019 = readOGR("../data/hotspot_data/DL_FIRE_M6_2019/fire_archive_2019.shp", "fire_archive_2019")
+hs2020 = readOGR("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_jul2020.shp", "fire_nrt_M6_jul2020")
+ 
+```
+
+
+## project to equal area russia
+```{r}
+hs2001_ee = spTransform(hs2001, CRS(ee_russia))
+hs2002_ee = spTransform(hs2002, CRS(ee_russia))
+hs2003_ee = spTransform(hs2003, CRS(ee_russia))
+hs2004_ee = spTransform(hs2004, CRS(ee_russia))
+hs2005_ee = spTransform(hs2005, CRS(ee_russia))
+```
+
+
+```{r}
+hs2006_ee = spTransform(hs2006, CRS(ee_russia))
+hs2007_ee = spTransform(hs2007, CRS(ee_russia))
+hs2008_ee = spTransform(hs2008, CRS(ee_russia))
+hs2009_ee = spTransform(hs2009, CRS(ee_russia))
+hs2010_ee = spTransform(hs2010, CRS(ee_russia))
+```
+
+```{r}
+hs2011_ee = spTransform(hs2011, CRS(ee_russia))
+hs2012_ee = spTransform(hs2012, CRS(ee_russia))
+hs2013_ee = spTransform(hs2013, CRS(ee_russia))
+hs2014_ee = spTransform(hs2014, CRS(ee_russia))
+hs2015_ee = spTransform(hs2015, CRS(ee_russia))
+```
+
+
+```{r}
+hs2016_ee = spTransform(hs2016, CRS(ee_russia))
+hs2017_ee = spTransform(hs2017, CRS(ee_russia))
+hs2018_ee = spTransform(hs2018, CRS(ee_russia))
+hs2019_ee = spTransform(hs2019, CRS(ee_russia))
+hs2020_ee = spTransform(hs2020, CRS(ee_russia))
+
+```
+
+
+## Reduce hotspot data to FLARE  BBox
+
+
+
+```{r}
+hs2001_ee_sub = hs2001_ee[Ps1_sp_ee, ]
+hs2002_ee_sub = hs2002_ee[Ps1_sp_ee, ]
+hs2003_ee_sub = hs2003_ee[Ps1_sp_ee, ]
+hs2004_ee_sub = hs2004_ee[Ps1_sp_ee, ]
+hs2005_ee_sub = hs2005_ee[Ps1_sp_ee, ]
+```
+
+
+```{r}
+hs2006_ee_sub = hs2006_ee[Ps1_sp_ee, ]
+hs2007_ee_sub = hs2007_ee[Ps1_sp_ee, ]
+hs2008_ee_sub = hs2008_ee[Ps1_sp_ee, ]
+hs2009_ee_sub = hs2009_ee[Ps1_sp_ee, ]
+hs2010_ee_sub = hs2010_ee[Ps1_sp_ee, ]
+```
+
+```{r}
+hs2011_ee_sub = hs2011_ee[Ps1_sp_ee, ]
+hs2012_ee_sub = hs2012_ee[Ps1_sp_ee, ]
+hs2013_ee_sub = hs2013_ee[Ps1_sp_ee, ]
+hs2014_ee_sub = hs2014_ee[Ps1_sp_ee, ]
+hs2015_ee_sub = hs2015_ee[Ps1_sp_ee, ]
+```
+
+
+```{r}
+hs2016_ee_sub = hs2016_ee[Ps1_sp_ee, ]
+hs2017_ee_sub = hs2017_ee[Ps1_sp_ee, ]
+hs2018_ee_sub = hs2018_ee[Ps1_sp_ee, ]
+hs2019_ee_sub = hs2019_ee[Ps1_sp_ee, ]
+hs2020_ee_sub = hs2020_ee[Ps1_sp_ee, ]
+
+```
+
+
+# Buffer by 3k
+
+```{r}
+hs2001_ee_3k = gBuffer(hs2001_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2002_ee_3k = gBuffer(hs2002_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2003_ee_3k = gBuffer(hs2003_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2004_ee_3k = gBuffer(hs2004_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2005_ee_3k = gBuffer(hs2005_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+
+```{r}
+hs2006_ee_3k = gBuffer(hs2006_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2007_ee_3k = gBuffer(hs2007_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2008_ee_3k = gBuffer(hs2008_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2009_ee_3k = gBuffer(hs2009_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2010_ee_3k = gBuffer(hs2010_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+```{r}
+hs2011_ee_3k = gBuffer(hs2011_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2012_ee_3k = gBuffer(hs2012_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2013_ee_3k = gBuffer(hs2013_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2014_ee_3k = gBuffer(hs2014_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2015_ee_3k = gBuffer(hs2015_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+
+```{r}
+hs2016_ee_3k = gBuffer(hs2016_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2017_ee_3k = gBuffer(hs2017_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2018_ee_3k = gBuffer(hs2018_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2019_ee_3k = gBuffer(hs2019_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+hs2020_ee_3k = gBuffer(hs2020_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+
+```
+
+## Remove holes in polygons
+
+```{r}
+hs2001_ee_3k_nh = remove.holes(hs2001_ee_3k)
+hs2002_ee_3k_nh = remove.holes(hs2002_ee_3k)
+hs2003_ee_3k_nh = remove.holes(hs2003_ee_3k)
+hs2004_ee_3k_nh = remove.holes(hs2004_ee_3k)
+hs2005_ee_3k_nh = remove.holes(hs2005_ee_3k)
+```
+
+
+```{r}
+hs2006_ee_3k_nh = remove.holes(hs2006_ee_3k)
+hs2007_ee_3k_nh = remove.holes(hs2007_ee_3k)
+hs2008_ee_3k_nh = remove.holes(hs2008_ee_3k)
+hs2009_ee_3k_nh = remove.holes(hs2009_ee_3k)
+hs2010_ee_3k_nh = remove.holes(hs2010_ee_3k)
+```
+
+```{r}
+hs2011_ee_3k_nh = remove.holes(hs2011_ee_3k)
+hs2012_ee_3k_nh = remove.holes(hs2012_ee_3k)
+hs2013_ee_3k_nh = remove.holes(hs2013_ee_3k)
+hs2014_ee_3k_nh = remove.holes(hs2014_ee_3k)
+hs2015_ee_3k_nh = remove.holes(hs2015_ee_3k)
+```
+
+
+```{r}
+hs2016_ee_3k_nh = remove.holes(hs2016_ee_3k)
+hs2017_ee_3k_nh = remove.holes(hs2017_ee_3k)
+hs2018_ee_3k_nh = remove.holes(hs2018_ee_3k)
+hs2019_ee_3k_nh = remove.holes(hs2019_ee_3k)
+hs2020_ee_3k_nh = remove.holes(hs2020_ee_3k)
+
+```
+
+## reproject to WGS for GEE
+
+```{r}
+hs2001_ee_3k_wgs = spTransform(hs2001_ee_3k_nh, CRS( wgs_proj))
+hs2002_ee_3k_wgs = spTransform(hs2002_ee_3k_nh, CRS( wgs_proj))
+hs2003_ee_3k_wgs = spTransform(hs2003_ee_3k_nh, CRS( wgs_proj))
+hs2004_ee_3k_wgs = spTransform(hs2004_ee_3k_nh, CRS( wgs_proj))
+hs2005_ee_3k_wgs = spTransform(hs2005_ee_3k_nh, CRS( wgs_proj))
+```
+
+
+```{r}
+hs2006_ee_3k_wgs = spTransform(hs2006_ee_3k_nh, CRS( wgs_proj))
+hs2007_ee_3k_wgs = spTransform(hs2007_ee_3k_nh, CRS( wgs_proj))
+hs2008_ee_3k_wgs = spTransform(hs2008_ee_3k_nh, CRS( wgs_proj))
+hs2009_ee_3k_wgs = spTransform(hs2009_ee_3k_nh, CRS( wgs_proj))
+hs2010_ee_3k_wgs = spTransform(hs2010_ee_3k_nh, CRS( wgs_proj))
+```
+
+```{r}
+hs2011_ee_3k_wgs = spTransform(hs2011_ee_3k_nh, CRS( wgs_proj))
+hs2012_ee_3k_wgs = spTransform(hs2012_ee_3k_nh, CRS( wgs_proj))
+hs2013_ee_3k_wgs = spTransform(hs2013_ee_3k_nh, CRS( wgs_proj))
+hs2014_ee_3k_wgs = spTransform(hs2014_ee_3k_nh, CRS( wgs_proj))
+hs2015_ee_3k_wgs = spTransform(hs2015_ee_3k_nh, CRS( wgs_proj))
+```
+
+```{r}
+hs2016_ee_3k_wgs = spTransform(hs2016_ee_3k_nh, CRS( wgs_proj))
+hs2017_ee_3k_wgs = spTransform(hs2017_ee_3k_nh, CRS( wgs_proj))
+hs2018_ee_3k_wgs = spTransform(hs2018_ee_3k_nh, CRS( wgs_proj))
+hs2019_ee_3k_wgs = spTransform(hs2019_ee_3k_nh, CRS( wgs_proj))
+hs2020_ee_3k_wgs = spTransform(hs2020_ee_3k_nh, CRS( wgs_proj))
+```
+
+## Sp to sf
+
+```{r}
+hs2001_3k_wgs = st_as_sf(hs2001_ee_3k_wgs)
+hs2002_3k_wgs = st_as_sf(hs2002_ee_3k_wgs)
+hs2003_3k_wgs = st_as_sf(hs2003_ee_3k_wgs)
+hs2004_3k_wgs = st_as_sf(hs2004_ee_3k_wgs)
+hs2005_3k_wgs = st_as_sf(hs2005_ee_3k_wgs)
+```
+
+
+```{r}
+hs2006_3k_wgs = st_as_sf(hs2006_ee_3k_wgs)
+hs2007_3k_wgs = st_as_sf(hs2007_ee_3k_wgs)
+hs2008_3k_wgs = st_as_sf(hs2008_ee_3k_wgs)
+hs2009_3k_wgs = st_as_sf(hs2009_ee_3k_wgs)
+hs2010_3k_wgs = st_as_sf(hs2010_ee_3k_wgs)
+```
+
+```{r}
+hs2011_3k_wgs = st_as_sf(hs2011_ee_3k_wgs)
+hs2012_3k_wgs = st_as_sf(hs2012_ee_3k_wgs)
+hs2013_3k_wgs = st_as_sf(hs2013_ee_3k_wgs)
+hs2014_3k_wgs = st_as_sf(hs2014_ee_3k_wgs)
+hs2015_3k_wgs = st_as_sf(hs2015_ee_3k_wgs)
+```
+
+```{r}
+hs2016_3k_wgs = st_as_sf(hs2016_ee_3k_wgs)
+hs2017_3k_wgs = st_as_sf(hs2017_ee_3k_wgs)
+hs2018_3k_wgs = st_as_sf(hs2018_ee_3k_wgs)
+hs2019_3k_wgs = st_as_sf(hs2019_ee_3k_wgs)
+hs2020_3k_wgs = st_as_sf(hs2020_ee_3k_wgs)
+```
+
+## Write to file
+Create a shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(hs2001_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2001.shp", driver="ESRI Shapefile")  
+st_write(hs2002_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2002.shp", driver="ESRI Shapefile") 
+st_write(hs2003_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2003.shp", driver="ESRI Shapefile") 
+st_write(hs2004_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2004.shp", driver="ESRI Shapefile") 
+st_write(hs2005_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2005.shp", driver="ESRI Shapefile") 
+
+st_write(hs2006_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2006.shp", driver="ESRI Shapefile") 
+st_write(hs2007_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2007.shp", driver="ESRI Shapefile") 
+st_write(hs2008_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2008.shp", driver="ESRI Shapefile") 
+st_write(hs2009_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2009.shp", driver="ESRI Shapefile") 
+st_write(hs2010_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2010.shp", driver="ESRI Shapefile") 
+
+
+st_write(hs2011_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2011.shp", driver="ESRI Shapefile")  
+st_write(hs2012_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2012.shp", driver="ESRI Shapefile") 
+st_write(hs2013_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2013.shp", driver="ESRI Shapefile") 
+st_write(hs2014_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2014.shp", driver="ESRI Shapefile") 
+st_write(hs2015_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2015.shp", driver="ESRI Shapefile") 
+
+st_write(hs2016_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2016.shp", driver="ESRI Shapefile") 
+st_write(hs2017_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2017.shp", driver="ESRI Shapefile") 
+st_write(hs2018_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2018.shp", driver="ESRI Shapefile") 
+st_write(hs2019_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2019.shp", driver="ESRI Shapefile") 
+st_write(hs2020_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2020.shp", driver="ESRI Shapefile") 
+ 
+```
+
