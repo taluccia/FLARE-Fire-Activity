@@ -1,0 +1,111 @@
+---
+title: "Bounding Boxes"
+author: "Anna Talucci"
+date: "2/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Overview
+
+What is included in this script:
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+```
+
+# Projections
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+# Create Bounding Box for FLARE
+
+Define coordinates in a matrix as Longitude, lattitude from Upper Left to Upper right, to lower right, to lower left 
+
+## FLARE coordinates 
+
+```{r}
+coords_flare = matrix(c(118.94, 72.26,
+               171.0, 72.26,
+               171.0, 60.0, 
+               118.94, 60.0), 
+             ncol = 2, byrow = TRUE)
+```
+
+## NE Siberia coordinates 
+
+```{r}
+coords_neSiberia = matrix(c(118.0, 74.26,
+               190.25, 74.26,
+               190.25, 60.0, 
+               118.0, 60.0), 
+             ncol = 2, byrow = TRUE)
+```
+
+## Yakutsk Bounding Box
+Long, Lat
+UL 129.9975, 63.7097
+UR 137.2975, 63.7097
+LR 137.2975, 61.3456
+LL 129.9975, 61.3456
+```{r}
+coords_yak = matrix(c(129.99, 63.70,
+               137.29, 63.70,
+               137.29, 61.34, 
+               129.99, 61.34), 
+             ncol = 2, byrow = TRUE)
+```
+
+## Convert to Polygon
+```{r}
+flare_coord = Polygon(coords_flare)
+nesiberia_coord = Polygon(coords_neSiberia)
+yak_coord = Polygon(coords_yak)
+```
+
+```{r}
+flare_poly = SpatialPolygons(list(Polygons(list(flare_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+ne_poly = SpatialPolygons(list(Polygons(list(nesiberia_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+yak_poly = SpatialPolygons(list(Polygons(list(yak_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+## Plot
+```{r}
+plot(flare_poly, axes = TRUE)
+```
+
+```{r}
+plot(yak_poly, axes = TRUE)
+```
+
+## Convertfrom sp to sf
+
+```{r}
+flare_sf = st_as_sf(flare_poly) 
+ne_sf = st_as_sf(ne_poly) 
+yak_sf = st_as_sf(yak_poly) 
+```
+
+## Write bounding box to shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(flare_sf, "../outputs/bbox/FLARE_bbox.shp", driver="ESRI Shapefile")  # create to a shapefile 
+
+st_write(ne_sf, "../outputs/bbox/neSiberia_bbox.shp", driver="ESRI Shapefile")
+
+st_write(yak_sf, "../outputs/bbox/yakutsk_bbox.shp", driver="ESRI Shapefile")
+```
