@@ -1,0 +1,97 @@
+---
+title: "Ecozones"
+author: "Anna Talucci"
+date: "7/31/2020"
+output: html_document
+---
+# Overview
+
+# packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+library(raster)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Data 
+```{r}
+
+bbox = readOGR("../data/bbox/neSiberia_bbox.shp", "neSiberia_bbox")
+ez = readOGR("../data/wwf_terr_ecos_oRn/wwf_terr_ecos_oRn.shp", "wwf_terr_ecos_oRn")
+
+```
+
+
+
+```{r}
+plot(ez)
+```
+
+```{r}
+head(ez)
+```
+```{r}
+unique(ez$REALM) 
+```
+
+```{r}
+unique(ez$ECO_NAME) 
+```
+# Transform CRS
+
+```{r}
+ez_ee = spTransform(ez, CRS(ee_russia))
+bbox_ee = spTransform(bbox, CRS(ee_russia))
+
+```
+
+# Subset to FLARE
+```{r}
+ez_subset <- ez_ee[bbox_ee, ]
+plot(ez_subset)
+```
+
+
+
+
+# Transform CRS
+
+```{r}
+ez_subset_wgs = spTransform(ez_subset, CRS(wgs_proj))
+```
+
+
+```{r}
+plot(ez_subset_wgs)
+plot(bbox, add=TRUE)
+```
+
+## Sp to sf
+
+```{r}
+ez_subset_wgs_st = st_as_sf(ez_subset_wgs)
+
+```
+
+```{r}
+st_write(ez_subset_wgs_st, "../outputs/ecozones/FLARE-Ecozones.shp", driver="ESRI Shapefile") 
+```
+
