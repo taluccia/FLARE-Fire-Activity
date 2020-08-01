@@ -76,6 +76,9 @@ hs2003 = readOGR("../data/hotspot_data/DL_FIRE_M6_2003/fire_archive_2003.shp", "
 hs2004 = readOGR("../data/hotspot_data/DL_FIRE_M6_2004/fire_archive_2004.shp", "fire_archive_2004") 
 hs2005 = readOGR("../data/hotspot_data/DL_FIRE_M6_2005/fire_archive_2005.shp", "fire_archive_2005") 
 ```
+```{r}
+plot(hs2003)
+```
 
 ```{r}
 hs2006 = readOGR("../data/hotspot_data/DL_FIRE_M6_2006/fire_archive_2006.shp", "fire_archive_2006") 
@@ -142,8 +145,6 @@ hs2020_ee = spTransform(hs2020, CRS(ee_russia))
 
 
 ## Reduce hotspot data to FLARE  BBox
-
-
 
 ```{r}
 hs2001_ee_sub = hs2001_ee[Ps1_sp_ee, ]
