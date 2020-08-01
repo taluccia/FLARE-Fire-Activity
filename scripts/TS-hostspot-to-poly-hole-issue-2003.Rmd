@@ -1,0 +1,212 @@
+---
+title: "Trouble shoot hotspot 2003 hole issue"
+author: "Anna Talucci"
+date: "7/31/2020"
+output: html_document
+---
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Creat Bounding Box for FLARE
+coords = matrix(c(118.94, 72.26,
+               171.0, 72.26,
+               171.0, 60.0, 
+               118.94, 60.0), 
+             ncol = 2, byrow = TRUE)
+```{r}
+
+
+coords = matrix(c(118.0, 74.26,
+               190.25, 74.26,
+               190.25, 60.0, 
+               118.0, 60.0), 
+             ncol = 2, byrow = TRUE)
+
+
+P1 = Polygon(coords)
+Ps1 = SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot(Ps1)
+```
+
+```{r}
+Ps1_sp_ee = spTransform(Ps1, CRS( ee_russia))
+```
+
+# Read in hotspot data
+
+```{r}
+
+hs2003 = readOGR("../data/hotspot_data/DL_FIRE_M6_2003/fire_archive_2003.shp", "fire_archive_2003") 
+
+```
+```{r}
+plot(hs2003)
+```
+
+## project to equal area russia
+```{r}
+hs2003_ee = spTransform(hs2003, CRS(ee_russia))
+```
+## Reduce hotspot data to FLARE  BBox
+
+
+
+```{r}
+hs2003_ee_sub = hs2003_ee[Ps1_sp_ee, ]
+```
+# Buffer by 3k
+
+```{r}
+hs2003_ee_3k = gBuffer(hs2003_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+
+```{r}
+plot(hs2003_ee_3k)
+```
+
+
+
+
+## SP to sf
+```{r}
+hs2003_ee_3k_sf = st_as_sf(hs2003_ee_3k)
+```
+
+```{r}
+hs2003_ee_3k_sf_wgs = st_transform(hs2003_ee_3k_sf, wgs_proj)
+```
+
+```{r}
+
+hs2003_wgs_3k_nh = st_multipolygon(lapply(hs2003_ee_3k_sf_wgs, function(x) x[1]))
+```
+
+```{r}
+st_write(hs2003_ee_3k_sf, "../outputs/hotspot-poly/Hole-Issue-hs2003_ee_3k_2001.shp", driver="ESRI Shapefile") 
+```
+
+```{r}
+
+hs2003_ee_3k_sf_nh = st_multipolygon(lapply(hs2003_ee_3k_sf, function(x) x[1]))
+```
+
+
+
+***
+## project to equal area russia
+```{r}
+hs2003_ee = spTransform(hs2003, CRS(ee_russia))
+```
+## Reduce hotspot data to FLARE  BBox
+
+
+
+```{r}
+hs2003_ee_sub = hs2003_ee[Ps1_sp_ee, ]
+```
+# Buffer by 3k
+
+```{r}
+hs2003_ee_3k = gBuffer(hs2003_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+```{r}
+plot(hs2003_ee_3k)
+```
+
+## Remove holes in polygons
+
+```{r}
+
+hs2003_ee_3k_nh = remove.holes(hs2003_ee_3k)
+```
+
+## reproject to WGS for GEE
+
+```{r}
+
+hs2003_ee_3k_wgs = spTransform(hs2003_ee_3k_nh, CRS( wgs_proj))
+
+```
+
+```{r}
+plot(hs2003_ee_3k_wgs)
+```
+
+
+## Sp to sf
+
+
+```{r}
+
+hs2003_3k_wgs = st_as_sf(hs2003_ee_3k_wgs)
+
+```
+
+## Trouble shooting
+```{r}
+require(devtools)
+install_github("eblondel/cleangeo")
+require(cleangeo)
+```
+```{r}
+#trying to address issue with hs2003_ee_3k_wgs
+report <- clgeo_CollectionReport(hs2003_ee_3k_wgs)
+summary <- clgeo_SummaryReport(report)
+issues <- report[report$valid == FALSE,]
+issues
+#get suspicious features (indexes)
+nv <- clgeo_SuspiciousFeatures(report)
+mysp <- hs2003_ee_3k_wgs[nv[-14],]
+
+#try to clean data
+mysp.clean <- clgeo_Clean(mysp)
+
+#check if they are still errors
+report.clean <- clgeo_CollectionReport(mysp.clean)
+summary.clean <- clgeo_SummaryReport(report.clean)
+report.clean
+```
+```{r}
+mysp <- hs2003_ee_3k_wgs[-325,]
+mysp.clean <- clgeo_Clean(mysp)
+
+#check if they are still errors
+report.clean <- clgeo_CollectionReport(mysp.clean)
+summary.clean <- clgeo_SummaryReport(report.clean)
+```
+```{r}
+pl2 <- st_multipolygon(lapply(hs2003_ee_3k_wgs, function(x) x[1]))
+```
