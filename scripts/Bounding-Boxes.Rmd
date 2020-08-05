@@ -54,6 +54,16 @@ coords_neSiberia = matrix(c(118.0, 74.26,
              ncol = 2, byrow = TRUE)
 ```
 
+## Far NE Siberia coordinates 
+
+```{r}
+coords_FneSiberia = matrix(c(170.5, 74.26,
+               190.25, 74.26,
+               190.25, 60.0, 
+               170.5, 60.0), 
+             ncol = 2, byrow = TRUE)
+```
+
 ## Yakutsk Bounding Box
 Long, Lat
 UL 129.9975, 63.7097
@@ -72,6 +82,8 @@ coords_yak = matrix(c(129.99, 63.70,
 ```{r}
 flare_coord = Polygon(coords_flare)
 nesiberia_coord = Polygon(coords_neSiberia)
+
+Fne_coord = Polygon(coords_FneSiberia)
 yak_coord = Polygon(coords_yak)
 ```
 
@@ -79,6 +91,8 @@ yak_coord = Polygon(coords_yak)
 flare_poly = SpatialPolygons(list(Polygons(list(flare_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 ne_poly = SpatialPolygons(list(Polygons(list(nesiberia_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+Fne_poly = SpatialPolygons(list(Polygons(list(Fne_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 
 yak_poly = SpatialPolygons(list(Polygons(list(yak_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
@@ -89,6 +103,10 @@ plot(flare_poly, axes = TRUE)
 ```
 
 ```{r}
+plot(Fne_poly, axes = TRUE)
+```
+
+```{r}
 plot(yak_poly, axes = TRUE)
 ```
 
@@ -96,7 +114,8 @@ plot(yak_poly, axes = TRUE)
 
 ```{r}
 flare_sf = st_as_sf(flare_poly) 
-ne_sf = st_as_sf(ne_poly) 
+ne_sf = st_as_sf(ne_poly)
+Fne_sf = st_as_sf(Fne_poly)
 yak_sf = st_as_sf(yak_poly) 
 ```
 
@@ -106,6 +125,8 @@ yak_sf = st_as_sf(yak_poly)
 st_write(flare_sf, "../outputs/bbox/FLARE_bbox.shp", driver="ESRI Shapefile")  # create to a shapefile 
 
 st_write(ne_sf, "../outputs/bbox/neSiberia_bbox.shp", driver="ESRI Shapefile")
+
+st_write(Fne_sf, "../outputs/bbox/FarNE_bbox.shp", driver="ESRI Shapefile")
 
 st_write(yak_sf, "../outputs/bbox/yakutsk_bbox.shp", driver="ESRI Shapefile")
 ```
