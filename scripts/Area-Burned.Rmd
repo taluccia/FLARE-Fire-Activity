@@ -56,36 +56,42 @@ Read in shape files
 
 
 ```{r}
-f01 = st_read("../data/clean-shapefile/fires2001.shp", "fires2001") 
-f02 = st_read("../data/clean-shapefile/fires2002.shp", "fires2002") 
-f03 = st_read("../data/clean-shapefile/fires2003.shp", "fires2003")
-f04 = st_read("../data/clean-shapefile/fires2004.shp", "fires2004") 
-f05 = st_read("../data/clean-shapefile/fires2005.shp", "fires2005") 
+f01 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
+f02 = st_read("../data/clean-shapefile/flare_30m/fires2002.shp", "fires2002") 
+f03 = st_read("../data/clean-shapefile/flare_30m/fires2003.shp", "fires2003")
+f04 = st_read("../data/clean-shapefile/flare_30m/fires2004.shp", "fires2004") 
+f05 = st_read("../data/clean-shapefile/flare_30m/fires2005.shp", "fires2005") 
 ```
 
 ```{r}
-f06 = st_read("../data/clean-shapefile/fires2006.shp", "fires2006") 
-f07 = st_read("../data/clean-shapefile/fires2007.shp", "fires2007") 
-f08 = st_read("../data/clean-shapefile/fires2008.shp", "fires2008")
-f09 = st_read("../data/clean-shapefile/fires2009.shp", "fires2009") 
-f10 = st_read("../data/clean-shapefile/fires2010.shp", "fires2010") 
+f06 = st_read("../data/clean-shapefile/flare_30m/fires2006.shp", "fires2006") 
+f07 = st_read("../data/clean-shapefile/flare_30m/fires2007.shp", "fires2007") 
+f08 = st_read("../data/clean-shapefile/flare_30m/fires2008.shp", "fires2008")
+f09 = st_read("../data/clean-shapefile/flare_30m/fires2009.shp", "fires2009") 
+f10 = st_read("../data/clean-shapefile/flare_30m/fires2010.shp", "fires2010") 
 ```
 
 ```{r}
-f11 = st_read("../data/clean-shapefile/fires2011.shp", "fires2011") 
-f12 = st_read("../data/clean-shapefile/fires2012.shp", "fires2012") 
-f13 = st_read("../data/clean-shapefile/fires2013.shp", "fires2013")
-f14 = st_read("../data/clean-shapefile/fires2014.shp", "fires2014") 
-f15 = st_read("../data/clean-shapefile/fires2015.shp", "fires2015") 
+f11 = st_read("../data/clean-shapefile/flare_30m/fires2011.shp", "fires2011") 
+f12 = st_read("../data/clean-shapefile/flare_30m/fires2012.shp", "fires2012") 
+f13 = st_read("../data/clean-shapefile/flare_30m/fires2013.shp", "fires2013")
+f14 = st_read("../data/clean-shapefile/flare_30m/fires2014.shp", "fires2014") 
+f15 = st_read("../data/clean-shapefile/flare_30m/fires2015.shp", "fires2015") 
 ```
 
 ```{r}
-f16 = st_read("../data/clean-shapefile/fires2016.shp", "fires2016") 
-f17 = st_read("../data/clean-shapefile/fires2017.shp", "fires2017") 
-f18 = st_read("../data/clean-shapefile/fires2018.shp", "fires2018")
-f19 = st_read("../data/clean-shapefile/fires2019.shp", "fires2019")
+f16 = st_read("../data/clean-shapefile/flare_30m/fires2016.shp", "fires2016") 
+f17 = st_read("../data/clean-shapefile/flare_30m/fires2017.shp", "fires2017") 
+f18 = st_read("../data/clean-shapefile/flare_30m/fires2018.shp", "fires2018")
+f19 = st_read("../data/clean-shapefile/flare_30m/fires2019.shp", "fires2019")
+```
+
+```{r eval=FALSE, include=FALSE}
 f20 = st_read("../data/clean-shapefile/fires2020.shp", "fires2020")
 
+```
+```{r eval=FALSE, include=FALSE}
+f19 = st_read("../data/clean-shapefile/flare_30m/fires2019.shp", "fires2019")
 ```
 
 
@@ -121,8 +127,10 @@ st_geometry(f16) <- NULL
 st_geometry(f17) <- NULL
 st_geometry(f18) <- NULL
 st_geometry(f19) <- NULL
-st_geometry(f20) <- NULL
 ```
+
+st_geometry(f20) <- NULL
+
 
 ```{r}
 head(f18)
@@ -148,8 +156,8 @@ f16_df = as.data.frame(f16)
 f17_df = as.data.frame(f17)
 f18_df = as.data.frame(f18)
 f19_df = as.data.frame(f19)
-f20_df = as.data.frame(f20)
 ```
+f20_df = as.data.frame(f20)
 
 
 ```{r}
@@ -172,8 +180,10 @@ f16_uni = f16_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
 f17_uni = f17_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
 f18_uni = f18_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
 f19_uni = f19_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
-f20_uni = f20_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
 ```
+
+f20_uni = f20_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
+
 
 
 ```{r}
@@ -293,13 +303,16 @@ fire_class_ct
 
 ```{r}
 plot_frq = ggplot(fire_frq, aes(fire_yr, n_fires)) +
-  geom_bar(stat="identity", width = 0.5, fill="tomato2") +
+  geom_bar(stat="identity", width = 0.5, fill="#abdda4") +
   xlab('Year') +
   ylab("Fire frequency (count)") +
   comp_theme + 
       theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
 
 plot_frq
+```
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-10-14_FireFrequency.png", plot = plot_frq, width = 6, height = 4, units = c("in"), dpi=600 )
 ```
 
 ```{r}
@@ -312,6 +325,7 @@ plot_frq_line = ggplot(fire_frq, aes(x=fire_yr, y=n_fires)) +
 
 plot_frq_line
 ```
+
 
 ```{r}
 head(d1_19)
@@ -333,7 +347,9 @@ plot_area = ggplot(fire_area, aes(fire_yr, total_area_ha)) +
 
 plot_area
 ```
-
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-10-14_AreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
+```
 ```{r}
 head(fire_area)
 head(fire_frq)
@@ -401,6 +417,57 @@ plot_class = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spec
   guides(fill = guide_legend(title.position = "top"))
 
 plot_class
+```
+
+```{r fig.height=5, fig.width=6}
+plot_class1 = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
+      geom_bar(aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
+  xlab("Fire year") +
+  ylab("Fire frequency \n(count)") +
+
+  theme_bw() + theme(legend.position = "bottom") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_class1
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-10-14_area-frequency-fireyear.png", plot = plot_class1, width = 6, height = 5, units = c("in"), dpi=600 )
+```
+```{r}
+head(fire_class)
+```
+
+```{r fig.height=5, fig.width=6}
+plot_class2 = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
+      geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
+  xlab("Fire year") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000), labels = c(0, 2, 4, 6)) +
+
+  theme_bw() + theme(legend.position = "bottom") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_class2
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-10-14_areaburn-class-fireyear.png", plot = plot_class2, width = 6, height = 5, units = c("in"), dpi=600 )
 ```
 
 

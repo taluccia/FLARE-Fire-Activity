@@ -78,7 +78,7 @@ f16 = readOGR("../data/shapefile/2016_fires.shp", "2016_fires")
 f17 = readOGR("../data/shapefile/2017_fires.shp", "2017_fires") 
 f18 = readOGR("../data/shapefile/2018_fires.shp", "2018_fires")
 
-f19 = readOGR("../data/shapefile/2019_fires.shp", "2019_fires")
+f19 = readOGR("../data/FLARE-Fires-30m/2019/2019_flare_fires.shp", "2019_flare_fires")
 f20 = readOGR("../data/shapefile/2020_fires.shp", "2020_fires")
  
 ```
@@ -390,7 +390,7 @@ st_write(f16_wgs, "../outputs/clean-shapefile/fires2016.shp", driver="ESRI Shape
 st_write(f17_wgs, "../outputs/clean-shapefile/fires2017.shp", driver="ESRI Shapefile")  
 st_write(f18_wgs, "../outputs/clean-shapefile/fires2018.shp", driver="ESRI Shapefile")  
 
-st_write(f19_wgs, "../outputs/clean-shapefile/fires2019.shp", driver="ESRI Shapefile") 
+st_write(f19_wgs, "../outputs/clean-shapefile/flare_30m/fires2019.shp", driver="ESRI Shapefile") 
 st_write(f20_wgs, "../outputs/clean-shapefile/fires2020.shp", driver="ESRI Shapefile") 
 ```
 
