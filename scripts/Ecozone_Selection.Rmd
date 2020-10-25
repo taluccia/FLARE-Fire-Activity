@@ -54,8 +54,9 @@ Chukchi Peninsula tundra
 Northeast Siberian taiga
 Bering tundra
 Taimyr-Central Siberian tundra
+East Siberian taiga
 ```{r}
-target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra")
+target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga")
 ```
 
 ```{r}
