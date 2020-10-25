@@ -48,3 +48,28 @@ biome = ecozone %>% filter(BIOME==11)
 unique(biome$ECO_NAME)
 ```
 
+Cherskii-Kolyma mountain tundra 
+Northeast Siberian coastal tundra 
+Chukchi Peninsula tundra
+Northeast Siberian taiga
+Bering tundra
+Taimyr-Central Siberian tundra
+```{r}
+target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra")
+```
+
+```{r}
+ne_subset = ecozone %>% filter(ECO_NAME %in% target) 
+```
+
+```{r}
+summary(ne_subset)
+```
+
+
+```{r}
+plot(ne_subset$geometry)
+```
+```{r}
+st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
+```
