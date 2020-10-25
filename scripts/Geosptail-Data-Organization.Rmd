@@ -1,0 +1,212 @@
+---
+title: "Fire Activity Data Organization"
+author: "Anna Talucci"
+date: "10/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+Assembly fire perimeter shape files with attribute data from hotspot data and bioclimatic zones, and climate. Data  needs to include:
+- FIre year
+- Fire class size
+- Fire start date
+- Fire end date
+- Bioclimatic zone (ecozone)
+- Max temp
+- Drought index
+- Snow off date
+
+# Library
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(purrr)
+library(readr)
+library(cowplot)
+library(ggcorrplot)
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+```
+
+# Read in Data  (Automated)
+Read in multiple data files
+f01 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
+```{r eval=FALSE, include=FALSE}
+fire_path <- "../data/clean-shapefile/flare_30m"   # path to the data
+fire_files <- list.files(fire_path, pattern = "\\.shp$") # get file names
+month_files
+```
+
+ replace with your folder name:
+dir <- "c:/files/shpfiles"
+ff <- list.files(dir, pattern="\\.shp$", full.names=TRUE)
+
+
+
+```{r eval=FALSE, include=FALSE}
+month_data <- month_files %>%
+  # read in all the files, appending the path before the filename
+  map(~ read_csv(file.path(month_path, .), .id = "file_name")) %>% 
+  reduce(rbind)
+month_data
+```
+map_df(~read_csv(.x, col_types = cols(), col_names = FALSE), .id = "file_name")
+
+
+```{r eval=FALSE, include=FALSE}
+list_of_files <- list.files(path = "../data/climate_monthly",
+                            full.names = TRUE)
+list_of_files
+df <- list_of_files %>%
+  setNames(nm = .) %>% 
+  map_df(~read_csv(.x, col_types = cols(), col_names = TRUE), .id = "file_name")     
+df
+```
+ separate(file_name, c("A","B","C"), sep = "([.?:])")
+```{r eval=FALSE, include=FALSE}
+df1 = df %>% 
+  separate(file_name, c("A","B","C","D","E","F","G"), sep = "([..///_])", extra = "merge") %>%
+  separate(G, c("A1","B1","C1","D1","E1","F1","G1"), sep = "([._])", extra = "merge") %>%
+  dplyr::select(A1:B1, ID_obj:vs) %>%
+  rename(climate_yr = A1, climate_mon = B1)
+
+df1
+  
+```
+
+# Read in one fire year are test extracting attributes
+```{r}
+perimeter = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
+```
+
+```{r}
+hotspot = st_read("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+```
+
+```{r}
+head(hotspot)
+```
+
+```{r}
+head(perimeter)  # polygons
+head(hotspot) # points
+plot(perimeter)
+plot(hotspot, add=TRUE)
+```
+
+```{r}
+test = st_intersection(hotspot, perimeter)
+```
+
+```{r}
+summary(test)
+```
+
+
+
+```{r}
+test_sum = test %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-") %>% group_by(ID_obj) %>% 
+  summarize(min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), mean_confidence = mean(CONFIDENCE), min_confidence = min(CONFIDENCE), max_confidence = max(CONFIDENCE)) 
+```
+
+```{r}
+st_geometry(test_sum) <- NULL
+```
+
+```{r}
+head(test_sum)
+```
+```{r}
+merge(perimeter, test_sum, by="ID_obj")
+```
+
+
+*************************************
+point.in.poly(point, poly)
+```{r}
+pts.poly <- point.in.poly(hotspot, perimeter)
+summary(pts.poly)
+```
+
+```{r}
+pts.poly
+```
+
+```{r}
+pts.poly2 = na.omit(pts.poly)
+head(pts.poly2)
+summary(pts.poly2)
+```
+
+```{r}
+ecozone
+```
+
+
+```{r}
+climate
+```
+
+
+# Spatial Analysis Test
+https://gis.stackexchange.com/questions/137621/join-spatial-point-data-to-polygons-in-r
+```{r}
+require(spatialEco)
+require(sp)
+data(meuse)
+coordinates(meuse) = ~x+y
+sr1=Polygons(list(Polygon(cbind(c(180114, 180553, 181127, 181477, 181294, 181007, 180409,
+  180162, 180114), c(332349, 332057, 332342, 333250, 333558, 333676,
+  332618, 332413, 332349)))),'1')
+sr2=Polygons(list(Polygon(cbind(c(180042, 180545, 180553, 180314, 179955, 179142, 179437,
+  179524, 179979, 180042), c(332373, 332026, 331426, 330889, 330683,
+  331133, 331623, 332152, 332357, 332373)))),'2')
+sr3=Polygons(list(Polygon(cbind(c(179110, 179907, 180433, 180712, 180752, 180329, 179875,
+  179668, 179572, 179269, 178879, 178600, 178544, 179046, 179110),
+  c(331086, 330620, 330494, 330265, 330075, 330233, 330336, 330004,
+  329783, 329665, 329720, 329933, 330478, 331062, 331086)))),'3')
+sr4=Polygons(list(Polygon(cbind(c(180304, 180403,179632,179420,180304),
+  c(332791, 333204, 333635, 333058, 332791)))),'4')
+sr=SpatialPolygons(list(sr1,sr2,sr3,sr4))
+srdf=SpatialPolygonsDataFrame(sr, data.frame(row.names=c('1','2','3','4'), PIDS=1:4, y=runif(4)))
+```
+
+```{r}
+head(srdf@data)  # polygons
+head(meuse@data) # points
+plot(srdf)
+points(meuse, pch=20)
+```
+
+```{r}
+ pts.poly <- point.in.poly(meuse, srdf)
+    head(pts.poly@data)
+```
+
+```{r}
+srdf@data$poly.ids <- 1:nrow(srdf) 
+```
+
+```{r}
+# Number of points in each polygon
+tapply(pts.poly@data$lead, pts.poly@data$PIDS, FUN=length)
+
+# Mean lead in each polygon
+tapply(pts.poly@data$lead, pts.poly@data$PIDS, FUN=mean)
+```
+
+
+
