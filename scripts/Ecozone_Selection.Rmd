@@ -1,0 +1,50 @@
+---
+title: "EcoZone Selection"
+author: "Anna Talucci"
+date: "10/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+
+
+# Library
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(purrr)
+library(readr)
+library(cowplot)
+library(ggcorrplot)
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+```
+
+# Data
+```{r}
+ecozone = st_read("../data/wwf_ecozone/wwf_terr_ecos_oRn.shp", "wwf_terr_ecos_oRn") 
+```
+
+```{r}
+head(ecozone)
+```
+
+```{r}
+biome = ecozone %>% filter(BIOME==11)
+```
+
+```{r}
+unique(biome$ECO_NAME)
+```
+
