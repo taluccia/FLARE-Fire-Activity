@@ -37,15 +37,20 @@ library(rgdal) # geospatial data
 library(raster)
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
+library(lubridate)
 ```
 
 # Read in Data  (Automated)
 Read in multiple data files
 f01 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
-```{r eval=FALSE, include=FALSE}
+```{r}
 fire_path <- "../data/clean-shapefile/flare_30m"   # path to the data
-fire_files <- list.files(fire_path, pattern = "\\.shp$") # get file names
-month_files
+fire_files <- list.files(fire_path, pattern = "\\.shp$") %>% setNames(nm = .) # get file names
+fire_files
+```
+
+```{r}
+head(fire2002)
 ```
 
  replace with your folder name:
@@ -104,7 +109,7 @@ head(hotspot) # points
 plot(perimeter)
 plot(hotspot, add=TRUE)
 ```
-
+##
 ```{r}
 test = st_intersection(hotspot, perimeter)
 ```
@@ -112,14 +117,34 @@ test = st_intersection(hotspot, perimeter)
 ```{r}
 summary(test)
 ```
+```{r}
+str(test$ACQ_DATE)
+```
+```{r}
+test1 = test %>% mutate(julian_date = yday(ACQ_DATE))
+head(test1)
+```
 
 
 
 ```{r}
-test_sum = test %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-") %>% group_by(ID_obj) %>% 
-  summarize(min_acq_month = min(acq_month),
-            min_acq_day = min(acq_day), max_acq_month = max(acq_month),
-            max_acq_day = max(acq_day), mean_confidence = mean(CONFIDENCE), min_confidence = min(CONFIDENCE), max_confidence = max(CONFIDENCE)) 
+test_sum = test1 %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>% group_by(ID_obj) %>% 
+  summarize(min_julian_date = min(julian_date),
+            max_julian_date = max(julian_date),
+            mean_julian_date = mean(julian_date),
+            median_julian_date = median(julian_date),
+            min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), 
+            max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), 
+            min_confidence = min(CONFIDENCE), 
+            max_confidence = max(CONFIDENCE), 
+            mean_confidence = mean(CONFIDENCE), 
+            median_confidence = median(CONFIDENCE)) 
+```
+
+```{r}
+head(test_sum)
 ```
 
 ```{r}
