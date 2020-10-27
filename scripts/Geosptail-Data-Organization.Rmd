@@ -95,11 +95,13 @@ df1
 
 # Read in one fire year are test extracting attributes
 ```{r}
-perimeter = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
+fire2001 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001")
+fire2002 = st_read("../data/clean-shapefile/flare_30m/fires2002.shp", "fires2002")
 ```
 
 ```{r}
-hotspot = st_read("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+hotspot2001 = st_read("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+hotspot2002 = st_read("../data/hotspot_data/DL_FIRE_M6_2002/fire_archive_2002.shp", "fire_archive_2002") 
 ```
 
 ```{r}
@@ -145,17 +147,45 @@ test_sum = test1 %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), se
             mean_confidence = mean(CONFIDENCE), 
             median_confidence = median(CONFIDENCE)) 
 ```
-# Functions
+
+# Trying to Automate
 
 ```{r}
-numextract <- function(string){ 
-  str_extract(string, "\\-*\\d+\\.*\\d*")
-} 
+polygon1 = c(fire2001, fire2002)
+point1 = c(hotspot2001, hotspot2002)
+```
 
+```{r}
+polygon1
+```
 
+Overlay points and polygons to determine intersection
+```{r}
+test = st_intersection(hotspot, perimeter)
 ```
 
 
+
+```{r}
+test_i = f_intersect(hotspot2001, fire2001)
+```
+
+```{r}
+test_intersect1 = f_intersect(point1,polygon1)
+```
+
+## Functions
+Function for overlay and itentifyinng in
+```{r}
+f_intersect = function(point,polygon) {
+  df_int = st_intersection(point, polygon)
+  
+  return(df_int)
+}
+```
+
+
+This function summarizes the point data (i.e., hotspot data) per polygon (i.e., fire perimeters)
 ```{r}
 f1 = function(x){
   x %>% mutate(julian_date = yday(ACQ_DATE)) %>%
@@ -171,18 +201,29 @@ f1 = function(x){
             min_confidence = min(CONFIDENCE), 
             max_confidence = max(CONFIDENCE), 
             mean_confidence = mean(CONFIDENCE), 
-            median_confidence = median(CONFIDENCE)) 
+            median_confidence = median(CONFIDENCE)) -> x
+  return(x)
 }
 ```
 
+```{r}
+f_intersect(hotspot2001, fire2001) %>% f1()
+```
 
+```{r}
+f1(test_i)
+```
 ```{r}
 f1(test)
 ```
 
 
 ```{r}
-head(test_sum)
+f1(test_intersect)
+```
+
+```{r}
+test_sum
 ```
 
 ```{r}
