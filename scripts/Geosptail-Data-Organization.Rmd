@@ -12,14 +12,17 @@ knitr::opts_chunk$set(echo = TRUE)
 # Overview
 
 Assembly fire perimeter shape files with attribute data from hotspot data and bioclimatic zones, and climate. Data  needs to include:
-- FIre year
+- Fire year
 - Fire class size
-- Fire start date
-- Fire end date
+- Fire start date (julian annual)
+- Fire end date (julian annual)
 - Bioclimatic zone (ecozone)
 - Max temp
 - Drought index
 - Snow off date
+
+
+
 
 # Library
 
@@ -147,17 +150,59 @@ test_sum = test1 %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), se
             mean_confidence = mean(CONFIDENCE), 
             median_confidence = median(CONFIDENCE)) 
 ```
+## Parrt 1: Overlay
+Overlay hotspot and  fire perimeter data by year in order to add attributes from hotspots to fire perimeters  that they interect. This will add attributes for:
+- Fire start
+- Fire end
+- Accuracy
+
+
+### Functions
+Function for overlay and itentifying in
+```{r}
+f_intersect = function(point,polygon) {
+  df_int = st_intersection(point, polygon)
+  
+  return(df_int)
+}
+```
+
+
+This function summarizes the point data (i.e., hotspot data) per polygon (i.e., fire perimeters)
+```{r}
+f1 = function(x){
+  x %>% mutate(julian_date = yday(ACQ_DATE)) %>%
+  separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>% group_by(ID_obj) %>% 
+  summarize(min_julian_date = min(julian_date),
+            max_julian_date = max(julian_date),
+            mean_julian_date = mean(julian_date),
+            median_julian_date = median(julian_date),
+            min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), 
+            max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), 
+            min_confidence = min(CONFIDENCE), 
+            max_confidence = max(CONFIDENCE), 
+            mean_confidence = mean(CONFIDENCE), 
+            median_confidence = median(CONFIDENCE)) -> x
+  return(x)
+}
+```
+
+### Apply  functions 
+
+```{r}
+f_intersect(hotspot2001, fire2001) %>% f1()
+```
 
 # Trying to Automate
 
 ```{r}
-polygon1 = c(fire2001, fire2002)
-point1 = c(hotspot2001, hotspot2002)
+polygon1 = list(fire2001, fire2002)
+point1 = list(hotspot2001, hotspot2002)
 ```
 
-```{r}
-polygon1
-```
+
 
 Overlay points and polygons to determine intersection
 ```{r}
@@ -175,7 +220,7 @@ test_intersect1 = f_intersect(point1,polygon1)
 ```
 
 ## Functions
-Function for overlay and itentifyinng in
+Function for overlay and itentifying in
 ```{r}
 f_intersect = function(point,polygon) {
   df_int = st_intersection(point, polygon)
