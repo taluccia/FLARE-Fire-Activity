@@ -42,6 +42,133 @@ library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
 library(lubridate)
 ```
+https://stackoverflow.com/questions/47784656/batch-load-shapefiles-from-directory-into-r
+
+##Fire perimeters
+```{r}
+poly_folder <- "../data/clean-shapefile/flare_30m" 
+
+    #--store shapefile names as a list
+    poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
+    poly_shp_files
+poly_names <-list(substr(poly_shp_files,1,19))
+poly_names
+    #--inspect list
+    #print(shp_files)
+```
+
+```{r}
+
+st_read_poly_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_st_read <-st_read(dsn = poly_folder, stringsAsFactors = FALSE,
+                         layer = layer_name)
+
+
+    }
+```
+
+```{r}
+ poly_shp_list <- lapply(poly_shp_files, st_read_poly_shp)
+```
+
+```{r}
+
+for (i in seq(poly_shp_list))
+      assign(paste("fire_", i+2000, sep = ""), poly_shp_list[[i]])
+```
+
+```{r}
+head(fire_2019)
+```
+
+
+
+
+## Hotspots
+```{r}
+point_folder <- "../data/hotspot_data/hotspots_shp" 
+
+    #--store shapefile names as a list
+    point_shp_files <- list.files(point_folder, pattern = "\\.shp$")
+
+    #--inspect list
+    #print(shp_files)
+```
+
+```{r}
+
+st_read_point_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_st_read <-st_read(dsn = point_folder, stringsAsFactors = FALSE,
+                         layer = layer_name)
+
+    }
+```
+
+```{r}
+ point_shp_list <- lapply(point_shp_files, st_read_point_shp)
+```
+
+# Other to delete
+```{r}
+    ####################################
+    # Batch shapefile loading function #
+    ####################################
+
+    rgdal_batch_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_spdf <-readOGR(dsn = fire_path, stringsAsFactors = FALSE, verbose = TRUE, 
+                         useC = TRUE, dropNULLGeometries = TRUE, addCommentsToPolygons = TRUE,
+                         layer = layer_name, require_geomType = NULL,
+                         p4s = NULL, encoding = 'ESRI Shapefile')
+    }
+```
+
+
+
+```{r}
+
+    #########################################
+    # Pass batch function to shapefile list #
+    #########################################
+
+   
+
+    #--Use lapply to pass rgdal_batch_shp function to files list.
+
+    batch_shp_list <- lapply(shp_files, rgdal_batch_shp)
+
+```
+
+
+
+batch_name = function(batch_name) {
+  purrr::set_names(nm = (basename(.) %>% tools::file_path_sans_ext()))
+}
+
+
+#--Extract each element in list into its own object
+```{r}
+    for (i in seq(batch_shp_list))
+      assign(sub(".shp", "", i), batch_shp_list[[i]])
+```
+
+
+sub(".xlsx", "", i)
+names (mycomparisons)
+
+Lapply <- lapply(myFiles, read.csv, header=TRUE))
+names(Lapply) <- myFiles
+for(i in myFiles) 
+    Lapply[[i]]$Source = i
+do.call(rbind, Lapply)
 
 # Read in Data  (Automated)
 Read in multiple data files
@@ -51,13 +178,7 @@ fire_path <- "../data/clean-shapefile/flare_30m"   # path to the data
 fire_files <- list.files(fire_path, pattern = "\\.shp$") %>% setNames(nm = .) # get file names
 fire_files
 ```
-```{r}
-st_read(fire_files)
-```
 
-```{r}
-head(fire2002)
-```
 
  replace with your folder name:
 dir <- "c:/files/shpfiles"
@@ -150,7 +271,8 @@ test_sum = test1 %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), se
             mean_confidence = mean(CONFIDENCE), 
             median_confidence = median(CONFIDENCE)) 
 ```
-## Parrt 1: Overlay
+
+# Part 1: Overlay
 Overlay hotspot and  fire perimeter data by year in order to add attributes from hotspots to fire perimeters  that they interect. This will add attributes for:
 - Fire start
 - Fire end
@@ -192,7 +314,7 @@ f1 = function(x){
 ### Apply  functions 
 
 ```{r}
-f_intersect(hotspot2001, fire2001) %>% f1()
+mapply(f_intersect(point_shp_list, poly_shp_list)) %>% f1()
 ```
 
 # Trying to Automate
