@@ -51,51 +51,31 @@ https://stackoverflow.com/questions/62419562/read-in-a-list-of-shapefiles-and-ro
 poly_folder <- "../data/clean-shapefile/flare_30m/" 
 
     #--store shapefile names as a list
-    poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
-    poly_shp_files
-poly_names <-list(substr(poly_shp_files,1,19))
-poly_names
-    #--inspect list
-    #print(shp_files)
-```
-CityA_CD.shp fires2017.shp
-```{r}
-makeNamedList <- function(...) {
-  structure(list(...), names = as.list(substitute(list(...)))[-1L])
-}
+poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
+poly_shp_files
+
 ```
 
-mylist <- makeNamedList(cars, iris)
-str(mylist)
 
 ```{r}
 # Reads in all shapefiles from Directory that include the string "_CDs".
-filenames <- list.files(poly_folder , pattern="\\.shp$", full.names=TRUE)
+poly_files <- list.files(poly_folder , pattern="\\.shp$", full.names=TRUE)
+poly_files
 ```
-
-
+***********
 ```{r}
 layer_name <- as.character(gsub(".shp","",filenames))
 layer_name
 ```
 
+names(d) <- gsub(".*/(.*)\\..*", "\\1", f)
 ```{r}
-# Applies the function st_read from the sf package to each file saved as a character string to transform the file list to a list object.
-shapefile_list <-lapply(filenames, st_read)
+poly_name <- as.character(gsub(".shp","", poly_shp_files))
+poly_name
 ```
 
 
-
-```{r}
-shapefile_list[[1]]
-```
-
-
-```{r}
-mylist <- makeNamedList(shapefile_list)
-str(mylist[[1]])
-```
-
+### Fuunction  1  to read in
 
 ```{r}
 
@@ -109,7 +89,7 @@ st_read_poly_shp <- function(shp_list) {
     }
 ```
 
-### Test FUnction
+#### Test FUnction
 ```{r}
 shp_list=poly_shp_files[[1]]
 shp_list
@@ -137,21 +117,93 @@ for (i in seq(poly_shp_list))
 ```{r}
 head(fire_2019)
 ```
+************************
+### Function #2  to read in all shapefiles
+
+
+names(mydata) <- as.character(gsub(".shp","",my_files))
+names(mydata) <- stringr::str_replace(my_files, pattern = ".csv", replacement = "")
 
 
 
+```{r}
+# Applies the function st_read from the sf package to each file saved as a character string to transform the file list to a list object.
+shapefile_list <-lapply(poly_files, st_read)
+```
+
+*********************
+names(d) <- gsub(".*/(.*)\\..*", "\\1", f)
+```{r}
+names(shapefile_list) <- gsub(".shp","", poly_shp_files)
+
+```
+```{r}
+shapefile_list[[1]]
+```
+paste(trt[i],sex[j],".csv",sep="")))
+So either:
+
+for (i in 1:length(temp)) { temp[[i]] <- read.csv(temp[i]) }
+or, if you don't want to overwrite the temp variable:
+
+df = c(rep(data.frame(), length(temp))) # list of empty dataframe
+for (i in 1:length(temp)) { df[[i]] <- as.list(read.csv(temp[i])) }
+
+
+
+```{r}
+
+for (i in seq(shapefile_list))
+      assign(paste("fire_", shapefile_list[[i]]["fire_yr"], sep = ""), shapefile_list[[i]])
+```
+
+
+```{r}
+names(lista[[1]]) = "number one"
+print(names(lista[[1]]))  #first
+```
+
+```{r}
+shapefile_lista <-Map(setNames, shapefile_list , poly_name)
+shapefile_lista # each column is now assigned a name from your vector called names
+```
+
+
+**************************
+```{r}
+s1 <- rbind(c(1, 1), c(10, 1), c(10, 10), c(1, 10), c(1, 1))
+p  <- list(s1 = s1, s2 = s1 + 4, s3 = s1 - 4)
+p  <-  lapply(p, function(x) st_sfc(st_polygon(list(x))) )
+```
+
+```{r}
+p[[1]]
+```
+
+**************************
 
 ## Hotspots
 ```{r}
 point_folder <- "../data/hotspot_data/hotspots_shp" 
 
     #--store shapefile names as a list
-    point_shp_files <- list.files(point_folder, pattern = "\\.shp$")
+    point_shp_files <- list.files(point_folder, pattern = "\\.shp$", full.names = TRUE)
 
     #--inspect list
     #print(shp_files)
 ```
 
+```{r}
+point_list <-lapply(point_shp_files, st_read)
+```
+
+
+Reading layer 
+```{r}
+(point_list[[1]])$name
+```
+
+*******
 ```{r}
 
 st_read_point_shp <- function(shp_list) {
@@ -366,9 +418,16 @@ f1 = function(x){
 ```
 
 ### Apply  functions 
+```{r}
+intersection <- accumulate(shapefile_list, st_intersection)$point_list
+```
 
 ```{r}
-mapply(f_intersect(point_shp_list, poly_shp_list)) %>% f1()
+test_list = f1(intersection)
+```
+
+```{r}
+mapply(f_intersect(point_list,shapefile_list)) %>% f1()
 ```
 
 # Trying to Automate
