@@ -516,4 +516,3 @@ head(test_sum)
 ```{r}
 merge(perimeter, test_sum, by="ID_obj")
 ```
-
