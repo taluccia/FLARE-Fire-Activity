@@ -1,0 +1,520 @@
+---
+title: "Automate Data Organization"
+author: "Anna Talucci"
+date: "11/5/2020"
+output: html_document
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+Assembly fire perimeter shape files with attribute data from hotspot data and bioclimatic zones, and climate. Data  needs to include:
+- Fire year
+- Fire class size
+- Fire start date (julian annual)
+- Fire end date (julian annual)
+- Bioclimatic zone (ecozone)
+- Max temp
+- Drought index
+- Snow off date
+
+
+
+
+# Library
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(purrr)
+library(readr)
+library(cowplot)
+library(ggcorrplot)
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(lubridate)
+```
+https://stackoverflow.com/questions/47784656/batch-load-shapefiles-from-directory-into-r
+
+https://stackoverflow.com/questions/62419562/read-in-a-list-of-shapefiles-and-row-bind-them-in-r-preferably-using-tidy-synta
+
+##Fire perimeters
+```{r}
+poly_folder <- "../data/clean-shapefile/flare_30m/" 
+
+    #--store shapefile names as a list
+poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
+poly_shp_files
+
+```
+
+
+```{r}
+# Reads in all shapefiles from Directory that include the string "_CDs".
+poly_files <- list.files(poly_folder , pattern="\\.shp$", full.names=TRUE)
+poly_files
+```
+***********
+```{r}
+layer_name <- as.character(gsub(".shp","",filenames))
+layer_name
+```
+
+names(d) <- gsub(".*/(.*)\\..*", "\\1", f)
+```{r}
+poly_name <- as.character(gsub(".shp","", poly_shp_files))
+poly_name
+```
+
+
+### Fuunction  1  to read in
+
+```{r}
+
+st_read_poly_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_st_read <-st_read(dsn = poly_folder, layer = layer_name)
+
+
+    }
+```
+
+#### Test FUnction
+```{r}
+shp_list=poly_shp_files[[1]]
+shp_list
+
+layer_name <- as.character(gsub(".shp","",shp_list))
+
+st_read(dsn = poly_folder, layer = layer_name)
+```
+
+```{r}
+ poly_shp_list <- lapply(poly_shp_files, st_read_poly_shp)
+```
+
+```{r}
+names(poly_shp_list)
+names(list)<-(poly_shp_files)
+```
+
+```{r}
+
+for (i in seq(poly_shp_list))
+      assign(paste("fire_", i+2000, sep = ""), poly_shp_list[[i]])
+```
+
+```{r}
+head(fire_2019)
+```
+************************
+### Function #2  to read in all shapefiles
+
+
+names(mydata) <- as.character(gsub(".shp","",my_files))
+names(mydata) <- stringr::str_replace(my_files, pattern = ".csv", replacement = "")
+
+
+
+```{r}
+# Applies the function st_read from the sf package to each file saved as a character string to transform the file list to a list object.
+shapefile_list <-lapply(poly_files, st_read)
+```
+
+*********************
+names(d) <- gsub(".*/(.*)\\..*", "\\1", f)
+```{r}
+names(shapefile_list) <- gsub(".shp","", poly_shp_files)
+
+```
+```{r}
+shapefile_list[[1]]
+```
+paste(trt[i],sex[j],".csv",sep="")))
+So either:
+
+for (i in 1:length(temp)) { temp[[i]] <- read.csv(temp[i]) }
+or, if you don't want to overwrite the temp variable:
+
+df = c(rep(data.frame(), length(temp))) # list of empty dataframe
+for (i in 1:length(temp)) { df[[i]] <- as.list(read.csv(temp[i])) }
+
+
+
+```{r}
+
+for (i in seq(shapefile_list))
+      assign(paste("fire_", shapefile_list[[i]]["fire_yr"], sep = ""), shapefile_list[[i]])
+```
+
+
+```{r}
+names(lista[[1]]) = "number one"
+print(names(lista[[1]]))  #first
+```
+
+```{r}
+shapefile_lista <-Map(setNames, shapefile_list , poly_name)
+shapefile_lista # each column is now assigned a name from your vector called names
+```
+
+
+**************************
+```{r}
+s1 <- rbind(c(1, 1), c(10, 1), c(10, 10), c(1, 10), c(1, 1))
+p  <- list(s1 = s1, s2 = s1 + 4, s3 = s1 - 4)
+p  <-  lapply(p, function(x) st_sfc(st_polygon(list(x))) )
+```
+
+```{r}
+p[[1]]
+```
+
+**************************
+
+## Hotspots
+```{r}
+point_folder <- "../data/hotspot_data/hotspots_shp" 
+
+    #--store shapefile names as a list
+    point_shp_files <- list.files(point_folder, pattern = "\\.shp$", full.names = TRUE)
+
+    #--inspect list
+    #print(shp_files)
+```
+
+```{r}
+point_list <-lapply(point_shp_files, st_read)
+```
+
+
+Reading layer 
+```{r}
+(point_list[[1]])$name
+```
+
+*******
+```{r}
+
+st_read_point_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_st_read <-st_read(dsn = point_folder, stringsAsFactors = FALSE,
+                         layer = layer_name)
+
+    }
+```
+
+```{r}
+ point_shp_list <- lapply(point_shp_files, st_read_point_shp)
+```
+
+# Other to delete
+```{r}
+    ####################################
+    # Batch shapefile loading function #
+    ####################################
+
+    rgdal_batch_shp <- function(shp_list) {
+
+      layer_name <- as.character(gsub(".shp","",shp_list))
+
+      shp_spdf <-readOGR(dsn = fire_path, stringsAsFactors = FALSE, verbose = TRUE, 
+                         useC = TRUE, dropNULLGeometries = TRUE, addCommentsToPolygons = TRUE,
+                         layer = layer_name, require_geomType = NULL,
+                         p4s = NULL, encoding = 'ESRI Shapefile')
+    }
+```
+
+
+
+```{r}
+
+    #########################################
+    # Pass batch function to shapefile list #
+    #########################################
+
+   
+
+    #--Use lapply to pass rgdal_batch_shp function to files list.
+
+    batch_shp_list <- lapply(shp_files, rgdal_batch_shp)
+
+```
+
+
+
+batch_name = function(batch_name) {
+  purrr::set_names(nm = (basename(.) %>% tools::file_path_sans_ext()))
+}
+
+
+#--Extract each element in list into its own object
+```{r}
+    for (i in seq(batch_shp_list))
+      assign(sub(".shp", "", i), batch_shp_list[[i]])
+```
+
+
+sub(".xlsx", "", i)
+names (mycomparisons)
+
+Lapply <- lapply(myFiles, read.csv, header=TRUE))
+names(Lapply) <- myFiles
+for(i in myFiles) 
+    Lapply[[i]]$Source = i
+do.call(rbind, Lapply)
+
+# Read in Data  (Automated)
+Read in multiple data files
+f01 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
+```{r}
+fire_path <- "../data/clean-shapefile/flare_30m"   # path to the data
+fire_files <- list.files(fire_path, pattern = "\\.shp$") %>% setNames(nm = .) # get file names
+fire_files
+```
+
+
+ replace with your folder name:
+dir <- "c:/files/shpfiles"
+ff <- list.files(dir, pattern="\\.shp$", full.names=TRUE)
+
+
+
+```{r eval=FALSE, include=FALSE}
+month_data <- month_files %>%
+  # read in all the files, appending the path before the filename
+  map(~ read_csv(file.path(month_path, .), .id = "file_name")) %>% 
+  reduce(rbind)
+month_data
+```
+map_df(~read_csv(.x, col_types = cols(), col_names = FALSE), .id = "file_name")
+
+
+```{r eval=FALSE, include=FALSE}
+list_of_files <- list.files(path = "../data/climate_monthly",
+                            full.names = TRUE)
+list_of_files
+df <- list_of_files %>%
+  setNames(nm = .) %>% 
+  map_df(~read_csv(.x, col_types = cols(), col_names = TRUE), .id = "file_name")     
+df
+```
+ separate(file_name, c("A","B","C"), sep = "([.?:])")
+```{r eval=FALSE, include=FALSE}
+df1 = df %>% 
+  separate(file_name, c("A","B","C","D","E","F","G"), sep = "([..///_])", extra = "merge") %>%
+  separate(G, c("A1","B1","C1","D1","E1","F1","G1"), sep = "([._])", extra = "merge") %>%
+  dplyr::select(A1:B1, ID_obj:vs) %>%
+  rename(climate_yr = A1, climate_mon = B1)
+
+df1
+  
+```
+
+# Read in one fire year are test extracting attributes
+```{r}
+fire2001 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001")
+fire2002 = st_read("../data/clean-shapefile/flare_30m/fires2002.shp", "fires2002")
+```
+
+```{r}
+hotspot2001 = st_read("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+hotspot2002 = st_read("../data/hotspot_data/DL_FIRE_M6_2002/fire_archive_2002.shp", "fire_archive_2002") 
+```
+
+```{r}
+head(hotspot)
+```
+
+```{r}
+head(perimeter)  # polygons
+head(hotspot) # points
+plot(perimeter)
+plot(hotspot, add=TRUE)
+```
+##
+```{r}
+test = st_intersection(hotspot, perimeter)
+```
+
+```{r}
+summary(test)
+```
+```{r}
+str(test$ACQ_DATE)
+```
+```{r}
+test1 = test %>% mutate(julian_date = yday(ACQ_DATE))
+head(test1)
+```
+
+
+
+```{r}
+test_sum = test1 %>% separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>% group_by(ID_obj) %>% 
+  summarize(min_julian_date = min(julian_date),
+            max_julian_date = max(julian_date),
+            mean_julian_date = mean(julian_date),
+            median_julian_date = median(julian_date),
+            min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), 
+            max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), 
+            min_confidence = min(CONFIDENCE), 
+            max_confidence = max(CONFIDENCE), 
+            mean_confidence = mean(CONFIDENCE), 
+            median_confidence = median(CONFIDENCE)) 
+```
+
+# Part 1: Overlay
+Overlay hotspot and  fire perimeter data by year in order to add attributes from hotspots to fire perimeters  that they interect. This will add attributes for:
+- Fire start
+- Fire end
+- Accuracy
+
+
+### Functions
+Function for overlay and itentifying in
+```{r}
+f_intersect = function(point,polygon) {
+  df_int = st_intersection(point, polygon)
+  
+  return(df_int)
+}
+```
+
+
+This function summarizes the point data (i.e., hotspot data) per polygon (i.e., fire perimeters)
+```{r}
+f1 = function(x){
+  x %>% mutate(julian_date = yday(ACQ_DATE)) %>%
+  separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>% group_by(ID_obj) %>% 
+  summarize(min_julian_date = min(julian_date),
+            max_julian_date = max(julian_date),
+            mean_julian_date = mean(julian_date),
+            median_julian_date = median(julian_date),
+            min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), 
+            max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), 
+            min_confidence = min(CONFIDENCE), 
+            max_confidence = max(CONFIDENCE), 
+            mean_confidence = mean(CONFIDENCE), 
+            median_confidence = median(CONFIDENCE)) -> x
+  return(x)
+}
+```
+
+### Apply  functions 
+```{r}
+intersection <- accumulate(shapefile_list, st_intersection)$point_list
+```
+
+```{r}
+test_list = f1(intersection)
+```
+
+```{r}
+mapply(f_intersect(point_list,shapefile_list)) %>% f1()
+```
+
+# Trying to Automate
+
+```{r}
+polygon1 = list(fire2001, fire2002)
+point1 = list(hotspot2001, hotspot2002)
+```
+
+
+
+Overlay points and polygons to determine intersection
+```{r}
+test = st_intersection(hotspot, perimeter)
+```
+
+
+
+```{r}
+test_i = f_intersect(hotspot2001, fire2001)
+```
+
+```{r}
+test_intersect1 = f_intersect(point1,polygon1)
+```
+
+## Functions
+Function for overlay and itentifying in
+```{r}
+f_intersect = function(point,polygon) {
+  df_int = st_intersection(point, polygon)
+  
+  return(df_int)
+}
+```
+
+
+This function summarizes the point data (i.e., hotspot data) per polygon (i.e., fire perimeters)
+```{r}
+f1 = function(x){
+  x %>% mutate(julian_date = yday(ACQ_DATE)) %>%
+  separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>% group_by(ID_obj) %>% 
+  summarize(min_julian_date = min(julian_date),
+            max_julian_date = max(julian_date),
+            mean_julian_date = mean(julian_date),
+            median_julian_date = median(julian_date),
+            min_acq_month = min(acq_month),
+            min_acq_day = min(acq_day), 
+            max_acq_month = max(acq_month),
+            max_acq_day = max(acq_day), 
+            min_confidence = min(CONFIDENCE), 
+            max_confidence = max(CONFIDENCE), 
+            mean_confidence = mean(CONFIDENCE), 
+            median_confidence = median(CONFIDENCE)) -> x
+  return(x)
+}
+```
+
+```{r}
+f_intersect(hotspot2001, fire2001) %>% f1()
+```
+
+```{r}
+f1(test_i)
+```
+```{r}
+f1(test)
+```
+
+
+```{r}
+f1(test_intersect)
+```
+
+```{r}
+test_sum
+```
+
+```{r}
+st_geometry(test_sum) <- NULL
+```
+
+```{r}
+head(test_sum)
+```
+```{r}
+merge(perimeter, test_sum, by="ID_obj")
+```
