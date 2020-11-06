@@ -1,0 +1,78 @@
+---
+title: "Fire starts and season"
+author: "Anna Talucci"
+date: "11/6/2020"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+
+Assembly fire perimeter shape files with attribute data from hotspot data and bioclimatic zones, and climate. Data  needs to include:
+- Fire year
+- Fire class size
+- Fire start date (julian annual)
+- Fire end date (julian annual)
+- Bioclimatic zone (ecozone)
+- Max temp
+- Drought index
+- Snow off date
+
+
+# Library
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(purrr)
+library(readr)
+library(cowplot)
+library(ggcorrplot)
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(lubridate)
+```
+
+##Fire perimeters
+```{r}
+poly_folder <- "../data/clean-shapefile/flare_30m/" 
+
+    #--store shapefile names as a list
+poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
+poly_shp_files
+
+```
+
+
+```{r}
+# Reads in all shapefiles from Directory that include the string "_CDs".
+poly_files <- list.files(poly_folder , pattern="\\.shp$", full.names=TRUE)
+poly_files
+```
+
+
+```{r}
+# Applies the function st_read from the sf package to each file saved as a character string to transform the file list to a list object.
+perimeter_list <-lapply(poly_files, st_read)
+```
+
+```{r}
+
+for (i in seq(perimeter_list))
+      assign(paste("fire_", i+2000, sep = ""), perimeter_list[[i]])
+```
+
+```{r}
+head(fire_2019)
+```
+
+
