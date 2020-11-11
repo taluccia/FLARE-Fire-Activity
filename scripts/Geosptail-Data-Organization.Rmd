@@ -285,7 +285,7 @@ perimeter2019 = merge(fire_2019, sum_2019, by="ID_obj")
 ```
 
 # Write shapefiles
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(perimeter2001, "../outputs/perimeter_summary/perimeters2001.shp", driver="ESRI Shapefile") 
 st_write(perimeter2002, "../outputs/perimeter_summary/perimeters2002.shp", driver="ESRI Shapefile") 
 st_write(perimeter2003, "../outputs/perimeter_summary/perimeters2003.shp", driver="ESRI Shapefile") 
@@ -293,7 +293,7 @@ st_write(perimeter2004, "../outputs/perimeter_summary/perimeters2004.shp", drive
 st_write(perimeter2005, "../outputs/perimeter_summary/perimeters2005.shp", driver="ESRI Shapefile") 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(perimeter2006, "../outputs/perimeter_summary/perimeters2006.shp", driver="ESRI Shapefile") 
 st_write(perimeter2007, "../outputs/perimeter_summary/perimeters2007.shp", driver="ESRI Shapefile") 
 st_write(perimeter2008, "../outputs/perimeter_summary/perimeters2008.shp", driver="ESRI Shapefile") 
@@ -301,7 +301,7 @@ st_write(perimeter2009, "../outputs/perimeter_summary/perimeters2009.shp", drive
 st_write(perimeter2010, "../outputs/perimeter_summary/perimeters2010.shp", driver="ESRI Shapefile") 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(perimeter2011, "../outputs/perimeter_summary/perimeters2011.shp", driver="ESRI Shapefile") 
 st_write(perimeter2012, "../outputs/perimeter_summary/perimeters2012.shp", driver="ESRI Shapefile") 
 st_write(perimeter2013, "../outputs/perimeter_summary/perimeters2013.shp", driver="ESRI Shapefile") 
@@ -309,7 +309,7 @@ st_write(perimeter2014, "../outputs/perimeter_summary/perimeters2014.shp", drive
 st_write(perimeter2015, "../outputs/perimeter_summary/perimeters2015.shp", driver="ESRI Shapefile") 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(perimeter2016, "../outputs/perimeter_summary/perimeters2016.shp", driver="ESRI Shapefile") 
 st_write(perimeter2017, "../outputs/perimeter_summary/perimeters2017.shp", driver="ESRI Shapefile") 
 st_write(perimeter2018, "../outputs/perimeter_summary/perimeters2018.shp", driver="ESRI Shapefile") 
