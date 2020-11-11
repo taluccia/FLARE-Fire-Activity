@@ -42,9 +42,33 @@ library(foreign) # deals with dbf files
 library(lubridate)
 ```
 
+# Define graph Theme and color Palette 
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+
 ##Fire perimeters
 ```{r}
-poly_folder <- "../data/clean-shapefile/flare_30m/" 
+poly_folder <- "../data/perimeter_summary/" 
 
     #--store shapefile names as a list
 poly_shp_files <- list.files(poly_folder, pattern = "\\.shp$")
@@ -66,13 +90,101 @@ perimeter_list <-lapply(poly_files, st_read)
 ```
 
 ```{r}
-
-for (i in seq(perimeter_list))
-      assign(paste("fire_", i+2000, sep = ""), perimeter_list[[i]])
+head(perimeter_list)
 ```
 
 ```{r}
-head(fire_2019)
+perimeters_df = perimeter_list %>% dplyr::bind_rows()
+```
+
+```{r}
+st_geometry(perimeters_df) <- NULL
+```
+
+```{r}
+head(perimeters_df)
 ```
 
 
+# Fire season
+
+Annual average start day
+average Season length
+```{r}
+fire_season1 = perimeters_df %>% group_by(fire_yr) %>%
+  mutate(burn_days = (mx_jln_ - min_jln_dt)) %>%
+  summarise(first_day = min(min_jln_dt), last_day = max(mx_jln_), avg_start_day = mean(min_jln_dt), avg_end_day = mean(mx_jln_), avg_burn_days = mean(burn_days)) %>%
+  as.data.frame() %>%
+  mutate(ssn_lngth = last_day - first_day)
+
+
+```
+
+```{r}
+
+fire_season1
+```
+fire_area = as.data.frame(fire_area)
+fire_area
+
+
+['#a6611a','#dfc27d','#f5f5f5','#80cdc1','#018571']
+```{r}
+ggplot(fire_season1) +
+  geom_line(aes(x=fire_yr, y=first_day), color = "#018571" , size=1) +
+  geom_line(aes(x=fire_yr, y=last_day), color = "#a6611a" , size=1) +
+  geom_line(aes(x=fire_yr, y=avg_start_day), color = "#80cdc1" , size=1) +
+  geom_line(aes(x=fire_yr, y=avg_end_day), color = "#dfc27d" , size=1) +
+  geom_hline(yintercept=152, color = "#fdae61", size=1, linetype = "longdash") +
+  geom_hline(yintercept=243, color = "#fdae61", size=1, linetype = "longdash") +
+  ylab("Julian Date") +
+  theme_bw() +
+  scale_x_continuous(name="Year", breaks=seq(2000, 2020,2)) +
+  theme(legend.position="bottom")
+
+
+
+```
+
+
+
+
+```{r}
+long_df = fire_season1 %>%
+  dplyr::select(fire_yr, first_day, last_day, avg_start_day, avg_end_day) %>%
+  pivot_longer(!fire_yr, names_to = "start_end", values_to = "date") 
+  
+```
+```{r}
+head(long_df)
+```
+
+geom_line(aes(x=fire_yr, y=first_day), color = "#018571" , size=1) +
+  geom_line(aes(x=fire_yr, y=last_day), color = "#a6611a" , size=1) +
+  geom_line(aes(x=fire_yr, y=avg_start_day), color = "#80cdc1" , size=1) +
+  geom_line(aes(x=fire_yr, y=avg_end_day), color = "#dfc27d" , size=1) +
+
+```{r fig.height=5, fig.width=6}
+plot_season = ggplot(long_df, aes(x=fire_yr, y=date, color = start_end)) +
+  geom_line(size=1) +
+   scale_color_manual(values = c("#80cdc1", "#018571", "#a6611a",  "#dfc27d"),  breaks = c("first_day", "avg_start_day","avg_end_day", "last_day"), 
+  labels = c("start", "mean start", "mean end", "end")) +
+   
+  geom_hline(yintercept=152, color = "#fdae61", size=1, linetype = "longdash") +
+  geom_hline(yintercept=243, color = "#fdae61", size=1, linetype = "longdash") +
+
+  ylab("Julian date") +
+  theme_bw() +
+  scale_x_continuous(name="Year", breaks=seq(2000, 2020,2)) +
+  theme(legend.position="bottom") +
+  guides(color=guide_legend(title="Fire season:")) +
+  annotate(geom="text", x=2001.1, y=157, label="June 1", color="grey30") +
+  annotate(geom="text", x=2001.6, y=249, label="August 31", color="grey30")
+
+
+plot_season
+``` 
+  
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-11-11_fire-season.png", plot = plot_season, width = 6, height = 5, units = c("in"), dpi=600 )
+```
