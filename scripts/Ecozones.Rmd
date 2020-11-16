@@ -31,15 +31,66 @@ wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
 ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
-# Data 
+# Data
+```{r}
+ecozone = st_read("../data/wwf_ecozone/wwf_terr_ecos_oRn.shp", "wwf_terr_ecos_oRn") 
+```
+
 ```{r}
 
-bbox = readOGR("../data/bbox/neSiberia_bbox.shp", "neSiberia_bbox")
-ez = readOGR("../data/wwf_terr_ecos_oRn/wwf_terr_ecos_oRn.shp", "wwf_terr_ecos_oRn")
+ne_bbox = st_read("../data/bbox/neSiberia_bbox.shp", "neSiberia_bbox") 
 
 ```
 
 
+```{r}
+bbox = readOGR("../data/bbox/neSiberia_bbox.shp", "neSiberia_bbox")
+ez = readOGR("../data/wwf_ecozone/wwf_terr_ecos_oRn.shp", "wwf_terr_ecos_oRn")
+```
+
+# Filter (subset by ECO_NAME
+```{r}
+head(ecozone)
+```
+
+```{r}
+biome = ecozone %>% filter(BIOME==11)
+```
+
+```{r}
+unique(biome$ECO_NAME)
+```
+
+Cherskii-Kolyma mountain tundra 
+Northeast Siberian coastal tundra 
+Chukchi Peninsula tundra
+Northeast Siberian taiga
+Bering tundra
+Taimyr-Central Siberian tundra
+East Siberian taiga
+
+Create Target with ECO_NAME associated with BIOME 11
+```{r}
+target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga")
+```
+
+```{r}
+ne_subset = ecozone %>% filter(ECO_NAME %in% target) 
+```
+
+```{r}
+summary(ne_subset)
+```
+
+
+
+
+
+## Plot Data
+
+```{r}
+plot(ne_subset$geometry)
+```
 
 ```{r}
 plot(ez)
@@ -52,7 +103,7 @@ head(ez)
 unique(ez$REALM) 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 unique(ez$ECO_NAME) 
 ```
 # Transform CRS
@@ -69,6 +120,15 @@ ez_subset <- ez_ee[bbox_ee, ]
 plot(ez_subset)
 ```
 
+# True clip (similar to ESRI)
+```{r}
+ne_subset_crop <-  st_crop(ne_subset, ne_bbox) #clip polygon 2 with polygon 1
+head(ne_subset_crop)
+```
+
+```{r}
+plot(ne_subset_clip$geometry)
+```
 
 
 
@@ -78,11 +138,31 @@ plot(ez_subset)
 ez_subset_wgs = spTransform(ez_subset, CRS(wgs_proj))
 ```
 
+# Clip to bbox
+
+```{r}
+ez_wgs_clip <- gIntersection(ez_subset_wgs, bbox, byid = TRUE, drop_lower_td = TRUE) #clip polygon 2 with polygon 1
+plot(ez_wgs_clip, col = "lightblue")
+```
+
+```{r}
+ez_wgs_clip <- gIntersection(ez_subset_wgs, bbox, byid = TRUE, drop_lower_td = TRUE) #clip polygon 2 with polygon 1
+plot(ez_wgs_clip, col = "lightblue")
+```
+
+```{r}
+ez_clip_wgs = spTransform(ez_clip, CRS(wgs_proj))
+plot(ez_clip_wgs)
+plot(bbox, add=TRUE)
+```
 
 ```{r}
 plot(ez_subset_wgs)
 plot(bbox, add=TRUE)
 ```
+
+
+
 
 ## Sp to sf
 
@@ -91,7 +171,26 @@ ez_subset_wgs_st = st_as_sf(ez_subset_wgs)
 
 ```
 
+
+```{r}
+ez_clip_wgs_st = st_as_sf(ez_clip_wgs)
+
+```
+
+# Write Shapefile
+
+```{r}
+st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
+```
+
+```{r}
+st_write(ne_subset_clip, "../outputs/ecozones/ne_siberia_ecozones_crop.shp", driver="ESRI Shapefile") 
+```
+
 ```{r}
 st_write(ez_subset_wgs_st, "../outputs/ecozones/FLARE-Ecozones.shp", driver="ESRI Shapefile") 
 ```
 
+```{r}
+st_write(ez_clip_wgs_st, "../outputs/ecozones/FLARE-Ecozones-clip.shp", driver="ESRI Shapefile") 
+```
