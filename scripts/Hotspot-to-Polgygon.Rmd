@@ -102,7 +102,7 @@ hs2016 = readOGR("../data/hotspot_data/DL_FIRE_M6_2016/fire_archive_2016.shp", "
 hs2017 = readOGR("../data/hotspot_data/DL_FIRE_M6_2017/fire_archive_2017.shp", "fire_archive_2017") 
 hs2018 = readOGR("../data/hotspot_data/DL_FIRE_M6_2018/fire_archive_2018.shp", "fire_archive_2018") 
 hs2019 = readOGR("../data/hotspot_data/DL_FIRE_M6_2019/fire_archive_2019.shp", "fire_archive_2019")
-hs2020 = readOGR("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_jul2020.shp", "fire_nrt_M6_jul2020")
+hs2020 = readOGR("../data/hotspot_data/DL_FIRE_M6_2020/hotspot_point_2020.shp", "hotspot_point_2020")
  
 ```
 
