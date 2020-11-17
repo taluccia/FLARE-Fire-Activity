@@ -1,0 +1,66 @@
+---
+title: "2020 hotspots"
+author: "Anna Talucci"
+date: "11/17/2020"
+output: html_document
+---
+
+# Overview
+
+combine to shapefiles with 2020 hotspot data
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+```
+
+
+# Data
+
+
+```{r}
+hs_m6_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_archive_M6_166449.shp", "fire_archive_M6_166449")
+hs_nrt_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_166449.shp", "fire_nrt_M6_166449")
+```
+```{r}
+head(hs_m6_2020)
+```
+```{r}
+summary(hs_m6_2020)
+```
+
+```{r}
+hs_m6_2020 = hs_m6_2020 %>% dplyr::select(-TYPE)
+```
+```{r}
+summary(hs_m6_2020)
+```
+
+```{r}
+head(hs_nrt_2020)
+```
+
+```{r}
+summary(hs_nrt_2020)
+```
+
+```{r}
+hs_2020=rbind(hs_m6_2020, hs_nrt_2020)
+```
+
+```{r}
+summary(hs_2020)
+```
+
+
+```{r eval=FALSE, warning=FALSE, include=FALSE}
+st_write(hs_2020, "../outputs/hotspot-point-combine/hotspot_point_2020.shp", driver="ESRI Shapefile")  
+```
