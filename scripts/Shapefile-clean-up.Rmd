@@ -79,7 +79,7 @@ f17 = readOGR("../data/shapefile/2017_fires.shp", "2017_fires")
 f18 = readOGR("../data/shapefile/2018_fires.shp", "2018_fires")
 
 f19 = readOGR("../data/FLARE-Fires-30m/2019/2019_flare_fires.shp", "2019_flare_fires")
-f20 = readOGR("../data/shapefile/2020_fires.shp", "2020_fires")
+f20 = readOGR("../data/FLARE-Fires-30m/2020_flare_fires.shp", "2020_flare_fires")
  
 ```
 
