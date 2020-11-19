@@ -247,6 +247,11 @@ Minimum = min(area_ha),
 Maximum = max(area_ha) ) )
 ```
 
+```{r eval=FALSE, include=FALSE}
+write.csv(sumdat2,"../outputs/2020-11-19_FLARE-Fire-Summary.csv", row.names = FALSE)
+```
+
+
 ```{r}
 summarise(d1_20, 
 n = n(),
