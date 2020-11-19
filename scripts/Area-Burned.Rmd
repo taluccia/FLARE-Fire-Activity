@@ -244,11 +244,12 @@ Mean = mean(area_ha),
 SD = sd(area_ha),
 Median = median(area_ha),
 Minimum = min(area_ha),
-Maximum = max(area_ha) ) )
+Maximum = max(area_ha),
+Total = sum(area_ha)) )
 ```
 
 ```{r eval=FALSE, include=FALSE}
-write.csv(sumdat2,"../outputs/2020-11-19_FLARE-Fire-Summary.csv", row.names = FALSE)
+write.csv(sumdat2,"../outputs/2020-11-19_FLARE-Fire-Summary_total.csv", row.names = FALSE)
 ```
 
 
