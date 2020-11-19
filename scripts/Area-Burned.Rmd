@@ -339,7 +339,7 @@ fire_area
 ```{r}
 plot_area = ggplot(fire_area, aes(fire_yr, total_area_ha)) +
   geom_bar(stat="identity", width = 0.5, fill="tomato2") +
-  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000), labels = c(0, 2, 4, 6)) + 
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   xlab('') +
   comp_theme + theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
 
@@ -442,6 +442,31 @@ plot_class1
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-11-18_area-frequency-fireyear.png", plot = plot_class1, width = 6, height = 5, units = c("in"), dpi=600 )
 ```
+
+```{r fig.height=4, fig.width=6}
+no_legend1 = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
+      geom_bar(aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
+  xlab("Fire year") +
+  ylab("Fire frequency \n(count)") +
+
+  theme_bw() + theme(legend.position = "none") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+no_legend1
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-11-19_area-frequency-NoLegend.png", plot = no_legend1, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
 ```{r}
 head(fire_class)
 ```
@@ -470,6 +495,52 @@ plot_class2
 ggsave("../figures/2020-11-18_areaburn-class-fireyear.png", plot = plot_class2, width = 6, height = 5, units = c("in"), dpi=600 )
 ```
 
+```{r fig.height=5, fig.width=6}
+ledgend_r = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
+      geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
+  xlab("Fire year") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+
+  theme_bw() + theme(legend.position = "right") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+ledgend_r
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-11-19_areaburn-class-legendR.png", plot =ledgend_r, width = 6, height = 5, units = c("in"), dpi=600 )
+```
+
+```{r fig.height=4, fig.width=6}
+no_legend = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
+      geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
+  xlab("Fire year") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+
+  theme_bw() + theme(legend.position = "none") +  
+    scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+no_legend
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-11-19_areaburn-class-NOlegend.png", plot =no_legend, width = 6, height = 4, units = c("in"), dpi=600 )
+```
 
 bottom_row <- plot_grid(p1, p2, labels = c('B', 'C'), label_size = 12)
 p3 <- ggplot(mtcars, aes(x = qsec, y = disp)) + geom_point() + facet_wrap(~gear)
