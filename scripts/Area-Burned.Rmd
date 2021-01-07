@@ -25,6 +25,7 @@ library(foreign) # deals with dbf files
 library(dplyr)
 library(ggplot2)
 library(cowplot)
+library(RColorBrewer)
 ```
 
 # Define graph Theme and color Palette 
@@ -56,40 +57,32 @@ Read in shape files
 
 
 ```{r}
-f01 = st_read("../data/clean-shapefile/flare_30m/fires2001.shp", "fires2001") 
-f02 = st_read("../data/clean-shapefile/flare_30m/fires2002.shp", "fires2002") 
-f03 = st_read("../data/clean-shapefile/flare_30m/fires2003.shp", "fires2003")
-f04 = st_read("../data/clean-shapefile/flare_30m/fires2004.shp", "fires2004") 
-f05 = st_read("../data/clean-shapefile/flare_30m/fires2005.shp", "fires2005") 
-```
+f01 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2001.shp", "perimeters2001") 
+f02 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2002.shp", "perimeters2002") 
+f03 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2003.shp", "perimeters2003")
+f04 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2004.shp", "perimeters2004") 
+f05 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2005.shp", "perimeters2005") 
 
-```{r}
-f06 = st_read("../data/clean-shapefile/flare_30m/fires2006.shp", "fires2006") 
-f07 = st_read("../data/clean-shapefile/flare_30m/fires2007.shp", "fires2007") 
-f08 = st_read("../data/clean-shapefile/flare_30m/fires2008.shp", "fires2008")
-f09 = st_read("../data/clean-shapefile/flare_30m/fires2009.shp", "fires2009") 
-f10 = st_read("../data/clean-shapefile/flare_30m/fires2010.shp", "fires2010") 
-```
+f06 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2006.shp", "perimeters2006") 
+f07 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2007.shp", "perimeters2007") 
+f08 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2008.shp", "perimeters2008")
+f09 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2009.shp", "perimeters2009") 
+f10 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2010.shp", "perimeters2010") 
 
-```{r}
-f11 = st_read("../data/clean-shapefile/flare_30m/fires2011.shp", "fires2011") 
-f12 = st_read("../data/clean-shapefile/flare_30m/fires2012.shp", "fires2012") 
-f13 = st_read("../data/clean-shapefile/flare_30m/fires2013.shp", "fires2013")
-f14 = st_read("../data/clean-shapefile/flare_30m/fires2014.shp", "fires2014") 
-f15 = st_read("../data/clean-shapefile/flare_30m/fires2015.shp", "fires2015") 
-```
+f11 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2011.shp", "perimeters2011") 
+f12 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2012.shp", "perimeters2012") 
+f13 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2013.shp", "perimeters2013")
+f14 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2014.shp", "perimeters2014") 
+f15 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2015.shp", "perimeters2015") 
 
-```{r}
-f16 = st_read("../data/clean-shapefile/flare_30m/fires2016.shp", "fires2016") 
-f17 = st_read("../data/clean-shapefile/flare_30m/fires2017.shp", "fires2017") 
-f18 = st_read("../data/clean-shapefile/flare_30m/fires2018.shp", "fires2018")
-f19 = st_read("../data/clean-shapefile/flare_30m/fires2019.shp", "fires2019")
-f20 = st_read("../data/clean-shapefile/flare_30m/fires2020.shp", "fires2020")
+f16 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2016.shp", "perimeters2016") 
+f17 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2017.shp", "perimeters2017") 
+f18 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2018.shp", "perimeters2018")
+f19 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2019.shp", "perimeters2019")
+f20 = st_read("../data/perimeter_summary/arctic_ecozone/perimeters2020.shp", "perimeters2020")
 
 ```
-```{r eval=FALSE, include=FALSE}
-f19 = st_read("../data/clean-shapefile/flare_30m/fires2019.shp", "fires2019")
-```
+
 
 
 ```{r}
@@ -103,6 +96,8 @@ head(f18)
 - pull attributes out into a data frame
 - create unique id [e.g. mutate(ID =  paste(site, burn_year, transect, plot, sep = '_'))]
 - combine all data tables
+
+## Remove Geometry
 
 ```{r}
 st_geometry(f01) <- NULL
@@ -134,6 +129,8 @@ st_geometry(f20) <- NULL
 head(f18)
 ```
 
+### Make into Dataframe
+
 ```{r}
 f01_df = as.data.frame(f01)
 f02_df = as.data.frame(f02)
@@ -158,7 +155,7 @@ f20_df = as.data.frame(f20)
 ```
 
 
-
+### Add Fire ID
 ```{r}
 f01_uni = f01_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
 f02_uni = f02_df %>% mutate(fire_ID =  paste(fire_yr, "ru", ID_obj, sep = '_'))
@@ -196,6 +193,7 @@ f01_uni
 f02_uni
 ```
 
+## Merge Dataframes
 
 ```{r}
 c01_02 = rbind(f01_uni, f02_uni)
@@ -229,7 +227,9 @@ head(d1_20)
 tail(d1_20)
 ```
 
-# Summary Data
+# Annual Summary Data
+
+## Frequency
 
 ```{r}
 fire_frq = d1_20 %>% count(fire_yr, name='n_fires')
@@ -252,6 +252,14 @@ Total = sum(area_ha)) )
 write.csv(sumdat2,"../outputs/2020-11-19_FLARE-Fire-Summary_total.csv", row.names = FALSE)
 ```
 
+```{r}
+( sumdat3 = summarise( sumdat2,
+mean_n = mean(n),
+mean_size = mean(Mean),
+mean_maximum = mean(Maximum),
+mean_annual_area = mean(Total)) ) 
+```
+
 
 ```{r}
 summarise(d1_20, 
@@ -263,7 +271,8 @@ Median = median(area_ha),
 Minimum = min(area_ha),
 Maximum = max(area_ha) ) 
 ```
-## Fire size class
+
+## Add Fire size class
 
 Fire Size classes in hectares
 1.  400-999
@@ -304,9 +313,25 @@ fire_class_ct = as.data.frame(fire_class_ct)
 fire_class_ct
 ```
 
+# Arctic/Subarctic Summary Data
+```{r}
+head(d1_20)
+```
 
+
+```{r}
+( arctic_sum = summarise( group_by(d1_20, "Fire Year" = fire_yr, "Location" = location),
+n = n(),
+Mean = mean(area_ha),
+SD = sd(area_ha),
+Median = median(area_ha),
+Minimum = min(area_ha),
+Maximum = max(area_ha),
+Total = sum(area_ha)) )
+```
 # Figures
 
+## Frequency
 ```{r}
 plot_frq = ggplot(fire_frq, aes(fire_yr, n_fires)) +
   geom_bar(stat="identity", width = 0.5, fill="#abdda4") +
@@ -334,7 +359,9 @@ plot_frq_line
 ```
 
 
+## Area 
 
+### by year
 ```{r}
 fire_area = d1_20 %>% group_by(fire_yr) %>%
   summarise(total_area_ha = sum(area_ha))
@@ -356,6 +383,47 @@ plot_area
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2020-11-18_AreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
 ```
+
+### by year and location
+```{r}
+fire_area_arctic = d1_20 %>% group_by(fire_yr, location) %>%
+  summarise(total_area_ha = sum(area_ha))
+fire_area_arctic = as.data.frame(fire_area_arctic)
+fire_area_arctic
+```
+```{r}
+
+arctic_palette = c("#018571", "#a6611a")
+
+```
+
+  scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+```{r}
+plot_area_arctic = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill=location)) +
+  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  
+
+  theme_bw() + theme(legend.position = "bottom") + 
+  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  xlab('') +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_area_arctic
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2021-01-07_ArctisAreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
+# Delete?
 ```{r}
 head(fire_area)
 head(fire_frq)
@@ -381,7 +449,7 @@ ggplot(head(fire_area_frq), aes(x=fire_yr)) +
 
 
 
-
+## Fire Class Frequency
 ```{r}
 plot_class1 = ggplot(fire_class_ct, aes(fire_size_class, count)) +
   geom_bar(stat="identity", width = 0.5, fill="tomato2") + 
@@ -565,3 +633,13 @@ grid_plot
 ggsave("../figures/2020-05-02_area-frequency-fireyear.png", plot = grid_plot, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
 
+# Gridded figure
+Area by class
+Area by arctic/subarctic
+Frequency by class
+Frequency by arctic subartic
+
+```{r}
+
+
+```
