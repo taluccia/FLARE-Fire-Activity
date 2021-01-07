@@ -51,6 +51,11 @@ comp_theme = theme_bw() + theme(legend.position = "none") +
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 ```
 
+```{r}
+arctic_palette1 = c("#018571", "#a6611a")
+arctic_palette2 = c("#80cdc1", "#dfc27d")
+
+```
 # Data 
 
 Read in shape files
@@ -340,7 +345,7 @@ Total = sum(area_ha)) )
 ### Frequency Only by year
 ```{r}
 plot_frq = ggplot(fire_frq, aes(fire_yr, n_fires)) +
-  geom_bar(stat="identity", width = 0.5, fill="#abdda4") +
+  geom_bar(stat="identity", width = 0.5, fill="black") +
   xlab('') +
   ylab("Fire frequency  \n(count)") +
   comp_theme + 
@@ -372,12 +377,12 @@ head(fire_frq_arctic)
 
 ```{r}
 plot_frq_arctic_nl = ggplot(fire_frq_arctic, aes(x=fire_yr, y=n_fires, fill=location)) +
-  geom_bar(stat="identity", width = 0.5, position = "dodge") +
-  scale_y_continuous(name = ('Frequency \n(count)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Fire frequency \n(count)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   
 
   theme_bw() + theme(legend.position = "none") + 
-  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  scale_fill_manual(values=arctic_palette2, name="", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   theme(panel.grid.major = element_blank()) +
     theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
@@ -401,7 +406,7 @@ fire_area
 
 ```{r}
 plot_area = ggplot(fire_area, aes(fire_yr, total_area_ha)) +
-  geom_bar(stat="identity", width = 0.5, fill="tomato2") +
+  geom_bar(stat="identity", width = 0.5, fill="black") +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   xlab('') +
   comp_theme + theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
@@ -421,19 +426,17 @@ fire_area_arctic = d1_20 %>% group_by(fire_yr, location) %>%
 fire_area_arctic = as.data.frame(fire_area_arctic)
 fire_area_arctic
 ```
-```{r}
-arctic_palette = c("#018571", "#a6611a")
-```
+
 
   scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
 ```{r}
 plot_area_arctic = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill=location)) +
-  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   
 
   theme_bw() + theme(legend.position = "right") + 
-  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  scale_fill_manual(values=arctic_palette2, name="", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   theme(panel.grid.major = element_blank()) +
     theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
@@ -448,12 +451,12 @@ plot_area_arctic
 
 ```{r}
 plot_area_arctic_nl = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill=location)) +
-  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   
 
   theme_bw() + theme(legend.position = "none") + 
-  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  scale_fill_manual(values=arctic_palette2, name="", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   theme(panel.grid.major = element_blank()) +
     theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
