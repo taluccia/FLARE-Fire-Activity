@@ -103,25 +103,17 @@ head(arctic)
 head(f01)
 ```
 
-```{r}
-f01 %>% mutate(location = ifelse(geometry %in% 66.5:75, "arctic", "subarctic"))
-```
-
-```{r}
-st_filter(f01, arctic, y)
-```
 
 
+# Specify Arctic or Subarctic
 ```{r}
-f01_arctic = st_join(f01, arctic)
+f01_arctic = st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+
 head(f01_arctic)
 ```
 
-```{r}
-perimeters2001 = f01_arctic %>% dplyr::mutate(location = replace_na(location, "subarctic"))
 
-head(perimeters2001)
-```
+# Write to shp
 
 ```{r}
 st_write(perimeters2001, "../outputs/perimeter_summary/arctic/perimeters2001.shp", driver="ESRI Shapefile") 
