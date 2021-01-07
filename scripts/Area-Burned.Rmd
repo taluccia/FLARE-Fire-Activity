@@ -236,6 +236,12 @@ fire_frq = d1_20 %>% count(fire_yr, name='n_fires')
 fire_frq = as.data.frame(fire_frq)
 ```
 
+```{r}
+fire_frq_arctic = d1_20 %>% dplyr::group_by(fire_yr, location) %>% count(fire_yr, name='n_fires')
+fire_frq_arctic = as.data.frame(fire_frq_arctic)
+
+head(fire_frq_arctic)
+```
 
 ```{r}
 ( sumdat2 = summarise( group_by(d1_20, "Fire Year" = fire_yr),
@@ -330,13 +336,13 @@ Maximum = max(area_ha),
 Total = sum(area_ha)) )
 ```
 # Figures
-
-## Frequency
+#Frequency
+### Frequency Only by year
 ```{r}
 plot_frq = ggplot(fire_frq, aes(fire_yr, n_fires)) +
   geom_bar(stat="identity", width = 0.5, fill="#abdda4") +
-  xlab('Year') +
-  ylab("Fire frequency (count)") +
+  xlab('') +
+  ylab("Fire frequency  \n(count)") +
   comp_theme + 
       theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
 
@@ -347,6 +353,7 @@ plot_frq
 ggsave("../figures/2020-11-18_FireFrequency.png", plot = plot_frq, width = 6, height = 4, units = c("in"), dpi=600 )
 ```
 
+### Frequency as line only by year
 ```{r}
 plot_frq_line = ggplot(fire_frq, aes(x=fire_yr, y=n_fires)) +
   geom_line(color = "grey" , size=2) +
@@ -358,7 +365,30 @@ plot_frq_line = ggplot(fire_frq, aes(x=fire_yr, y=n_fires)) +
 plot_frq_line
 ```
 
+### Frequency year and arctic
+```{r}
+head(fire_frq_arctic)
+```
 
+```{r}
+plot_frq_arctic_nl = ggplot(fire_frq_arctic, aes(x=fire_yr, y=n_fires, fill=location)) +
+  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  scale_y_continuous(name = ('Frequency \n(count)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  
+
+  theme_bw() + theme(legend.position = "none") + 
+  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  xlab('') +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_frq_arctic_nl
+```
 ## Area 
 
 ### by year
@@ -384,7 +414,7 @@ plot_area
 ggsave("../figures/2020-11-18_AreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
 ```
 
-### by year and location
+### by year and Arctic
 ```{r}
 fire_area_arctic = d1_20 %>% group_by(fire_yr, location) %>%
   summarise(total_area_ha = sum(area_ha))
@@ -392,9 +422,7 @@ fire_area_arctic = as.data.frame(fire_area_arctic)
 fire_area_arctic
 ```
 ```{r}
-
 arctic_palette = c("#018571", "#a6611a")
-
 ```
 
   scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
@@ -404,7 +432,7 @@ plot_area_arctic = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
   
 
-  theme_bw() + theme(legend.position = "bottom") + 
+  theme_bw() + theme(legend.position = "right") + 
   scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   theme(panel.grid.major = element_blank()) +
@@ -418,6 +446,25 @@ plot_area_arctic = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill
 plot_area_arctic
 ```
 
+```{r}
+plot_area_arctic_nl = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill=location)) +
+  geom_bar(stat="identity", width = 0.5, position = "dodge") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  
+
+  theme_bw() + theme(legend.position = "none") + 
+  scale_fill_manual(values=arctic_palette, name="", labels = c("Arctic", "Subarctic")) +
+  xlab('') +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_area_arctic_nl
+```
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/2021-01-07_ArctisAreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
@@ -462,7 +509,7 @@ plot_class1
 
 
 
-
+## Annual frequency by class
 scale_fill_brewer(palette = "Spectral")
 
 - 400-999
@@ -493,7 +540,7 @@ plot_class = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spec
 plot_class
 ```
 
-```{r fig.height=5, fig.width=6}
+```{r}
 plot_class1 = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
       geom_bar(aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
   xlab("Fire year") +
@@ -517,10 +564,10 @@ plot_class1
 ggsave("../figures/2020-11-18_area-frequency-fireyear.png", plot = plot_class1, width = 6, height = 5, units = c("in"), dpi=600 )
 ```
 
-```{r fig.height=4, fig.width=6}
-no_legend1 = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
+```{r}
+frq_class_no_legend = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spectral") +
       geom_bar(aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
-  xlab("Fire year") +
+  xlab("") +
   ylab("Fire frequency \n(count)") +
 
   theme_bw() + theme(legend.position = "none") +  
@@ -533,7 +580,7 @@ no_legend1 = ggplot(fire_class, aes(fire_yr)) +scale_fill_brewer(palette = "Spec
   theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
   guides(fill = guide_legend(title.position = "top"))
 
-no_legend1
+frq_class_no_legend
 ```
 
 
@@ -545,7 +592,8 @@ ggsave("../figures/2020-11-19_area-frequency-NoLegend.png", plot = no_legend1, w
 head(fire_class)
 ```
 
-```{r fig.height=5, fig.width=6}
+## Annual class by area
+```{r}
 plot_class2 = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
       geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
   xlab("Fire year") +
@@ -593,10 +641,10 @@ ledgend_r
 ggsave("../figures/2020-11-19_areaburn-class-legendR.png", plot =ledgend_r, width = 6, height = 5, units = c("in"), dpi=600 )
 ```
 
-```{r fig.height=4, fig.width=6}
-no_legend = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
+```{r}
+area_class_no_legend = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
       geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
-  xlab("Fire year") +
+  xlab("") +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
 
   theme_bw() + theme(legend.position = "none") +  
@@ -609,7 +657,7 @@ no_legend = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palett
   theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
   guides(fill = guide_legend(title.position = "top"))
 
-no_legend
+area_class_no_legend
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -639,7 +687,7 @@ Area by arctic/subarctic
 Frequency by class
 Frequency by arctic subartic
 
-```{r}
-
+```{r fig.height=7, fig.width=6}
+cowplot::plot_grid(plot_area, plot_frq, area_class_no_legend, frq_class_no_legend, plot_area_arctic_nl, plot_frq_arctic_nl, labels = "AUTO", ncol = 2)
 
 ```
