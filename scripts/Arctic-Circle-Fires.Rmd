@@ -25,28 +25,6 @@ library(cowplot)
 library(tidyverse)
 ```
 
-# Define graph Theme and color Palette 
-```{r}
-lb_theme = theme_bw() + theme(legend.position = "bottom") +  
-  theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
-```
-
-```{r}
-comp_theme = theme_bw() + theme(legend.position = "none") +  
-  theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black"))
-```
-
-```{r}
-cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-```
 
 # Data 
 
@@ -54,6 +32,12 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 
 ```{r}
 arctic = st_read("../data/bbox/ArcticCircle_bbox.shp", "ArcticCircle_bbox") 
+```
+
+## Ecozone Poly
+
+```{r}
+ecozone = st_read("../data/ecozones/ne_siberia_ecozones_crop.shp", "ne_siberia_ecozones_crop") 
 ```
 
 ## Fire perimeters
@@ -112,9 +96,132 @@ f01_arctic = st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(locati
 head(f01_arctic)
 ```
 
+```{r}
+f01_arctic = st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f02_arctic = st_join(f02, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f03_arctic = st_join(f03, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f04_arctic = st_join(f04, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f05_arctic = st_join(f05, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f06_arctic = st_join(f06, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f07_arctic = st_join(f07, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f08_arctic = st_join(f08, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f09_arctic = st_join(f09, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f10_arctic = st_join(f10, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f11_arctic = st_join(f11, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f12_arctic = st_join(f12, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f13_arctic = st_join(f13, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f14_arctic = st_join(f14, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f15_arctic = st_join(f15, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f16_arctic = st_join(f16, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f17_arctic = st_join(f17, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f18_arctic = st_join(f18, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f19_arctic = st_join(f19, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+f20_arctic = st_join(f20, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+```
+
+# Specify Ecozone
+```{r}
+f01_ecozone = st_join(f01_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+head(f01_ecozone)
+```
+
+
+```{r}
+
+f01_ecozone %>% summarise_all(funs(sum(is.na(.))))
+```
+```{r}
+f01_ecozone = st_join(f01_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f02_ecozone = st_join(f02_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f03_ecozone = st_join(f03_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f04_ecozone = st_join(f04_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f05_ecozone = st_join(f05_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f06_ecozone = st_join(f06_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f07_ecozone = st_join(f07_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f08_ecozone = st_join(f08_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f09_ecozone = st_join(f09_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f10_ecozone = st_join(f10_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f11_ecozone = st_join(f11_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f12_ecozone = st_join(f12_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f13_ecozone = st_join(f13_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f14_ecozone = st_join(f14_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f15_ecozone = st_join(f15_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f16_ecozone = st_join(f16_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f17_ecozone = st_join(f17_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f18_ecozone = st_join(f18_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f19_ecozone = st_join(f19_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+f20_ecozone = st_join(f20_arctic, ecozone) %>% dplyr::select(ID_obj:mdn_cnf, location, ECO_NAME, geometry)
+
+```
 
 # Write to shp
 
+## Arctic only
 ```{r}
-st_write(perimeters2001, "../outputs/perimeter_summary/arctic/perimeters2001.shp", driver="ESRI Shapefile") 
+st_write(f01_arctic, "../outputs/perimeter_summary/arctic/perimeters2001.shp", driver="ESRI Shapefile") 
+st_write(f02_arctic, "../outputs/perimeter_summary/arctic/perimeters2002.shp", driver="ESRI Shapefile") 
+st_write(f03_arctic, "../outputs/perimeter_summary/arctic/perimeters2003.shp", driver="ESRI Shapefile") 
+st_write(f04_arctic, "../outputs/perimeter_summary/arctic/perimeters2004.shp", driver="ESRI Shapefile") 
+st_write(f05_arctic, "../outputs/perimeter_summary/arctic/perimeters2005.shp", driver="ESRI Shapefile") 
+st_write(f06_arctic, "../outputs/perimeter_summary/arctic/perimeters2006.shp", driver="ESRI Shapefile") 
+st_write(f07_arctic, "../outputs/perimeter_summary/arctic/perimeters2007.shp", driver="ESRI Shapefile") 
+st_write(f08_arctic, "../outputs/perimeter_summary/arctic/perimeters2008.shp", driver="ESRI Shapefile") 
+st_write(f09_arctic, "../outputs/perimeter_summary/arctic/perimeters2009.shp", driver="ESRI Shapefile") 
+st_write(f10_arctic, "../outputs/perimeter_summary/arctic/perimeters2010.shp", driver="ESRI Shapefile") 
+st_write(f11_arctic, "../outputs/perimeter_summary/arctic/perimeters2011.shp", driver="ESRI Shapefile") 
+st_write(f12_arctic, "../outputs/perimeter_summary/arctic/perimeters2012.shp", driver="ESRI Shapefile") 
+st_write(f13_arctic, "../outputs/perimeter_summary/arctic/perimeters2013.shp", driver="ESRI Shapefile") 
+st_write(f14_arctic, "../outputs/perimeter_summary/arctic/perimeters2014.shp", driver="ESRI Shapefile") 
+st_write(f15_arctic, "../outputs/perimeter_summary/arctic/perimeters2015.shp", driver="ESRI Shapefile") 
+st_write(f16_arctic, "../outputs/perimeter_summary/arctic/perimeters2016.shp", driver="ESRI Shapefile") 
+st_write(f17_arctic, "../outputs/perimeter_summary/arctic/perimeters2017.shp", driver="ESRI Shapefile") 
+st_write(f18_arctic, "../outputs/perimeter_summary/arctic/perimeters2018.shp", driver="ESRI Shapefile") 
+st_write(f19_arctic, "../outputs/perimeter_summary/arctic/perimeters2019.shp", driver="ESRI Shapefile") 
+st_write(f20_arctic, "../outputs/perimeter_summary/arctic/perimeters2020.shp", driver="ESRI Shapefile") 
+```
+
+
+## Arctic + ecozone
+
+```{r}
+st_write(f01_ecozone, "../outputs/perimeter_summary/arctic/perimeters2001.shp", driver="ESRI Shapefile") 
+st_write(f02_ecozone, "../outputs/perimeter_summary/arctic/perimeters2002.shp", driver="ESRI Shapefile") 
+st_write(f03_ecozone, "../outputs/perimeter_summary/arctic/perimeters2003.shp", driver="ESRI Shapefile") 
+st_write(f04_ecozone, "../outputs/perimeter_summary/arctic/perimeters2004.shp", driver="ESRI Shapefile") 
+st_write(f05_ecozone, "../outputs/perimeter_summary/arctic/perimeters2005.shp", driver="ESRI Shapefile") 
+st_write(f06_ecozone, "../outputs/perimeter_summary/arctic/perimeters2006.shp", driver="ESRI Shapefile") 
+st_write(f07_ecozone, "../outputs/perimeter_summary/arctic/perimeters2007.shp", driver="ESRI Shapefile") 
+st_write(f08_ecozone, "../outputs/perimeter_summary/arctic/perimeters2008.shp", driver="ESRI Shapefile") 
+st_write(f09_ecozone, "../outputs/perimeter_summary/arctic/perimeters2009.shp", driver="ESRI Shapefile") 
+st_write(f10_ecozone, "../outputs/perimeter_summary/arctic/perimeters2010.shp", driver="ESRI Shapefile") 
+st_write(f11_ecozone, "../outputs/perimeter_summary/arctic/perimeters2011.shp", driver="ESRI Shapefile") 
+st_write(f12_ecozone, "../outputs/perimeter_summary/arctic/perimeters2012.shp", driver="ESRI Shapefile") 
+st_write(f13_ecozone, "../outputs/perimeter_summary/arctic/perimeters2013.shp", driver="ESRI Shapefile") 
+st_write(f14_ecozone, "../outputs/perimeter_summary/arctic/perimeters2014.shp", driver="ESRI Shapefile") 
+st_write(f15_arctic, "../outputs/perimeter_summary/arctic/perimeters2015.shp", driver="ESRI Shapefile") 
+st_write(f16_arctic, "../outputs/perimeter_summary/arctic/perimeters2016.shp", driver="ESRI Shapefile") 
+st_write(f17_arctic, "../outputs/perimeter_summary/arctic/perimeters2017.shp", driver="ESRI Shapefile") 
+st_write(f18_arctic, "../outputs/perimeter_summary/arctic/perimeters2018.shp", driver="ESRI Shapefile") 
+st_write(f19_arctic, "../outputs/perimeter_summary/arctic/perimeters2019.shp", driver="ESRI Shapefile") 
+st_write(f20_arctic, "../outputs/perimeter_summary/arctic/perimeters2020.shp", driver="ESRI Shapefile") 
 ```
