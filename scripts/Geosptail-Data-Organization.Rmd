@@ -212,6 +212,7 @@ sum_2016 = st_intersection(hotspot_2016, fire_2016) %>% sum_pt_poly()
 sum_2017 = st_intersection(hotspot_2017, fire_2017) %>% sum_pt_poly()
 sum_2018 = st_intersection(hotspot_2018, fire_2018) %>% sum_pt_poly()
 sum_2019 = st_intersection(hotspot_2019, fire_2019) %>% sum_pt_poly()
+sum_2020 = st_intersection(hotspot_2020, fire_2020) %>% sum_pt_poly()
 ```
 
 ## remove geometry
@@ -245,7 +246,7 @@ st_geometry(sum_2016) <- NULL
 st_geometry(sum_2017) <- NULL
 st_geometry(sum_2018) <- NULL
 st_geometry(sum_2019) <- NULL
-
+st_geometry(sum_2020) <- NULL
 ```
 
 ```{r}
@@ -282,6 +283,8 @@ perimeter2017 = merge(fire_2017, sum_2017, by="ID_obj")
 perimeter2018 = merge(fire_2018, sum_2018, by="ID_obj")
 perimeter2019 = merge(fire_2019, sum_2019, by="ID_obj")
 
+perimeter2020 = merge(fire_2020, sum_2020, by="ID_obj")
+
 ```
 
 # Write shapefiles
@@ -314,4 +317,5 @@ st_write(perimeter2016, "../outputs/perimeter_summary/perimeters2016.shp", drive
 st_write(perimeter2017, "../outputs/perimeter_summary/perimeters2017.shp", driver="ESRI Shapefile") 
 st_write(perimeter2018, "../outputs/perimeter_summary/perimeters2018.shp", driver="ESRI Shapefile") 
 st_write(perimeter2019, "../outputs/perimeter_summary/perimeters2019.shp", driver="ESRI Shapefile") 
+st_write(perimeter2020, "../outputs/perimeter_summary/perimeters2020.shp", driver="ESRI Shapefile") 
 ```
