@@ -1,0 +1,128 @@
+---
+title: "Arctic Circle Fires"
+author: "Anna Talucci"
+date: "12/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages
+
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(ggplot2)
+library(cowplot)
+library(tidyverse)
+```
+
+# Define graph Theme and color Palette 
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+# Data 
+
+## Arctic Circle Poly
+
+```{r}
+arctic = st_read("../data/bbox/ArcticCircle_bbox.shp", "ArcticCircle_bbox") 
+```
+
+## Fire perimeters
+Read in shape files
+
+
+```{r}
+f01 = st_read("../data/perimeter_summary/perimeters2001.shp", "perimeters2001") 
+f02 = st_read("../data/perimeter_summary/perimeters2002.shp", "perimeters2002") 
+f03 = st_read("../data/perimeter_summary/perimeters2003.shp", "perimeters2003") 
+f04 = st_read("../data/perimeter_summary/perimeters2004.shp", "perimeters2004") 
+f05 = st_read("../data/perimeter_summary/perimeters2005.shp", "perimeters2005") 
+f06 = st_read("../data/perimeter_summary/perimeters2006.shp", "perimeters2006") 
+
+f07 = st_read("../data/perimeter_summary/perimeters2007.shp", "perimeters2007") 
+f08 = st_read("../data/perimeter_summary/perimeters2008.shp", "perimeters2008") 
+f09 = st_read("../data/perimeter_summary/perimeters2009.shp", "perimeters2009") 
+f10 = st_read("../data/perimeter_summary/perimeters2010.shp", "perimeters2010") 
+f11 = st_read("../data/perimeter_summary/perimeters2011.shp", "perimeters2011") 
+f12 = st_read("../data/perimeter_summary/perimeters2012.shp", "perimeters2012") 
+
+f13 = st_read("../data/perimeter_summary/perimeters2013.shp", "perimeters2013") 
+f14 = st_read("../data/perimeter_summary/perimeters2014.shp", "perimeters2014") 
+f15 = st_read("../data/perimeter_summary/perimeters2015.shp", "perimeters2015") 
+f16 = st_read("../data/perimeter_summary/perimeters2016.shp", "perimeters2016") 
+f17 = st_read("../data/perimeter_summary/perimeters2017.shp", "perimeters2017") 
+f18 = st_read("../data/perimeter_summary/perimeters2018.shp", "perimeters2018") 
+f19 = st_read("../data/perimeter_summary/perimeters2019.shp", "perimeters2019") 
+f20 = st_read("../data/perimeter_summary/perimeters2020.shp", "perimeters2020") 
+
+
+```
+
+# Attributes
+```{r}
+head(arctic)
+```
+```{r}
+arctic = arctic %>% mutate(location="arctic")
+```
+
+```{r}
+head(arctic)
+```
+
+```{r}
+head(f01)
+```
+
+```{r}
+f01 %>% mutate(location = ifelse(geometry %in% 66.5:75, "arctic", "subarctic"))
+```
+
+```{r}
+st_filter(f01, arctic, y)
+```
+
+
+```{r}
+f01_arctic = st_join(f01, arctic)
+head(f01_arctic)
+```
+
+```{r}
+perimeters2001 = f01_arctic %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+
+head(perimeters2001)
+```
+
+```{r}
+st_write(perimeters2001, "../outputs/perimeter_summary/arctic/perimeters2001.shp", driver="ESRI Shapefile") 
+```
