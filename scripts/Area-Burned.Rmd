@@ -378,9 +378,7 @@ head(fire_frq_arctic)
 ```{r}
 plot_frq_arctic_nl = ggplot(fire_frq_arctic, aes(x=fire_yr, y=n_fires, fill=location)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  scale_y_continuous(name = ('Fire frequency \n(count)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
-  
-
+  ylab("Fire frequency \n(count)") +
   theme_bw() + theme(legend.position = "none") + 
   scale_fill_manual(values=arctic_palette2, name="", labels = c("Arctic", "Subarctic")) +
   xlab('') +
@@ -436,7 +434,7 @@ plot_area_arctic = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, fill
   
 
   theme_bw() + theme(legend.position = "right") + 
-  scale_fill_manual(values=arctic_palette2, name="", labels = c("Arctic", "Subarctic")) +
+  scale_fill_manual(values=arctic_palette2, name="Location", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   theme(panel.grid.major = element_blank()) +
     theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
@@ -621,7 +619,7 @@ ggsave("../figures/2020-11-18_areaburn-class-fireyear.png", plot = plot_class2, 
 ```
 
 ```{r fig.height=5, fig.width=6}
-ledgend_r = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
+legend_r = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palette = "Spectral") +
       geom_bar(stat="identity", aes(fill=fire_size_class), width = 0.5, position = position_stack(reverse = TRUE)) + 
   xlab("Fire year") +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
@@ -636,7 +634,7 @@ ledgend_r = ggplot(fire_class, aes(fire_yr, area_ha)) + scale_fill_brewer(palett
   theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
   guides(fill = guide_legend(title.position = "top"))
 
-ledgend_r
+legend_r
 ```
 
 
@@ -691,6 +689,34 @@ Frequency by class
 Frequency by arctic subartic
 
 ```{r fig.height=7, fig.width=6}
-cowplot::plot_grid(plot_area, plot_frq, area_class_no_legend, frq_class_no_legend, plot_area_arctic_nl, plot_frq_arctic_nl, labels = "AUTO", ncol = 2)
+figure1 = cowplot::plot_grid(plot_area, plot_frq, area_class_no_legend, frq_class_no_legend, plot_area_arctic_nl, plot_frq_arctic_nl, labels = "AUTO", ncol = 2)
 
+
+figure1
+```
+
+```{r}
+legend_class = get_legend(legend_r)
+legend_class_bottom = get_legend(plot_class)
+legend_arctic_bottom = get_legend(plot_area_arctic)
+```
+
+```{r fig.height=1, fig.width=6}
+
+legends = cowplot::plot_grid(
+  legend_class_bottom, legend_arctic_bottom, align = "h", nrow = 1, rel_widths = c(2, .5))
+
+legends
+```
+
+```{r fig.height=7, fig.width=6}
+
+
+fig1 = cowplot::plot_grid(figure1,legends, ncol = 1, rel_heights = c(1, .1))
+
+fig1
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2021-01-07_manuscript-figure1.png", plot = fig1, width = 6, height = 7, units = c("in"), dpi=600 )
 ```
