@@ -467,10 +467,44 @@ plot_area_arctic_nl = ggplot(fire_area_arctic, aes(x=fire_yr, y=total_area_ha, f
 plot_area_arctic_nl
 ```
 
-```{r eval=FALSE, include=FALSE}
-ggsave("../figures/2021-01-07_ArctisAreaBurned.png", plot = plot_area, width = 6, height = 4, units = c("in"), dpi=600 )
+
+
+
+### by year and Ecozone
+
+```{r}
+head(d1_20)
 ```
 
+
+```{r}
+fire_area_ecozone = d1_20 %>% group_by(fire_yr, ECO_NAME) %>%
+  summarise(total_area_ha = sum(area_ha))
+fire_area_ecozone = as.data.frame(fire_area_ecozone)
+fire_area_ecozone
+```
+
+
+  scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
+```{r}
+plot_area_ecozone = ggplot(fire_area_ecozone, aes(x=fire_yr, y=total_area_ha, fill=ECO_NAME)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  
+
+  theme_bw() + theme(legend.position = "right") + 
+  scale_fill_manual(values=cbbPalette, name="Ecozone") +
+  xlab('') +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_area_ecozone
+```
 # Delete?
 ```{r}
 head(fire_area)
