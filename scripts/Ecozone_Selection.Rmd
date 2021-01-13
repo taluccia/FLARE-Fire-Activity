@@ -12,13 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # Overview
 This code uses the WWF Ecozones shapefile available from (insert website address). We subset the ecozones for NE Siberia to include the following:
 
--- Bering tundra
--- Chukchi peninsula tundra
--- Cherskii-Kolyma mountain tundra
--- East Siberia Tiaga
--- Northeast Siberia coastal Tundra
--- Northeast Siberia taiga
--- Taimyr-central Siberia tundra 
+1. Bering tundra
+2. Chukchi peninsula tundra
+3. Cherskii-Kolyma mountain tundra
+4. East Siberia Tiaga
+5. Northeast Siberia coastal Tundra
+6. Northeast Siberia taiga
+7. Taimyr-central Siberia tundra 
 
 
 # Library
@@ -56,20 +56,101 @@ biome = ecozone %>% filter(BIOME==11)
 unique(biome$ECO_NAME)
 ```
 
-Cherskii-Kolyma mountain tundra 
-Northeast Siberian coastal tundra 
-Chukchi Peninsula tundra
-Northeast Siberian taiga
-Bering tundra
-Taimyr-Central Siberian tundra
-East Siberian taiga
+# Spatial Analysis
+
+## Create target of require ecozones 
+1. Cherskii-Kolyma mountain tundra (CKMT)
+2. Northeast Siberian coastal tundra (NSCT)
+3. Chukchi Peninsula tundra (CPT)
+4. Northeast Siberian taiga (NST)
+5. Bering tundra (BT)
+6. Taimyr-Central Siberian tundra (TCST)
+7. East Siberian taiga (EST)
 ```{r}
 target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga")
 ```
 
+## Apply filter
+
+Filter for all
 ```{r}
-ne_subset = ecozone %>% filter(ECO_NAME %in% target) 
+ne_subset = ecozone %>% 
+  filter(ECO_NAME %in% target) %>% 
+  mutate(eco_code = ifelse(ECO_NAME %in% "Cherskii-Kolyma mountain tundra", "CKMT",
+       ifelse(ECO_NAME %in% "Northeast Siberian coastal tundra", "NSCT",
+          ifelse(ECO_NAME %in% "Chukchi Peninsula tundra", "CPT",
+            ifelse(ECO_NAME %in% "Northeast Siberian taiga", "NST",
+              ifelse(ECO_NAME %in% "Bering tundra", "BT",
+                ifelse(ECO_NAME %in% "Taimyr-Central Siberian tundra", "TCST",
+            ifelse(ECO_NAME %in%  "East Siberian taiga", "NST", "NA"))))))))
 ```
+
+```{r}
+head(ne_subset)
+```
+```{r}
+ne_subset$eco_code
+```
+
+
+```{r}
+ne_subset %>%
+  summarise_all(funs(sum(is.na(.))))
+```
+
+```{r}
+name(ne_subset$eco_code)
+```
+### Filter individual ecozones
+1. Cherskii-Kolyma mountain tundra (CKMT)
+2. Northeast Siberian coastal tundra (NSCT)
+3. Chukchi Peninsula tundra (CPT)
+4. Northeast Siberian taiga (NST)
+5. Bering tundra (BT)
+6. Taimyr-Central Siberian tundra (TCST)
+7. East Siberian taiga (EST)
+
+Treat CKMT and NST as one spatial unit
+
+2. Northeast Siberian coastal tundra (NSCT)
+```{r}
+nsct = ne_subset %>% 
+  filter(eco_code %in% "NSCT")
+```
+
+3. Chukchi Peninsula tundra (CPT)
+```{r}
+CPT = ne_subset %>% 
+  filter(eco_code %in% "CPT")
+```
+
+5. Bering tundra (BT)
+```{r}
+BT = ne_subset %>% 
+  filter(eco_code %in% "BT")
+```
+
+6. Taimyr-Central Siberian tundra (TCST)
+```{r}
+TCST = ne_subset %>% 
+  filter(eco_code %in% "TCST")
+```
+
+7. East Siberian taiga (EST)
+```{r}
+EST = ne_subset %>% 
+  filter(eco_code %in% "EST")
+```
+
+1. Cherskii-Kolyma mountain tundra (CKMT) &
+4. Northeast Siberian taiga (NST)
+
+```{r}
+CKMT_NST = ne_subset %>% 
+  filter(eco_code %in% "CKMT_NST")
+```
+
+## Look at Selected data
 
 ```{r}
 summary(ne_subset)
@@ -79,6 +160,42 @@ summary(ne_subset)
 ```{r}
 plot(ne_subset$geometry)
 ```
+
+## Steps to create polygons for GEE
+Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
+
+## Dissolve
+```{r}
+head(TCST)
+```
+```{r}
+TCST$area <- st_area(TCST)
+TCST
+```
+```{r}
+
+TCST_buf = st_buffer(TCST, dist=1000, joinStyle="ROUND")
+```
+```{r}
+TCST <- TCST %>%
+  summarise(area = sum(area))
+```
+```{r}
+  
+ggplot(TCST) + geom_sf()
+```
+
+```{r}
+  
+ggplot(TCST_buf) + geom_sf()
+```
+```{r}
+polya = aggregate(TCST, dissolve = TRUE)
+```
+
+## Save Shapefiles
+
 ```{r}
 st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
 ```
+
