@@ -56,6 +56,24 @@ biome = ecozone %>% filter(BIOME==11)
 unique(biome$ECO_NAME)
 ```
 
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+
 # Spatial Analysis
 
 ## Create target of require ecozones 
@@ -82,8 +100,15 @@ ne_subset = ecozone %>%
             ifelse(ECO_NAME %in% "Northeast Siberian taiga", "NST",
               ifelse(ECO_NAME %in% "Bering tundra", "BT",
                 ifelse(ECO_NAME %in% "Taimyr-Central Siberian tundra", "TCST",
-            ifelse(ECO_NAME %in%  "East Siberian taiga", "NST", "NA"))))))))
+            ifelse(ECO_NAME %in%  "East Siberian taiga", "EST", "NA"))))))))
 ```
+
+
+```{r}
+  
+ggplot(ne_subset) + geom_sf()
+```
+
 
 ```{r}
 head(ne_subset)
@@ -102,67 +127,138 @@ ne_subset %>%
 name(ne_subset$eco_code)
 ```
 ### Filter individual ecozones
-1. Cherskii-Kolyma mountain tundra (CKMT)
-2. Northeast Siberian coastal tundra (NSCT)
-3. Chukchi Peninsula tundra (CPT)
-4. Northeast Siberian taiga (NST)
-5. Bering tundra (BT)
-6. Taimyr-Central Siberian tundra (TCST)
-7. East Siberian taiga (EST)
+-- Cherskii-Kolyma mountain tundra (CKMT)
+-- Northeast Siberian coastal tundra (NSCT)
+-- Chukchi Peninsula tundra (CPT)
+-- Northeast Siberian taiga (NST)
+-- Bering tundra (BT)
+-- Taimyr-Central Siberian tundra (TCST)
+-- East Siberian taiga (EST)
 
-Treat CKMT and NST as one spatial unit
+Treat CKMT and NST as one spatial unit.
+Treat CPT and BT as one spatail unit, but split by east/west hemisphere.
 
-2. Northeast Siberian coastal tundra (NSCT)
+#### Northeast Siberian coastal tundra (NSCT)
 ```{r}
 nsct = ne_subset %>% 
   filter(eco_code %in% "NSCT")
 ```
 
-3. Chukchi Peninsula tundra (CPT)
 ```{r}
-CPT = ne_subset %>% 
-  filter(eco_code %in% "CPT")
+ggplot(nsct) + geom_sf()
 ```
 
-5. Bering tundra (BT)
+#### Taimyr-Central Siberian tundra (TCST)
 ```{r}
-BT = ne_subset %>% 
-  filter(eco_code %in% "BT")
-```
-
-6. Taimyr-Central Siberian tundra (TCST)
-```{r}
-TCST = ne_subset %>% 
+tcst = ne_subset %>% 
   filter(eco_code %in% "TCST")
 ```
 
-7. East Siberian taiga (EST)
 ```{r}
-EST = ne_subset %>% 
+ggplot(tcst) + geom_sf()
+```
+
+#### East Siberian taiga (EST)
+```{r}
+est = ne_subset %>% 
   filter(eco_code %in% "EST")
 ```
 
-1. Cherskii-Kolyma mountain tundra (CKMT) &
-4. Northeast Siberian taiga (NST)
-
 ```{r}
-CKMT_NST = ne_subset %>% 
-  filter(eco_code %in% "CKMT_NST")
+ggplot(est) + geom_sf()
 ```
 
-## Look at Selected data
+#### Cherskii-Kolyma mountain tundra (CKMT) & Northeast Siberian taiga (NST)
 
 ```{r}
-summary(ne_subset)
+ckmt_nst = ne_subset %>% 
+  filter(eco_code %in% c("CKMT", "NST"))
 ```
 
+```{r}
+ggplot(ckmt_nst) + geom_sf()
+```
+
+#### Chukchi Peninsula tundra (CPT) and Bering tundra (BT)
+```{r}
+cpt_bt_east = ne_subset %>% 
+  filter(eco_code %in% c("CPT", "BT")) %>%
+  filter(OBJECTID %in% c("4730", "4302"))
+```
 
 ```{r}
-plot(ne_subset$geometry)
+ggplot(cpt_bt_east) + geom_sf()
+```
+
+```{r}
+cpt_bt_west = ne_subset %>% 
+  filter(eco_code %in% c("CPT", "BT")) %>%
+  filter(OBJECTID %in% c("4890", "2692"))
+```
+
+```{r}
+ggplot(cpt_bt_west) + geom_sf()
+```
+## ne_subset
+```{r}
+ne_subset_ee = st_transform(ne_subset, crs=ee_russia)
+```
+
+```{r}
+  
+ggplot(ne_subset_ee) + geom_sf()
 ```
 
 ## Steps to create polygons for GEE
 Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
+
+-- nsct
+-- tcst
+-- est
+-- ckmt_nst
+-- cpt_bt_east
+-- cpt_bt_west
+
+### Covert to Equal Area projection
+st_transform(x, crs = st_crs(x), ...)
+
+### Individual polygons
+```{r}
+nsct_ee = st_transform(nsct, crs=ee_russia)
+tcst_ee = st_transform(tcst, crs=ee_russia)
+est_ee = st_transform(est, crs=ee_russia)
+ckmt_nst_ee = st_transform(ckmt_nst, crs=ee_russia)
+cpt_bt_east_ee = st_transform(cpt_bt_east, crs=ee_russia)
+cpt_bt_west_ee = st_transform(cpt_bt_west, crs=ee_russia)
+
+```
+
+
+```{r}
+ggplot(nsct_ee) + geom_sf()
+```
+
+### Buffer
+
+```{r}
+nsct_buf = st_buffer(nsct_ee, dist=1000, joinStyle="ROUND")
+tcst_buf = st_buffer(tcst_ee, dist=1000, joinStyle="ROUND")
+est_buf = st_buffer(est_ee, dist=1000, joinStyle="ROUND")
+ckmt_nst_buf = st_buffer(ckmt_nst_ee, dist=1000, joinStyle="ROUND")
+cpt_bt_east_buf = st_buffer(cpt_bt_east_ee, dist=1000, joinStyle="ROUND")
+cpt_bt_west_buf = st_buffer(cpt_bt_west_ee, dist=1000, joinStyle="ROUND")
+
+```
+
+
+```{r}
+ggplot(nsct_buf) + geom_sf()
+```
+
+```{r}
+ggplot(cpt_bt_east_buf) + geom_sf()
+```
+
 
 ## Dissolve
 ```{r}
