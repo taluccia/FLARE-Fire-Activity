@@ -10,7 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Overview
+This code uses the WWF Ecozones shapefile available from (insert website address). We subset the ecozones for NE Siberia to include the following:
 
+-- Bering tundra
+-- Chukchi peninsula tundra
+-- Cherskii-Kolyma mountain tundra
+-- East Siberia Tiaga
+-- Northeast Siberia coastal Tundra
+-- Northeast Siberia taiga
+-- Taimyr-central Siberia tundra 
 
 
 # Library
