@@ -37,6 +37,7 @@ library(rgdal) # geospatial data
 library(raster)
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
+library(spatialEco)
 ```
 
 # Data
@@ -255,8 +256,10 @@ cpt_bt_west_buf = st_buffer(cpt_bt_west_ee, dist=1000, joinStyle="ROUND")
 ggplot(nsct_buf) + geom_sf()
 ```
 
+
+
 ```{r}
-ggplot(cpt_bt_east_buf) + geom_sf()
+ggplot(cpt_bt_east_) + geom_sf()
 ```
 
 
