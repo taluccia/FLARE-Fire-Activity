@@ -19,6 +19,11 @@ This code uses the WWF Ecozones shapefile available from (insert website address
 5. Northeast Siberia coastal Tundra
 6. Northeast Siberia taiga
 7. Taimyr-central Siberia tundra 
+8. Trans-Baikal Bald Mountain Tundra
+
+While we will need the attribute field for the final fire perimeters, they are not neccessary for the polygons we use in GEE.
+
+Here we split the ecozones needed into individual polygon shapefile with a couple of exceptions. We will combine Cherskii-Kolyma mountain tundra and Northeast Siberia taiga into one polygon for GEE. We will also combine Bering tundra Chukchi peninsula tundra, which will then be split by east and west hemisphere. Treat East Siberia Tiaga and Trans-Baikal Bald Mountain Tundra as one spatial unit.
 
 
 # Library
@@ -85,8 +90,9 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 5. Bering tundra (BT)
 6. Taimyr-Central Siberian tundra (TCST)
 7. East Siberian taiga (EST)
+8. Trans-Baikal Bald Mountain tundra (TBBMT)
 ```{r}
-target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga")
+target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga", "Trans-Baikal Bald Mountain tundra")
 ```
 
 ## Apply filter
@@ -101,12 +107,12 @@ ne_subset = ecozone %>%
             ifelse(ECO_NAME %in% "Northeast Siberian taiga", "NST",
               ifelse(ECO_NAME %in% "Bering tundra", "BT",
                 ifelse(ECO_NAME %in% "Taimyr-Central Siberian tundra", "TCST",
-            ifelse(ECO_NAME %in%  "East Siberian taiga", "EST", "NA"))))))))
+                  ifelse(ECO_NAME %in% "Trans-Baikal Bald Mountain tundra", "TBBMT",
+            ifelse(ECO_NAME %in%  "East Siberian taiga", "EST", "NA")))))))))
 ```
 
 
 ```{r}
-  
 ggplot(ne_subset) + geom_sf()
 ```
 
@@ -135,9 +141,12 @@ name(ne_subset$eco_code)
 -- Bering tundra (BT)
 -- Taimyr-Central Siberian tundra (TCST)
 -- East Siberian taiga (EST)
+-- Trans-Baikal Bald Mountain tundra (TBBMT)
 
 Treat CKMT and NST as one spatial unit.
 Treat CPT and BT as one spatail unit, but split by east/west hemisphere.
+Treat EST and TBBMT as one spatial unit.
+
 
 #### Northeast Siberian coastal tundra (NSCT)
 ```{r}
@@ -159,14 +168,14 @@ tcst = ne_subset %>%
 ggplot(tcst) + geom_sf()
 ```
 
-#### East Siberian taiga (EST)
+#### East Siberian taiga (EST) & Trans-Baikal Bald Mountain tundra (TBBMT)
 ```{r}
-est = ne_subset %>% 
-  filter(eco_code %in% "EST")
+est_tbbmt = ne_subset %>% 
+  filter(eco_code %in% c("EST", "TBBMT"))
 ```
 
 ```{r}
-ggplot(est) + geom_sf()
+ggplot(est_tbbmt) + geom_sf()
 ```
 
 #### Cherskii-Kolyma mountain tundra (CKMT) & Northeast Siberian taiga (NST)
@@ -210,7 +219,7 @@ ne_subset_ee = st_transform(ne_subset, crs=ee_russia)
 ggplot(ne_subset_ee) + geom_sf()
 ```
 
-## Steps to create polygons for GEE
+## Steps to create individual polygons for GEE
 Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
 
 -- nsct
@@ -223,11 +232,10 @@ Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
 ### Covert to Equal Area projection
 st_transform(x, crs = st_crs(x), ...)
 
-### Individual polygons
 ```{r}
 nsct_ee = st_transform(nsct, crs=ee_russia)
 tcst_ee = st_transform(tcst, crs=ee_russia)
-est_ee = st_transform(est, crs=ee_russia)
+est_tbbmt_ee = st_transform(est_tbbmt, crs=ee_russia)
 ckmt_nst_ee = st_transform(ckmt_nst, crs=ee_russia)
 cpt_bt_east_ee = st_transform(cpt_bt_east, crs=ee_russia)
 cpt_bt_west_ee = st_transform(cpt_bt_west, crs=ee_russia)
@@ -242,54 +250,61 @@ ggplot(nsct_ee) + geom_sf()
 ### Buffer
 
 ```{r}
-nsct_buf = st_buffer(nsct_ee, dist=1000, joinStyle="ROUND")
-tcst_buf = st_buffer(tcst_ee, dist=1000, joinStyle="ROUND")
-est_buf = st_buffer(est_ee, dist=1000, joinStyle="ROUND")
-ckmt_nst_buf = st_buffer(ckmt_nst_ee, dist=1000, joinStyle="ROUND")
-cpt_bt_east_buf = st_buffer(cpt_bt_east_ee, dist=1000, joinStyle="ROUND")
-cpt_bt_west_buf = st_buffer(cpt_bt_west_ee, dist=1000, joinStyle="ROUND")
-
+nsct_buf = st_buffer(nsct_ee, dist=3000, joinStyle="ROUND")
+tcst_buf = st_buffer(tcst_ee, dist=3000, joinStyle="ROUND")
+est_tbbmt_buf = st_buffer(est_tbbmt_ee, dist=3000, joinStyle="ROUND")
+ckmt_nst_buf = st_buffer(ckmt_nst_ee, dist=3000, joinStyle="ROUND")
+cpt_bt_east_buf = st_buffer(cpt_bt_east_ee, dist=3000, joinStyle="ROUND")
+cpt_bt_west_buf = st_buffer(cpt_bt_west_ee, dist=3000, joinStyle="ROUND")
 ```
 
 
+### Remove overlap between buffers
 ```{r}
-ggplot(nsct_buf) + geom_sf()
+nsct_dis = st_cast(st_union(nsct_buf),"POLYGON")
+tcst_dis = st_cast(st_union(tcst_buf),"POLYGON")
+est_tbbmt_dis = st_cast(st_union(est_tbbmt_buf),"POLYGON")
+ckmt_nst_dis = st_cast(st_union(ckmt_nst_buf),"POLYGON")
+cpt_bt_east_dis = st_cast(st_union(cpt_bt_east_buf),"POLYGON")
+cpt_bt_west_dis = st_cast(st_union(cpt_bt_west_buf),"POLYGON")
 ```
 
 
-
+#### Check buffer and dissolve effect
 ```{r}
-ggplot(cpt_bt_east_) + geom_sf()
-```
-
-
-## Dissolve
-```{r}
-head(TCST)
-```
-```{r}
-TCST$area <- st_area(TCST)
-TCST
-```
-```{r}
-
-TCST_buf = st_buffer(TCST, dist=1000, joinStyle="ROUND")
-```
-```{r}
-TCST <- TCST %>%
-  summarise(area = sum(area))
-```
-```{r}
-  
-ggplot(TCST) + geom_sf()
+ggplot(nsct_dis) + geom_sf()
 ```
 
 ```{r}
-  
-ggplot(TCST_buf) + geom_sf()
+ggplot(tcst_dis) + geom_sf()
+```
+
+```{r}
+ggplot(est_tbbmt_dis) + geom_sf()
 ```
 ```{r}
-polya = aggregate(TCST, dissolve = TRUE)
+ggplot(ckmt_nst_dis) + geom_sf()
+```
+
+```{r}
+ggplot(cpt_bt_west_dis) + geom_sf()
+```
+```{r}
+ggplot(cpt_bt_east_dis) + geom_sf()
+```
+
+### Convert back to WSG 84 for GEE
+```{r}
+nsct_wgs = st_transform(nsct_dis, crs=wgs_proj)
+tcst_wgs = st_transform(tcst_dis, crs=wgs_proj)
+est_tbbmt_wgs = st_transform(est_tbbmt_dis, crs=wgs_proj)
+ckmt_nst_wgs = st_transform(ckmt_nst_dis, crs=wgs_proj)
+cpt_bt_east_wgs = st_transform(cpt_bt_east_dis, crs=wgs_proj)
+cpt_bt_west_wgs = st_transform(cpt_bt_west_dis, crs=wgs_proj)
+```
+
+```{r}
+ggplot(cpt_bt_west_wgs) + geom_sf()
 ```
 
 ## Save Shapefiles
@@ -298,3 +313,18 @@ polya = aggregate(TCST, dissolve = TRUE)
 st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
 ```
 
+### Individual buffered ecozones for GEE
+```{r eval=FALSE, include=FALSE}
+st_write(nsct_wgs, "../outputs/ecozones/gee_ecozones_nsct.shp", driver="ESRI Shapefile") 
+
+st_write(tcst_wgs, "../outputs/ecozones/gee_ecozones_tcst.shp", driver="ESRI Shapefile")
+
+st_write(est_tbbmt_wgs, "../outputs/ecozones/gee_eco_est_tbbmt.shp", driver="ESRI Shapefile")
+
+st_write(ckmt_nst_wgs, "../outputs/ecozones/gee_eco_ckmt_nst.shp", driver="ESRI Shapefile")
+
+st_write(cpt_bt_east_wgs, "../outputs/ecozones/gee_eco_cpt_bt_east.shp", driver="ESRI Shapefile")
+
+st_write(cpt_bt_west_wgs, "../outputs/ecozones/gee_eco_cpt_bt_west.shp", driver="ESRI Shapefile")
+
+```
