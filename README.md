@@ -9,4 +9,4 @@ The paper can be found here
 
 1. Process ecozone shapefile boundaries to upload as assets to GEE (Google Earth Engine)
 
-2. Process Hotspot (i.e., thermal detection data) from MODIS (Moderate Resolution Imaging Spectroradiometer; 2001-present) and VIIRS (Visible Infrared Imaging Radiometer Suite; 2011-present). Data was acquire for Russia from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
+2. Process Hotspot (i.e., thermal detection data) from MODIS (Moderate Resolution Imaging Spectroradiometer; November 2000-present), VIIRS (Visible Infrared Imaging Radiometer Suite; January 2012-present), and VIIRS NOAA-20 375 m data is available from January 2020-present. Data was acquire for Russia from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
