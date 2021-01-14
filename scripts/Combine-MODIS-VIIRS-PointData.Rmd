@@ -7,7 +7,7 @@ output: html_document
 
 # Overview
 
-combine to shapefiles with 2020 hotspot data
+Combine Modis and VIIRS point data into single files.
 
 # Packages
 
