@@ -24,38 +24,108 @@ library(spatialEco)
 
 
 # Data
-
-
 ```{r}
 hs_m6_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_archive_M6_166449.shp", "fire_archive_M6_166449")
 hs_nrt_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_166449.shp", "fire_nrt_M6_166449")
 ```
+
+## Modis and VIIRS for 2012-2020
 ```{r}
-head(hs_m6_2020)
-```
-```{r}
-summary(hs_m6_2020)
+m_2020 = st_read("../data/FIRMS-PointData-raw/firms_2020/fire_archive_M6_2020.shp", "fire_archive_M6_2020")
+v_2020 = st_read("../data/FIRMS-PointData-raw/firms_2020/fire_archive_V1_2020.shp", "fire_archive_V1_2020")
+
+m_2019 = st_read("../data/FIRMS-PointData-raw/firms_2019/fire_archive_M6_2019.shp", "fire_archive_M6_2019")
+v_2019 = st_read("../data/FIRMS-PointData-raw/firms_2019/fire_archive_V1_2019.shp", "fire_archive_V1_2019")
+
+m_2018 = st_read("../data/FIRMS-PointData-raw/firms_2018/fire_archive_M6_2018.shp", "fire_archive_M6_2018")
+v_2018 = st_read("../data/FIRMS-PointData-raw/firms_2018/fire_archive_V1_2018.shp", "fire_archive_V1_2018")
+
+m_2017 = st_read("../data/FIRMS-PointData-raw/firms_2017/fire_archive_M6_2017.shp", "fire_archive_M6_2017")
+v_2017 = st_read("../data/FIRMS-PointData-raw/firms_2017/fire_archive_V1_2017.shp", "fire_archive_V1_2017")
+
+m_2016 = st_read("../data/FIRMS-PointData-raw/firms_2016/fire_archive_M6_2016.shp", "fire_archive_M6_2016")
+v_2016 = st_read("../data/FIRMS-PointData-raw/firms_2016/fire_archive_V1_2016.shp", "fire_archive_V1_2016")
+
+m_2015 = st_read("../data/FIRMS-PointData-raw/firms_2015/fire_archive_M6_2015.shp", "fire_archive_M6_2015")
+v_2015 = st_read("../data/FIRMS-PointData-raw/firms_2015/fire_archive_V1_2015.shp", "fire_archive_V1_2015")
+
+m_2014 = st_read("../data/FIRMS-PointData-raw/firms_2014/fire_archive_M6_2014.shp", "fire_archive_M6_2014")
+v_2014 = st_read("../data/FIRMS-PointData-raw/firms_2014/fire_archive_V1_2014.shp", "fire_archive_V1_2014")
+
+m_2013 = st_read("../data/FIRMS-PointData-raw/firms_2013/fire_archive_M6_2013.shp", "fire_archive_M6_2013")
+v_2013 = st_read("../data/FIRMS-PointData-raw/firms_2013/fire_archive_V1_2013.shp", "fire_archive_V1_2013")
+
+m_2012 = st_read("../data/FIRMS-PointData-raw/firms_2012/fire_archive_M6_2012.shp", "fire_archive_M6_2012")
+v_2012 = st_read("../data/FIRMS-PointData-raw/firms_2012/fire_archive_V1_2012.shp", "fire_archive_V1_2012")
 ```
 
 ```{r}
-hs_m6_2020 = hs_m6_2020 %>% dplyr::select(-TYPE)
-```
-```{r}
-summary(hs_m6_2020)
+head(m_2012)
+
 ```
 
 ```{r}
-head(hs_nrt_2020)
+
+head(v_2012)
+```
+```{r}
+summary(m_2012)
+```
+```{r}
+summary(v_2012)
 ```
 
 ```{r}
-summary(hs_nrt_2020)
+names(m_2012)
 ```
 
 ```{r}
-hs_2020=rbind(hs_m6_2020, hs_nrt_2020)
+names(v_2012)
 ```
 
+## Drop columns that do not match
+### Modis
+```{r}
+m_2012 = m_2012 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2013 = m_2013 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2014 = m_2014 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2015 = m_2015 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2016 = m_2016 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2017 = m_2017 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2018 = m_2018 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2019 = m_2019 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+m_2020 = m_2020 %>% dplyr::select(-BRIGHTNESS, -BRIGHT_T31)
+```
+
+###VIIRS
+```{r}
+v_2012 = v_2012 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2013 = v_2013 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2014 = v_2014 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2015 = v_2015 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2016 = v_2016 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2017 = v_2017 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2018 = v_2018 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2019 = v_2019 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+v_2020 = v_2020 %>% dplyr::select(-BRIGHT_TI4, -BRIGHT_TI5)
+
+```
+
+## COmbine MODIS and VIIRS into one Shapefile
+```{r}
+vm_2012 = rbind(m_2012, v_2012)
+vm_2013 = rbind(m_2013, v_2013)
+vm_2014 = rbind(m_2014, v_2014)
+vm_2015 = rbind(m_2015, v_2015)
+vm_2016 = rbind(m_2016, v_2016)
+vm_2017 = rbind(m_2017, v_2017)
+vm_2018 = rbind(m_2018, v_2018)
+vm_2019 = rbind(m_2019, v_2019)
+vm_2020 = rbind(m_2020, v_2020)
+```
+
+
+# Check Data
 ```{r}
 summary(hs_2020)
 ```
