@@ -8,6 +8,11 @@ output: html_document
 # Overview
 
 Combine Modis and VIIRS point data into single files.
+Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
+
+Description of [Modis and VIIRS data]( https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
+
+
 
 # Packages
 

@@ -6,6 +6,14 @@ output: html_document
 ---
 
 # Overview
+Convert Hotspot/VIIRS point data to polygons. This is to limit the extent of the vector function in GEE to delinieate fire perimeters.
+
+
+Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
+
+Description of [Modis and VIIRS data](https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
+
+
 
 What is included in this script:
 
