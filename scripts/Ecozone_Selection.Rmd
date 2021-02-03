@@ -312,7 +312,7 @@ ggplot(cpt_bt_west_wgs) + geom_sf()
 ```
 
 ## Save Shapefiles
-## Save Shapefiles
+
 
 ```{r}
 st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones_ee.shp", driver="ESRI Shapefile") 
