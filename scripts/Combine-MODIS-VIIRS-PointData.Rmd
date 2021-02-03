@@ -12,7 +12,12 @@ Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.
 
 Description of [Modis and VIIRS data]( https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
 
+VIIRS launch October 2011, fire season data available 2012-present
+MODIS launch    , available 2001-present
 
+Only running on 2012-2020 since those years are the only ones with overlap.
+
+Annual point data from January to December.
 
 # Packages
 
@@ -29,10 +34,7 @@ library(spatialEco)
 
 
 # Data
-```{r}
-hs_m6_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_archive_M6_166449.shp", "fire_archive_M6_166449")
-hs_nrt_2020 = st_read("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_166449.shp", "fire_nrt_M6_166449")
-```
+
 
 ## Modis and VIIRS for 2012-2020
 ```{r}
@@ -132,10 +134,19 @@ vm_2020 = rbind(m_2020, v_2020)
 
 # Check Data
 ```{r}
-summary(hs_2020)
+summary(vm_2020)
 ```
 
 
 ```{r eval=FALSE, warning=FALSE, include=FALSE}
-st_write(hs_2020, "../outputs/hotspot-point-combine/hotspot_point_2020.shp", driver="ESRI Shapefile")  
+st_write(vm_2012, "../outputs/hotspot-point-combine/hotspot_point_2012.shp", driver="ESRI Shapefile")
+st_write(vm_2013, "../outputs/hotspot-point-combine/hotspot_point_2013.shp", driver="ESRI Shapefile")
+st_write(vm_2014, "../outputs/hotspot-point-combine/hotspot_point_2014.shp", driver="ESRI Shapefile")
+st_write(vm_2015, "../outputs/hotspot-point-combine/hotspot_point_2015.shp", driver="ESRI Shapefile")
+st_write(vm_2016, "../outputs/hotspot-point-combine/hotspot_point_2016.shp", driver="ESRI Shapefile")
+st_write(vm_2017, "../outputs/hotspot-point-combine/hotspot_point_2017.shp", driver="ESRI Shapefile")
+st_write(vm_2018, "../outputs/hotspot-point-combine/hotspot_point_2018.shp", driver="ESRI Shapefile")
+st_write(vm_2019, "../outputs/hotspot-point-combine/hotspot_point_2019.shp", driver="ESRI Shapefile")
+st_write(vm_2020, "../outputs/hotspot-point-combine/hotspot_point_2020.shp", driver="ESRI Shapefile")
+
 ```
