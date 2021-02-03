@@ -116,6 +116,9 @@ ne_subset = ecozone %>%
 ggplot(ne_subset) + geom_sf()
 ```
 
+```{r}
+ne_subset
+```
 
 ```{r}
 head(ne_subset)
@@ -209,6 +212,7 @@ cpt_bt_west = ne_subset %>%
 ```{r}
 ggplot(cpt_bt_west) + geom_sf()
 ```
+
 ## ne_subset
 ```{r}
 ne_subset_ee = st_transform(ne_subset, crs=ee_russia)
@@ -308,8 +312,10 @@ ggplot(cpt_bt_west_wgs) + geom_sf()
 ```
 
 ## Save Shapefiles
+## Save Shapefiles
 
 ```{r}
+st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones_ee.shp", driver="ESRI Shapefile") 
 st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
 ```
 
