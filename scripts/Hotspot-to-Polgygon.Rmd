@@ -81,7 +81,7 @@ Ps1_sp_ee = spTransform(Ps1, CRS( ee_russia))
 
 ### Equal Area Ecozones
 ```{r}
-eco_ee = readOGR(ne_subset_ee, "../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee.shp") 
+eco_ee = readOGR("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
 ```
 
 # Data: Hotspots
@@ -121,7 +121,7 @@ hs2020 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_p
 ```
 
 
-## project to equal area russia
+# project to equal area russia
 ```{r}
 hs2001_ee = spTransform(hs2001, CRS(ee_russia))
 hs2002_ee = spTransform(hs2002, CRS(ee_russia))
@@ -158,40 +158,46 @@ hs2020_ee = spTransform(hs2020, CRS(ee_russia))
 ```
 
 
-## Reduce hotspot data to FLARE  BBox
+# Reduce hotspot data to FLARE  BBox
 
 ```{r}
-hs2001_ee_sub = hs2001_ee[Ps1_sp_ee, ]
-hs2002_ee_sub = hs2002_ee[Ps1_sp_ee, ]
-hs2003_ee_sub = hs2003_ee[Ps1_sp_ee, ]
-hs2004_ee_sub = hs2004_ee[Ps1_sp_ee, ]
-hs2005_ee_sub = hs2005_ee[Ps1_sp_ee, ]
+hs2001_ee_sub = hs2001_ee[eco_ee, ]
+hs2002_ee_sub = hs2002_ee[eco_ee, ]
+hs2003_ee_sub = hs2003_ee[eco_ee, ]
+hs2004_ee_sub = hs2004_ee[eco_ee, ]
+hs2005_ee_sub = hs2005_ee[eco_ee, ]
 ```
 
 
 ```{r}
-hs2006_ee_sub = hs2006_ee[Ps1_sp_ee, ]
-hs2007_ee_sub = hs2007_ee[Ps1_sp_ee, ]
-hs2008_ee_sub = hs2008_ee[Ps1_sp_ee, ]
-hs2009_ee_sub = hs2009_ee[Ps1_sp_ee, ]
-hs2010_ee_sub = hs2010_ee[Ps1_sp_ee, ]
+hs2006_ee_sub = hs2006_ee[eco_ee, ]
+hs2007_ee_sub = hs2007_ee[eco_ee, ]
+hs2008_ee_sub = hs2008_ee[eco_ee, ]
+hs2009_ee_sub = hs2009_ee[eco_ee, ]
+hs2010_ee_sub = hs2010_ee[eco_ee, ]
 ```
 
 ```{r}
-hs2011_ee_sub = hs2011_ee[Ps1_sp_ee, ]
-hs2012_ee_sub = hs2012_ee[Ps1_sp_ee, ]
-hs2013_ee_sub = hs2013_ee[Ps1_sp_ee, ]
-hs2014_ee_sub = hs2014_ee[Ps1_sp_ee, ]
-hs2015_ee_sub = hs2015_ee[Ps1_sp_ee, ]
+hs2011_ee_sub = hs2011_ee[eco_ee, ]
+hs2012_ee_sub = hs2012_ee[eco_ee, ]
+hs2013_ee_sub = hs2013_ee[eco_ee, ]
+hs2014_ee_sub = hs2014_ee[eco_ee, ]
+hs2015_ee_sub = hs2015_ee[eco_ee, ]
 ```
 
 
 ```{r}
-hs2016_ee_sub = hs2016_ee[Ps1_sp_ee, ]
-hs2017_ee_sub = hs2017_ee[Ps1_sp_ee, ]
-hs2018_ee_sub = hs2018_ee[Ps1_sp_ee, ]
-hs2019_ee_sub = hs2019_ee[Ps1_sp_ee, ]
-hs2020_ee_sub = hs2020_ee[Ps1_sp_ee, ]
+hs2016_ee_sub = hs2016_ee[eco_ee, ]
+hs2017_ee_sub = hs2017_ee[eco_ee, ]
+hs2018_ee_sub = hs2018_ee[eco_ee, ]
+hs2019_ee_sub = hs2019_ee[eco_ee, ]
+hs2020_ee_sub = hs2020_ee[eco_ee, ]
+
+```
+
+```{r}
+plot(hs2020_ee_sub)
+plot(eco_ee, add=TRUE)
 
 ```
 
@@ -233,7 +239,7 @@ hs2020_ee_3k = gBuffer(hs2020_ee_sub, width = 3000, capStyle="ROUND", joinStyle=
 
 ```
 
-## Remove holes in polygons
+# Remove holes in polygons
 
 ```{r}
 hs2001_ee_3k_nh = remove.holes(hs2001_ee_3k)
