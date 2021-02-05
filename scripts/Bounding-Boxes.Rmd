@@ -162,3 +162,102 @@ st_write(yak_sf, "../outputs/bbox/yakutsk_bbox.shp", driver="ESRI Shapefile")
 st_write(AC_sf, "../outputs/bbox/ArcticCircle_bbox.shp", driver="ESRI Shapefile")
 ```
 
+
+# Create Bounding Boxes for Ecozone Extent
+
+## Equal Area Ecozones
+```{r}
+eco_ee = readOGR("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+```
+
+**Ecozone Extent from ecozone layer**
+bbox:           xmin: -180 ymin: 50.13147 xmax: 180 ymax: 77.76253
+bbox:           xmin: 130.1842 ymin: 68.56218 xmax: 161.9283 ymax: 72.9427
+bbox:           xmin: 79.01171 ymin: 64.7211 xmax: 130.4216 ymax: 77.79169
+bbox:           xmin: 86.27558 ymin: 50.10451 xmax: 142.6297 ymax: 71.44453
+bbox:           xmin: 124.9269 ymin: 58.78296 xmax: 170.2515 ymax: 71.75275
+bbox:           xmin: -179.9998 ymin: 59.77511 xmax: 179.9998 ymax: 70.15549
+bbox:           xmin: -179.9995 ymin: 64.20744 xmax: 179.9971 ymax: 69.00497
+
+**Create 3 ecozones to span the ecozones we are interested and deal with the Chukchi Peninsula**
+1. Ecozones west xmin: 78 ymin: 50.0 xmax: 129 ymax: 78.0
+2. Ecozones east xmin:  128.5 ymin: 50.0 xmax: 180 ymax: 78.0
+3. Ecozones Chukchi xmin: -180 ymin: 50.0 xmax: -168 ymax: 78.0
+
+How to formate the matrix for the bounding box
+matrix(c(xmin, ymax,
+               xmax, ymax,
+               xmax, ymin, 
+               xmin, ymin), 
+             ncol = 2, byrow = TRUE)
+```{r}
+eco_west = matrix(c(78.0, 78.0,
+               129.0, 78.0,
+               129.0, 50.0, 
+               78.0, 50.0), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_west_coords = Polygon(eco_west)
+eco_west_bbox = SpatialPolygons(list(Polygons(list(eco_west_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot(eco_west_bbox)
+```
+
+```{r}
+eco_east = matrix(c(128.5, 78.0,
+               180.0, 78.0,
+               180.0, 50.0, 
+               128.5, 50.0), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_east_coords = Polygon(eco_east)
+eco_east_bbox = SpatialPolygons(list(Polygons(list(eco_east_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot(eco_east_bbox)
+```
+
+```{r}
+eco_chukchi = matrix(c(-168.0, 78.0,
+               -180.0, 78.0,
+               -180.0, 50.0, 
+               -168.0, 50.0), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_chukchi_coords = Polygon(eco_chukchi)
+eco_chukchi_bbox = SpatialPolygons(list(Polygons(list(eco_chukchi_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+plot(eco_chukchi_bbox)
+```
+
+```{r}
+eco_west_bbox_ee = spTransform(eco_west_bbox, CRS(ee_russia))
+eco_east_bbox_ee = spTransform(eco_east_bbox, CRS(ee_russia))
+eco_chukchi_bbox_ee = spTransform(eco_chukchi_bbox, CRS(ee_russia))
+```
+
+
+
+### Plot data
+```{r}
+plot(eco_ee)
+plot(eco_west_bbox_ee, add=TRUE)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(eco_west_bbox, "../outputs/bbox/eco_west.shp", driver="ESRI Shapefile")  # create to a shapefile 
+
+st_write(eco_east_bbox, "../outputs/bbox/eco_east.shp", driver="ESRI Shapefile")
+
+st_write(eco_chukchi_bbox, "../outputs/bbox/eco_chukchi.shp", driver="ESRI Shapefile")
+
+```
