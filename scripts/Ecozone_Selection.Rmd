@@ -134,7 +134,7 @@ ne_subset %>%
 ```
 
 ```{r}
-name(ne_subset$eco_code)
+ne_subset$eco_code
 ```
 ### Filter individual ecozones
 -- Cherskii-Kolyma mountain tundra (CKMT)
@@ -274,6 +274,22 @@ cpt_bt_west_dis = st_cast(st_union(cpt_bt_west_buf),"POLYGON")
 ```
 
 
+# Save Individual Ecozone Polygons in Equal Area
+```{r eval=FALSE, include=FALSE}
+st_write(nsct_dis, "../outputs/ecozones/eco_ee/gee_eco_nsct_ee.shp", driver="ESRI Shapefile") 
+
+st_write(tcst_dis, "../outputs/ecozones/eco_ee/gee_eco_tcst_ee.shp", driver="ESRI Shapefile")
+
+st_write(est_tbbmt_dis, "../outputs/ecozones/eco_ee/gee_eco_est_tbbmt_ee.shp", driver="ESRI Shapefile")
+
+st_write(ckmt_nst_dis, "../outputs/ecozones/eco_ee/gee_eco_ckmt_nst_ee.shp", driver="ESRI Shapefile")
+
+st_write(cpt_bt_east_dis, "../outputs/ecozones/eco_ee/gee_eco_cpt_bt_east_ee.shp", driver="ESRI Shapefile")
+
+st_write(cpt_bt_west_dis, "../outputs/ecozones/eco_ee/gee_eco_cpt_bt_west_ee.shp", driver="ESRI Shapefile")
+
+```
+
 #### Check buffer and dissolve effect
 ```{r}
 ggplot(nsct_dis) + geom_sf()
@@ -311,10 +327,20 @@ cpt_bt_west_wgs = st_transform(cpt_bt_west_dis, crs=wgs_proj)
 ggplot(cpt_bt_west_wgs) + geom_sf()
 ```
 
-## Save Shapefiles
 
 
 ```{r}
+nsct_wgs
+tcst_wgs
+est_tbbmt_wgs
+ckmt_nst_wgs
+cpt_bt_east_wgs
+cpt_bt_west_wgs
+```
+## Save Shapefiles
+
+
+```{r eval=FALSE, include=FALSE}
 st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones_ee.shp", driver="ESRI Shapefile") 
 st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
 ```
