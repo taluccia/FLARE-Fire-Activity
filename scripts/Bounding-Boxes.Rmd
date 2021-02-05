@@ -237,7 +237,15 @@ eco_chukchi_bbox = SpatialPolygons(list(Polygons(list(eco_chukchi_coords), ID = 
 ```{r}
 plot(eco_chukchi_bbox)
 ```
+### Convert to sf
+```{r}
+eco_west_sf = st_as_sf(eco_west_bbox) 
+eco_east_sf = st_as_sf(eco_east_bbox)
+eco_chukchi_sf = st_as_sf(eco_chukchi_bbox)
 
+```
+
+### Equal Area to overlay on Ecozones
 ```{r}
 eco_west_bbox_ee = spTransform(eco_west_bbox, CRS(ee_russia))
 eco_east_bbox_ee = spTransform(eco_east_bbox, CRS(ee_russia))
@@ -250,14 +258,16 @@ eco_chukchi_bbox_ee = spTransform(eco_chukchi_bbox, CRS(ee_russia))
 ```{r}
 plot(eco_ee)
 plot(eco_west_bbox_ee, add=TRUE)
+plot(eco_east_bbox_ee, add=TRUE)
+plot(eco_chukchi_bbox_ee, add=TRUE)
 ```
 
 
 ```{r eval=FALSE, include=FALSE}
-st_write(eco_west_bbox, "../outputs/bbox/eco_west.shp", driver="ESRI Shapefile")  # create to a shapefile 
+st_write(eco_west_sf, "../outputs/bbox/eco_west.shp", driver="ESRI Shapefile")  # create to a shapefile 
 
-st_write(eco_east_bbox, "../outputs/bbox/eco_east.shp", driver="ESRI Shapefile")
+st_write(eco_east_sf, "../outputs/bbox/eco_east.shp", driver="ESRI Shapefile")
 
-st_write(eco_chukchi_bbox, "../outputs/bbox/eco_chukchi.shp", driver="ESRI Shapefile")
+st_write(eco_chukchi_sf, "../outputs/bbox/eco_chukchi.shp", driver="ESRI Shapefile")
 
 ```
