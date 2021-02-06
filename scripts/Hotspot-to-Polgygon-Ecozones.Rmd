@@ -50,116 +50,6 @@ https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
-# Boundaing Boxes
-## Creat Bounding Box for FLARE
-coords = matrix(c(118.94, 72.26,
-               171.0, 72.26,
-               171.0, 60.0, 
-               118.94, 60.0), 
-             ncol = 2, byrow = TRUE)
-```{r}
-coords = matrix(c(118.0, 74.26,
-               190.25, 74.26,
-               190.25, 60.0, 
-               118.0, 60.0), 
-             ncol = 2, byrow = TRUE)
-
-
-P1 = Polygon(coords)
-Ps1 = SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(Ps1)
-```
-
-```{r}
-Ps1_sp_ee = spTransform(Ps1, CRS( ee_russia))
-```
-
-## Creat Bounding Box for Ecozone Extent
-bbox:           xmin: -180 ymin: 50.13147 xmax: 180 ymax: 77.76253
-bbox:           xmin: 130.1842 ymin: 68.56218 xmax: 161.9283 ymax: 72.9427
-bbox:           xmin: 79.01171 ymin: 64.7211 xmax: 130.4216 ymax: 77.79169
-bbox:           xmin: 86.27558 ymin: 50.10451 xmax: 142.6297 ymax: 71.44453
-bbox:           xmin: 124.9269 ymin: 58.78296 xmax: 170.2515 ymax: 71.75275
-bbox:           xmin: -179.9998 ymin: 59.77511 xmax: 179.9998 ymax: 70.15549
-bbox:           xmin: -179.9995 ymin: 64.20744 xmax: 179.9971 ymax: 69.00497
-
-
-**Ecozones west xmin: 78 ymin: 50.0 xmax: 129 ymax: 78.0**
-**Ecozones east xmin:  128.5 ymin: 50.0 xmax: 180 ymax: 78.0**
-**Ecozones Chukchi xmin: -180 ymin: 50.0 xmax: -168 ymax: 78.0**
-
-matrix(c(xmin, ymax,
-               xmax, ymax,
-               xmax, ymin, 
-               xmin, ymin), 
-             ncol = 2, byrow = TRUE)
-```{r}
-eco_west = matrix(c(78.0, 78.0,
-               129.0, 78.0,
-               129.0, 50.0, 
-               78.0, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_west_coords = Polygon(eco_west)
-eco_west_bbox = SpatialPolygons(list(Polygons(list(eco_west_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(eco_west_bbox)
-```
-
-```{r}
-eco_east = matrix(c(128.5, 78.0,
-               180.0, 78.0,
-               180.0, 50.0, 
-               128.5, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_east_coords = Polygon(eco_east)
-eco_east_bbox = SpatialPolygons(list(Polygons(list(eco_east_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(eco_east_bbox)
-```
-
-```{r}
-eco_chukchi = matrix(c(-168.0, 78.0,
-               -180.0, 78.0,
-               -180.0, 50.0, 
-               -168.0, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_chukchi_coords = Polygon(eco_chukchi)
-eco_chukchi_bbox = SpatialPolygons(list(Polygons(list(eco_chukchi_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(eco_chukchi_bbox)
-```
-
-```{r}
-eco_west_bbox_ee = spTransform(eco_west_bbox, CRS(ee_russia))
-eco_east_bbox_ee = spTransform(eco_east_bbox, CRS(ee_russia))
-eco_chukchi_bbox_ee = spTransform(eco_chukchi_bbox, CRS(ee_russia))
-```
-
-
-### Equal Area Ecozones
-```{r}
-eco_ee = readOGR("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
-```
-
-```{r}
-plot(eco_ee)
-plot(eco_west_bbox_ee, add=TRUE)
-```
 # Data: Hotspots
 
 ## Read in MODIS only data (2001-2011)
@@ -251,8 +141,8 @@ hs2020_ee = spTransform(hs2020, CRS(ee_russia))
 
 
 ```{r}
-plot(eco_ee)
-plot(hs2001_ee, pch=16, col="red", add=TRUE)
+
+plot(hs2001_ee, pch=16, col="red")
 ```
 original code
 
