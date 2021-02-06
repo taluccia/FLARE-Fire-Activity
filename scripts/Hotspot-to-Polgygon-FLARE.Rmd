@@ -6,18 +6,7 @@ output: html_document
 ---
 
 # Overview
-Convert Hotspot/VIIRS point data to polygons. This is to limit the extent of the vector function in GEE to delinieate fire perimeters.
 
-
-Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
-
-Description of [Modis and VIIRS data](https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
-
-VIIRS launch October 2011, fire season data available 2012-present
-MODIS launch    , available 2001-present
-
-Take all annual hotspot data and make polygons 2001-2020, where 2012-2020 is the combine MODIS/VIIRS Data
- 
 What is included in this script:
 
 # Packages
@@ -38,7 +27,6 @@ library(spatialEco)
 WGS 84 need for gee
 ```{r}
 wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
-
 ```
 
 Equal Area projection for russia need for buffering hotspot data
@@ -50,8 +38,7 @@ https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
-# Boundaing Boxes
-## Creat Bounding Box for FLARE
+# Creat Bounding Box for FLARE
 coords = matrix(c(118.94, 72.26,
                171.0, 72.26,
                171.0, 60.0, 
@@ -63,8 +50,6 @@ coords = matrix(c(118.0, 74.26,
                190.25, 60.0, 
                118.0, 60.0), 
              ncol = 2, byrow = TRUE)
-
-
 P1 = Polygon(coords)
 Ps1 = SpatialPolygons(list(Polygons(list(P1), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
@@ -77,139 +62,45 @@ plot(Ps1)
 Ps1_sp_ee = spTransform(Ps1, CRS( ee_russia))
 ```
 
-## Creat Bounding Box for Ecozone Extent
-bbox:           xmin: -180 ymin: 50.13147 xmax: 180 ymax: 77.76253
-bbox:           xmin: 130.1842 ymin: 68.56218 xmax: 161.9283 ymax: 72.9427
-bbox:           xmin: 79.01171 ymin: 64.7211 xmax: 130.4216 ymax: 77.79169
-bbox:           xmin: 86.27558 ymin: 50.10451 xmax: 142.6297 ymax: 71.44453
-bbox:           xmin: 124.9269 ymin: 58.78296 xmax: 170.2515 ymax: 71.75275
-bbox:           xmin: -179.9998 ymin: 59.77511 xmax: 179.9998 ymax: 70.15549
-bbox:           xmin: -179.9995 ymin: 64.20744 xmax: 179.9971 ymax: 69.00497
-
-
-**Ecozones west xmin: 78 ymin: 50.0 xmax: 129 ymax: 78.0**
-**Ecozones east xmin:  128.5 ymin: 50.0 xmax: 180 ymax: 78.0**
-**Ecozones Chukchi xmin: -180 ymin: 50.0 xmax: -168 ymax: 78.0**
-
-matrix(c(xmin, ymax,
-               xmax, ymax,
-               xmax, ymin, 
-               xmin, ymin), 
-             ncol = 2, byrow = TRUE)
-```{r}
-eco_west = matrix(c(78.0, 78.0,
-               129.0, 78.0,
-               129.0, 50.0, 
-               78.0, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_west_coords = Polygon(eco_west)
-eco_west_bbox = SpatialPolygons(list(Polygons(list(eco_west_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
+# Read in hotspot data
 
 ```{r}
-plot(eco_west_bbox)
-```
-
-```{r}
-eco_east = matrix(c(128.5, 78.0,
-               180.0, 78.0,
-               180.0, 50.0, 
-               128.5, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_east_coords = Polygon(eco_east)
-eco_east_bbox = SpatialPolygons(list(Polygons(list(eco_east_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(eco_east_bbox)
-```
-
-```{r}
-eco_chukchi = matrix(c(-168.0, 78.0,
-               -180.0, 78.0,
-               -180.0, 50.0, 
-               -168.0, 50.0), 
-             ncol = 2, byrow = TRUE)
-
-
-eco_chukchi_coords = Polygon(eco_chukchi)
-eco_chukchi_bbox = SpatialPolygons(list(Polygons(list(eco_chukchi_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-```
-
-```{r}
-plot(eco_chukchi_bbox)
-```
-
-```{r}
-eco_west_bbox_ee = spTransform(eco_west_bbox, CRS(ee_russia))
-eco_east_bbox_ee = spTransform(eco_east_bbox, CRS(ee_russia))
-eco_chukchi_bbox_ee = spTransform(eco_chukchi_bbox, CRS(ee_russia))
+hs2001 = readOGR("../data/hotspot_data/DL_FIRE_M6_2001/fire_archive_2001.shp", "fire_archive_2001") 
+hs2002 = readOGR("../data/hotspot_data/DL_FIRE_M6_2002/fire_archive_2002.shp", "fire_archive_2002") 
+hs2003 = readOGR("../data/hotspot_data/DL_FIRE_M6_2003/fire_archive_2003.shp", "fire_archive_2003") 
+hs2004 = readOGR("../data/hotspot_data/DL_FIRE_M6_2004/fire_archive_2004.shp", "fire_archive_2004") 
+hs2005 = readOGR("../data/hotspot_data/DL_FIRE_M6_2005/fire_archive_2005.shp", "fire_archive_2005") 
 ```
 
 
-### Equal Area Ecozones
 ```{r}
-eco_ee = readOGR("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+hs2006 = readOGR("../data/hotspot_data/DL_FIRE_M6_2006/fire_archive_2006.shp", "fire_archive_2006") 
+hs2007 = readOGR("../data/hotspot_data/DL_FIRE_M6_2007/fire_archive_2007.shp", "fire_archive_2007") 
+hs2008 = readOGR("../data/hotspot_data/DL_FIRE_M6_2008/fire_archive_2008.shp", "fire_archive_2008") 
+hs2009 = readOGR("../data/hotspot_data/DL_FIRE_M6_2009/fire_archive_2009.shp", "fire_archive_2009") 
+hs2010 = readOGR("../data/hotspot_data/DL_FIRE_M6_2010/fire_archive_2010.shp", "fire_archive_2010") 
 ```
 
 ```{r}
-plot(eco_ee)
-plot(eco_west_bbox_ee, add=TRUE)
-```
-# Data: Hotspots
-
-## Read in MODIS only data (2001-2011)
-
-```{r}
-hs2001 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2001/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
-hs2002 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2002/fire_archive_M6_2002.shp", "fire_archive_M6_2002") 
-hs2003 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2003/fire_archive_M6_2003.shp", "fire_archive_M6_2003") 
-hs2004 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2004/fire_archive_M6_2004.shp", "fire_archive_M6_2004") 
-hs2005 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2005/fire_archive_M6_2005.shp", "fire_archive_M6_2005") 
-
-hs2006 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2006/fire_archive_M6_2006.shp", "fire_archive_M6_2006") 
-hs2007 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2007/fire_archive_M6_2007.shp", "fire_archive_M6_2007") 
-hs2008 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2008/fire_archive_M6_2008.shp", "fire_archive_M6_2008") 
-hs2009 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2009/fire_archive_M6_2009.shp", "fire_archive_M6_2009") 
-hs2010 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2010/fire_archive_M6_2010.shp", "fire_archive_M6_2010") 
-hs2011 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2011/fire_archive_M6_2011.shp", "fire_archive_M6_2011") 
+hs2011 = readOGR("../data/hotspot_data/DL_FIRE_M6_2011/fire_archive_2011.shp", "fire_archive_2011") 
+hs2012 = readOGR("../data/hotspot_data/DL_FIRE_M6_2012/fire_archive_2012.shp", "fire_archive_2012") 
+hs2013 = readOGR("../data/hotspot_data/DL_FIRE_M6_2013/fire_archive_2013.shp", "fire_archive_2013") 
+hs2014 = readOGR("../data/hotspot_data/DL_FIRE_M6_2014/fire_archive_2014.shp", "fire_archive_2014") 
+hs2015 = readOGR("../data/hotspot_data/DL_FIRE_M6_2015/fire_archive_2015.shp", "fire_archive_2015") 
 ```
 
 
-
-## Read in Combined MODIS/VIIRS Data (2012-2020)
 ```{r}
-
-hs2012 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2012.shp", "hotspot_point_2012")
-hs2013 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2013.shp", "hotspot_point_2013")
-hs2014 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2014.shp", "hotspot_point_2014")
-hs2015 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2015.shp", "hotspot_point_2015")
-hs2016 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2016.shp", "hotspot_point_2016")
-hs2017 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2017.shp", "hotspot_point_2017")
-hs2018 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2018.shp", "hotspot_point_2018")
-hs2019 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2019.shp", "hotspot_point_2019")
-hs2020 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2020.shp", "hotspot_point_2020")
+hs2016 = readOGR("../data/hotspot_data/DL_FIRE_M6_2016/fire_archive_2016.shp", "fire_archive_2016") 
+hs2017 = readOGR("../data/hotspot_data/DL_FIRE_M6_2017/fire_archive_2017.shp", "fire_archive_2017") 
+hs2018 = readOGR("../data/hotspot_data/DL_FIRE_M6_2018/fire_archive_2018.shp", "fire_archive_2018") 
+hs2019 = readOGR("../data/hotspot_data/DL_FIRE_M6_2019/fire_archive_2019.shp", "fire_archive_2019")
+hs2020 = readOGR("../data/hotspot_data/DL_FIRE_M6_2020/fire_nrt_M6_jul2020.shp", "fire_nrt_M6_jul2020")
  
 ```
 
-# Data: Individual Ecozones
-```{r}
-eco_nsct = readOGR("../data/ecozones/eco_ee/gee_eco_nsct_ee.shp", "gee_eco_nsct_ee")
 
-eco_tcst = readOGR("../data/ecozones/eco_ee/gee_eco_tcst_ee.shp", "gee_eco_tcst_ee")
-eco_est_tbbmt = readOGR("../data/ecozones/eco_ee/gee_eco_est_tbbmt_ee.shp", "gee_eco_est_tbbmt_ee")
-eco_ckmt_nst = readOGR("../data/ecozones/eco_ee/gee_eco_ckmt_nst_ee.shp", "gee_eco_ckmt_nst_ee")
-eco_cpt_bt_east = readOGR("../data/ecozones/eco_ee/gee_eco_cpt_bt_east_ee.shp", "gee_eco_cpt_bt_east_ee")
-eco_cpt_bt_west = readOGR("../data/ecozones/eco_ee/gee_eco_cpt_bt_west_ee.shp", "gee_eco_cpt_bt_west_ee")
-```
-
-
-
-# project to equal area russia
+## project to equal area russia
 ```{r}
 hs2001_ee = spTransform(hs2001, CRS(ee_russia))
 hs2002_ee = spTransform(hs2002, CRS(ee_russia))
@@ -242,101 +133,45 @@ hs2017_ee = spTransform(hs2017, CRS(ee_russia))
 hs2018_ee = spTransform(hs2018, CRS(ee_russia))
 hs2019_ee = spTransform(hs2019, CRS(ee_russia))
 hs2020_ee = spTransform(hs2020, CRS(ee_russia))
-
 ```
 
-# Split and run by ecozone and Year
 
-### 2001
+## Reduce hotspot data to FLARE  BBox
+
 
 
 ```{r}
-plot(eco_ee)
-plot(hs2001_ee, pch=16, col="red", add=TRUE)
-```
-original code
-
-```{r}
-plot(hs2001)
-```
-
-```{r}
-plot(hs2001_ee)
-plot(eco_west_bbox_ee, add=TRUE)
-plot(eco_east_bbox_ee, add=TRUE)
-plot(eco_chukchi_bbox_ee, add=TRUE)
-```
-```{r}
-hs2001_ee_eco_east = hs2001_ee[eco_east_bbox_ee, ]
-```
-```{r}
-plot(hs2001_ee_eco_east)
-```
-```{r}
-hs2001_ee_3k_eco_east = gBuffer(hs2001_ee_eco_east, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-```
-
-```{r}
-hs2001_ee_3k_nh_eco_east = remove.holes(hs2001_ee_3k_eco_east)
-```
-
-```{r}
-hs2001_eco_east_wgs = spTransform(hs2001_ee_3k_nh_eco_east, CRS( wgs_proj))
-```
-
-```{r}
-hs2001_3k_wgs_eco_east = st_as_sf(hs2001_eco_east_wgs)
-```
-
-
-```{r eval=FALSE, include=FALSE}
-st_write(hs2001_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2001.shp", driver="ESRI Shapefile")
-
-```
-
-
-
-# Reduce hotspot data to FLARE  BBox
-
-```{r}
-hs2001_ee_sub = hs2001_ee[eco_ee, ]
-hs2002_ee_sub = hs2002_ee[eco_ee, ]
-hs2003_ee_sub = hs2003_ee[eco_ee, ]
-hs2004_ee_sub = hs2004_ee[eco_ee, ]
-hs2005_ee_sub = hs2005_ee[eco_ee, ]
+hs2001_ee_sub = hs2001_ee[Ps1_sp_ee, ]
+hs2002_ee_sub = hs2002_ee[Ps1_sp_ee, ]
+hs2003_ee_sub = hs2003_ee[Ps1_sp_ee, ]
+hs2004_ee_sub = hs2004_ee[Ps1_sp_ee, ]
+hs2005_ee_sub = hs2005_ee[Ps1_sp_ee, ]
 ```
 
 
 ```{r}
-hs2006_ee_sub = hs2006_ee[eco_ee, ]
-hs2007_ee_sub = hs2007_ee[eco_ee, ]
-hs2008_ee_sub = hs2008_ee[eco_ee, ]
-hs2009_ee_sub = hs2009_ee[eco_ee, ]
-hs2010_ee_sub = hs2010_ee[eco_ee, ]
+hs2006_ee_sub = hs2006_ee[Ps1_sp_ee, ]
+hs2007_ee_sub = hs2007_ee[Ps1_sp_ee, ]
+hs2008_ee_sub = hs2008_ee[Ps1_sp_ee, ]
+hs2009_ee_sub = hs2009_ee[Ps1_sp_ee, ]
+hs2010_ee_sub = hs2010_ee[Ps1_sp_ee, ]
 ```
 
 ```{r}
-hs2011_ee_sub = hs2011_ee[eco_ee, ]
-hs2012_ee_sub = hs2012_ee[eco_ee, ]
-hs2013_ee_sub = hs2013_ee[eco_ee, ]
-hs2014_ee_sub = hs2014_ee[eco_ee, ]
-hs2015_ee_sub = hs2015_ee[eco_ee, ]
+hs2011_ee_sub = hs2011_ee[Ps1_sp_ee, ]
+hs2012_ee_sub = hs2012_ee[Ps1_sp_ee, ]
+hs2013_ee_sub = hs2013_ee[Ps1_sp_ee, ]
+hs2014_ee_sub = hs2014_ee[Ps1_sp_ee, ]
+hs2015_ee_sub = hs2015_ee[Ps1_sp_ee, ]
 ```
 
 
 ```{r}
-hs2016_ee_sub = hs2016_ee[eco_ee, ]
-hs2017_ee_sub = hs2017_ee[eco_ee, ]
-hs2018_ee_sub = hs2018_ee[eco_ee, ]
-hs2019_ee_sub = hs2019_ee[eco_ee, ]
-hs2020_ee_sub = hs2020_ee[eco_ee, ]
-
-```
-
-```{r}
-plot(hs2020_ee_sub)
-plot(eco_ee, add=TRUE)
-
+hs2016_ee_sub = hs2016_ee[Ps1_sp_ee, ]
+hs2017_ee_sub = hs2017_ee[Ps1_sp_ee, ]
+hs2018_ee_sub = hs2018_ee[Ps1_sp_ee, ]
+hs2019_ee_sub = hs2019_ee[Ps1_sp_ee, ]
+hs2020_ee_sub = hs2020_ee[Ps1_sp_ee, ]
 ```
 
 
@@ -374,10 +209,9 @@ hs2017_ee_3k = gBuffer(hs2017_ee_sub, width = 3000, capStyle="ROUND", joinStyle=
 hs2018_ee_3k = gBuffer(hs2018_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 hs2019_ee_3k = gBuffer(hs2019_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 hs2020_ee_3k = gBuffer(hs2020_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-
 ```
 
-# Remove holes in polygons
+## Remove holes in polygons
 
 ```{r}
 hs2001_ee_3k_nh = remove.holes(hs2001_ee_3k)
@@ -411,7 +245,6 @@ hs2017_ee_3k_nh = remove.holes(hs2017_ee_3k)
 hs2018_ee_3k_nh = remove.holes(hs2018_ee_3k)
 hs2019_ee_3k_nh = remove.holes(hs2019_ee_3k)
 hs2020_ee_3k_nh = remove.holes(hs2020_ee_3k)
-
 ```
 
 ## reproject to WGS for GEE
@@ -493,20 +326,16 @@ st_write(hs2002_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2002.shp", driv
 st_write(hs2003_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2003.shp", driver="ESRI Shapefile") 
 st_write(hs2004_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2004.shp", driver="ESRI Shapefile") 
 st_write(hs2005_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2005.shp", driver="ESRI Shapefile") 
-
 st_write(hs2006_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2006.shp", driver="ESRI Shapefile") 
 st_write(hs2007_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2007.shp", driver="ESRI Shapefile") 
 st_write(hs2008_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2008.shp", driver="ESRI Shapefile") 
 st_write(hs2009_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2009.shp", driver="ESRI Shapefile") 
 st_write(hs2010_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2010.shp", driver="ESRI Shapefile") 
-
-
 st_write(hs2011_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2011.shp", driver="ESRI Shapefile")  
 st_write(hs2012_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2012.shp", driver="ESRI Shapefile") 
 st_write(hs2013_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2013.shp", driver="ESRI Shapefile") 
 st_write(hs2014_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2014.shp", driver="ESRI Shapefile") 
 st_write(hs2015_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2015.shp", driver="ESRI Shapefile") 
-
 st_write(hs2016_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2016.shp", driver="ESRI Shapefile") 
 st_write(hs2017_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2017.shp", driver="ESRI Shapefile") 
 st_write(hs2018_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2018.shp", driver="ESRI Shapefile") 
@@ -514,4 +343,3 @@ st_write(hs2019_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2019.shp", driv
 st_write(hs2020_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2020.shp", driver="ESRI Shapefile") 
  
 ```
-
