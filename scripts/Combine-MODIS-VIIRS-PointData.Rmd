@@ -38,32 +38,32 @@ library(spatialEco)
 
 ## Modis and VIIRS for 2012-2020
 ```{r}
-m_2020 = st_read("../data/FIRMS-PointData-raw/firms_2020/fire_archive_M6_2020.shp", "fire_archive_M6_2020")
-v_2020 = st_read("../data/FIRMS-PointData-raw/firms_2020/fire_archive_V1_2020.shp", "fire_archive_V1_2020")
+m_2020 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2020.shp", "fire_archive_M6_2020")
+v_2020 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2020.shp", "fire_archive_V1_2020")
 
-m_2019 = st_read("../data/FIRMS-PointData-raw/firms_2019/fire_archive_M6_2019.shp", "fire_archive_M6_2019")
-v_2019 = st_read("../data/FIRMS-PointData-raw/firms_2019/fire_archive_V1_2019.shp", "fire_archive_V1_2019")
+m_2019 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2019.shp", "fire_archive_M6_2019")
+v_2019 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2019.shp", "fire_archive_V1_2019")
 
-m_2018 = st_read("../data/FIRMS-PointData-raw/firms_2018/fire_archive_M6_2018.shp", "fire_archive_M6_2018")
-v_2018 = st_read("../data/FIRMS-PointData-raw/firms_2018/fire_archive_V1_2018.shp", "fire_archive_V1_2018")
+m_2018 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2018.shp", "fire_archive_M6_2018")
+v_2018 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2018.shp", "fire_archive_V1_2018")
 
-m_2017 = st_read("../data/FIRMS-PointData-raw/firms_2017/fire_archive_M6_2017.shp", "fire_archive_M6_2017")
-v_2017 = st_read("../data/FIRMS-PointData-raw/firms_2017/fire_archive_V1_2017.shp", "fire_archive_V1_2017")
+m_2017 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2017.shp", "fire_archive_M6_2017")
+v_2017 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2017.shp", "fire_archive_V1_2017")
 
-m_2016 = st_read("../data/FIRMS-PointData-raw/firms_2016/fire_archive_M6_2016.shp", "fire_archive_M6_2016")
-v_2016 = st_read("../data/FIRMS-PointData-raw/firms_2016/fire_archive_V1_2016.shp", "fire_archive_V1_2016")
+m_2016 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2016.shp", "fire_archive_M6_2016")
+v_2016 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2016.shp", "fire_archive_V1_2016")
 
-m_2015 = st_read("../data/FIRMS-PointData-raw/firms_2015/fire_archive_M6_2015.shp", "fire_archive_M6_2015")
-v_2015 = st_read("../data/FIRMS-PointData-raw/firms_2015/fire_archive_V1_2015.shp", "fire_archive_V1_2015")
+m_2015 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2015.shp", "fire_archive_M6_2015")
+v_2015 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2015.shp", "fire_archive_V1_2015")
 
-m_2014 = st_read("../data/FIRMS-PointData-raw/firms_2014/fire_archive_M6_2014.shp", "fire_archive_M6_2014")
-v_2014 = st_read("../data/FIRMS-PointData-raw/firms_2014/fire_archive_V1_2014.shp", "fire_archive_V1_2014")
+m_2014 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2014.shp", "fire_archive_M6_2014")
+v_2014 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2014.shp", "fire_archive_V1_2014")
 
-m_2013 = st_read("../data/FIRMS-PointData-raw/firms_2013/fire_archive_M6_2013.shp", "fire_archive_M6_2013")
-v_2013 = st_read("../data/FIRMS-PointData-raw/firms_2013/fire_archive_V1_2013.shp", "fire_archive_V1_2013")
+m_2013 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2013.shp", "fire_archive_M6_2013")
+v_2013 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2013.shp", "fire_archive_V1_2013")
 
-m_2012 = st_read("../data/FIRMS-PointData-raw/firms_2012/fire_archive_M6_2012.shp", "fire_archive_M6_2012")
-v_2012 = st_read("../data/FIRMS-PointData-raw/firms_2012/fire_archive_V1_2012.shp", "fire_archive_V1_2012")
+m_2012 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_M6_2012.shp", "fire_archive_M6_2012")
+v_2012 = st_read("../data/MODIS_VIIRS_Annual_Raw/fire_archive_V1_2012.shp", "fire_archive_V1_2012")
 ```
 
 ```{r}
@@ -139,14 +139,14 @@ summary(vm_2020)
 
 
 ```{r eval=FALSE, warning=FALSE, include=FALSE}
-st_write(vm_2012, "../outputs/hotspot-point-combine/hotspot_point_2012.shp", driver="ESRI Shapefile")
-st_write(vm_2013, "../outputs/hotspot-point-combine/hotspot_point_2013.shp", driver="ESRI Shapefile")
-st_write(vm_2014, "../outputs/hotspot-point-combine/hotspot_point_2014.shp", driver="ESRI Shapefile")
-st_write(vm_2015, "../outputs/hotspot-point-combine/hotspot_point_2015.shp", driver="ESRI Shapefile")
-st_write(vm_2016, "../outputs/hotspot-point-combine/hotspot_point_2016.shp", driver="ESRI Shapefile")
-st_write(vm_2017, "../outputs/hotspot-point-combine/hotspot_point_2017.shp", driver="ESRI Shapefile")
-st_write(vm_2018, "../outputs/hotspot-point-combine/hotspot_point_2018.shp", driver="ESRI Shapefile")
-st_write(vm_2019, "../outputs/hotspot-point-combine/hotspot_point_2019.shp", driver="ESRI Shapefile")
-st_write(vm_2020, "../outputs/hotspot-point-combine/hotspot_point_2020.shp", driver="ESRI Shapefile")
+st_write(vm_2012, "../outputs/M6_V1_combine/M6_V1_2012.shp", driver="ESRI Shapefile")
+st_write(vm_2013, "../outputs/M6_V1_combine/M6_V1_2013.shp", driver="ESRI Shapefile")
+st_write(vm_2014, "../outputs/M6_V1_combine/M6_V1_2014.shp", driver="ESRI Shapefile")
+st_write(vm_2015, "../outputs/M6_V1_combine/M6_V1_2015.shp", driver="ESRI Shapefile")
+st_write(vm_2016, "../outputs/M6_V1_combine/M6_V1_2016.shp", driver="ESRI Shapefile")
+st_write(vm_2017, "../outputs/M6_V1_combine/M6_V1_2017.shp", driver="ESRI Shapefile")
+st_write(vm_2018, "../outputs/M6_V1_combine/M6_V1_2018.shp", driver="ESRI Shapefile")
+st_write(vm_2019, "../outputs/M6_V1_combine/M6_V1_2019.shp", driver="ESRI Shapefile")
+st_write(vm_2020, "../outputs/M6_V1_combine/M6_V1_2020.shp", driver="ESRI Shapefile")
 
 ```
