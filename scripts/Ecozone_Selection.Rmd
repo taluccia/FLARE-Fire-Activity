@@ -200,6 +200,9 @@ cpt_bt_east = ne_subset %>%
 ```
 
 ```{r}
+cpt_bt_east
+```
+```{r}
 ggplot(cpt_bt_east) + geom_sf()
 ```
 
@@ -207,6 +210,10 @@ ggplot(cpt_bt_east) + geom_sf()
 cpt_bt_west = ne_subset %>% 
   filter(eco_code %in% c("CPT", "BT")) %>%
   filter(OBJECTID %in% c("4890", "2692"))
+```
+
+```{r}
+cpt_bt_west
 ```
 
 ```{r}
@@ -328,14 +335,48 @@ ggplot(cpt_bt_west_wgs) + geom_sf()
 ```
 
 
+# Bounding box details
 
+-- Cherskii-Kolyma mountain tundra (CKMT)
+-- Northeast Siberian taiga (NST)
+```{r}
+ckmt_nst_wgs
+ggplot(ckmt_nst_wgs) +geom_sf()
+```
+
+-- Northeast Siberian coastal tundra (NSCT)
 ```{r}
 nsct_wgs
-tcst_wgs
-est_tbbmt_wgs
-ckmt_nst_wgs
+ggplot(nsct_wgs) +geom_sf()
+```
+
+-- Chukchi Peninsula tundra (CPT)
+-- Bering tundra (BT)
+
+```{r}
 cpt_bt_east_wgs
+ggplot(cpt_bt_east_wgs) +geom_sf()
+```
+
+```{r}
 cpt_bt_west_wgs
+ggplot(cpt_bt_west_wgs) +geom_sf()
+```
+
+-- Taimyr-Central Siberian tundra (TCST)
+
+```{r}
+tcst_wgs
+ggplot(tcst_wgs) +geom_sf()
+```
+
+
+-- East Siberian taiga (EST)
+-- Trans-Baikal Bald Mountain tundra (TBBMT)
+
+```{r}
+est_tbbmt_wgs
+ggplot(est_tbbmt_wgs) +geom_sf()
 ```
 ## Save Shapefiles
 
