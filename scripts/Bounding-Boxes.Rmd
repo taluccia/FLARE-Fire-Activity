@@ -205,6 +205,28 @@ eco_west_bbox = SpatialPolygons(list(Polygons(list(eco_west_coords), ID = "a")),
 ```{r}
 plot(eco_west_bbox)
 ```
+```{r}
+eco_nwest = matrix(c(78.0, 78.0,
+               129.0, 78.0,
+               129.0, 63.75, 
+               78.0, 63.75), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_nwest_coords = Polygon(eco_nwest)
+eco_nwest_bbox = SpatialPolygons(list(Polygons(list(eco_nwest_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+```{r}
+eco_swest = matrix(c(78.0, 64.0,
+               129.0, 64.0,
+               129.0, 50.0, 
+               78.0, 50.0), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_swest_coords = Polygon(eco_swest)
+eco_swest_bbox = SpatialPolygons(list(Polygons(list(eco_swest_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
 
 ```{r}
 eco_east = matrix(c(128.5, 78.0,
@@ -216,6 +238,29 @@ eco_east = matrix(c(128.5, 78.0,
 
 eco_east_coords = Polygon(eco_east)
 eco_east_bbox = SpatialPolygons(list(Polygons(list(eco_east_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+eco_neast = matrix(c(128.5, 78.0,
+               180.0, 78.0,
+               180.0, 63.5, 
+               128.5, 63.5), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_neast_coords = Polygon(eco_neast)
+eco_neast_bbox = SpatialPolygons(list(Polygons(list(eco_neast_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+```{r}
+eco_seast = matrix(c(128.5, 64.0,
+               180.0, 64.0,
+               180.0, 50.0, 
+               128.5, 50.0), 
+             ncol = 2, byrow = TRUE)
+
+
+eco_seast_coords = Polygon(eco_seast)
+eco_seast_bbox = SpatialPolygons(list(Polygons(list(eco_seast_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
 ```{r}
@@ -241,6 +286,13 @@ plot(eco_chukchi_bbox)
 ```{r}
 eco_west_sf = st_as_sf(eco_west_bbox) 
 eco_east_sf = st_as_sf(eco_east_bbox)
+
+eco_nwest_sf = st_as_sf(eco_nwest_bbox) 
+eco_neast_sf = st_as_sf(eco_neast_bbox)
+
+eco_swest_sf = st_as_sf(eco_swest_bbox) 
+eco_seast_sf = st_as_sf(eco_seast_bbox)
+
 eco_chukchi_sf = st_as_sf(eco_chukchi_bbox)
 
 ```
@@ -269,5 +321,142 @@ st_write(eco_west_sf, "../outputs/bbox/eco_west.shp", driver="ESRI Shapefile")  
 st_write(eco_east_sf, "../outputs/bbox/eco_east.shp", driver="ESRI Shapefile")
 
 st_write(eco_chukchi_sf, "../outputs/bbox/eco_chukchi.shp", driver="ESRI Shapefile")
+
+st_write(eco_nwest_sf, "../outputs/bbox/eco_nwest.shp", driver="ESRI Shapefile")
+st_write(eco_swest_sf, "../outputs/bbox/eco_swest.shp", driver="ESRI Shapefile")# create to a shapefile 
+
+st_write(eco_neast_sf, "../outputs/bbox/eco_neast.shp", driver="ESRI Shapefile")
+st_write(eco_seast_sf, "../outputs/bbox/eco_seast.shp", driver="ESRI Shapefile")
+
+```
+
+#BBOX based on smaller ecozone area
+```{r}
+ckmt_nst_nsct = matrix(c(135.0, 72.5,
+               171.0, 72.5,
+               171.0, 55.0, 
+               135.0, 55.0), 
+             ncol = 2, byrow = TRUE)
+
+
+ckmt_nst_nsct_coords = Polygon(ckmt_nst_nsct)
+ckmt_nst_nsct_bbox = SpatialPolygons(list(Polygons(list(ckmt_nst_nsct_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+tcst_n = matrix(c(135.0, 77.0,
+               79.0, 77.0,
+               79.0, 70.0, 
+               135.0, 70.0), 
+             ncol = 2, byrow = TRUE)
+
+
+tcst_n_coords = Polygon(tcst_n)
+tcst_n_bbox = SpatialPolygons(list(Polygons(list(tcst_n_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+tcst_s = matrix(c(135.0, 70.0,
+               79.0, 70.0,
+               79.0, 63.0, 
+               135.0, 63.0), 
+             ncol = 2, byrow = TRUE)
+
+
+tcst_s_coords = Polygon(tcst_s)
+tcst_s_bbox = SpatialPolygons(list(Polygons(list(tcst_s_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+
+```{r}
+est_tbbmt_n = matrix(c(135.0, 63.0,
+               79.0, 63.0,
+               79.0, 56.0, 
+               135.0, 56.0), 
+             ncol = 2, byrow = TRUE)
+
+
+est_tbbmt_n_coords = Polygon(est_tbbmt_n)
+est_tbbmt_n_bbox = SpatialPolygons(list(Polygons(list(est_tbbmt_n_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+est_tbbmt_s = matrix(c(135.0, 56.0,
+               79.0,56.0,
+               79.0, 49.0, 
+               135.0, 49.0), 
+             ncol = 2, byrow = TRUE)
+
+
+est_tbbmt_s_coords = Polygon(est_tbbmt_s)
+est_tbbmt_s_bbox = SpatialPolygons(list(Polygons(list(est_tbbmt_s_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+cpt_bt_east = matrix(c(179.99, 71.0,
+               156.0, 71.0,
+               156.0, 59.0, 
+               179.99, 59.0), 
+             ncol = 2, byrow = TRUE)
+
+
+cpt_bt_east_coords = Polygon(cpt_bt_east)
+cpt_bt_east_bbox = SpatialPolygons(list(Polygons(list(cpt_bt_east_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+```{r}
+cpt_bt_west = matrix(c(-179.99, 71.0,
+               -168.0, 71.0,
+               -168.0, 59.0, 
+               -179.99, 59.0), 
+             ncol = 2, byrow = TRUE)
+
+
+cpt_bt_west_coords = Polygon(cpt_bt_west)
+cpt_bt_west_bbox = SpatialPolygons(list(Polygons(list(cpt_bt_west_coords), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+```
+
+### Convert to sf
+```{r}
+ckmt_nst_nsct_sf = st_as_sf(ckmt_nst_nsct_bbox) 
+tcst_n_sf = st_as_sf(tcst_n_bbox) 
+tcst_s_sf = st_as_sf(tcst_s_bbox)
+est_tbbmt_n_sf = st_as_sf(est_tbbmt_n_bbox)
+est_tbbmt_s_sf = st_as_sf(est_tbbmt_s_bbox)
+cpt_bt_west_sf = st_as_sf(cpt_bt_west_bbox)
+cpt_bt_east_sf = st_as_sf(cpt_bt_east_bbox)
+```
+
+### Equal Area to overlay on Ecozones
+```{r}
+ckmt_nst_nsct_bbox_ee = spTransform(ckmt_nst_nsct_bbox, CRS(ee_russia))
+tcst_n_bbox_ee = spTransform(tcst_n_bbox, CRS(ee_russia))
+tcst_s_bbox_ee = spTransform(tcst_s_bbox, CRS(ee_russia))
+est_tbbmt_n_bbox_ee = spTransform(est_tbbmt_n_bbox, CRS(ee_russia))
+est_tbbmt_s_bbox_ee = spTransform(est_tbbmt_s_bbox, CRS(ee_russia))
+cpt_bt_west_bbox_ee = spTransform(cpt_bt_west_bbox, CRS(ee_russia))
+cpt_bt_east_bbox_ee = spTransform(cpt_bt_east_bbox, CRS(ee_russia))
+```
+
+
+
+### Plot data
+```{r}
+plot(eco_ee)
+plot(ckmt_nst_nsct_bbox_ee, add=TRUE)
+plot(tcst_n_bbox_ee, add=TRUE)
+plot(tcst_s_bbox_ee, add=TRUE)
+plot(est_tbbmt_n_bbox_ee, add=TRUE)
+plot(est_tbbmt_s_bbox_ee, add=TRUE)
+plot(cpt_bt_west_bbox_ee, add=TRUE)
+plot(cpt_bt_east_bbox_ee, add=TRUE)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(ckmt_nst_nsct_sf, "../outputs/bbox/ckmt_nst_nsct.shp", driver="ESRI Shapefile") 
+st_write(tcst_n_sf, "../outputs/bbox/tcst_n.shp", driver="ESRI Shapefile") 
+
+
 
 ```
