@@ -383,8 +383,8 @@ est_tbbmt_n_bbox = SpatialPolygons(list(Polygons(list(est_tbbmt_n_coords), ID = 
 ```{r}
 est_tbbmt_s = matrix(c(135.0, 56.0,
                79.0,56.0,
-               79.0, 49.0, 
-               135.0, 49.0), 
+               79.0, 48.0, 
+               135.0, 48.0), 
              ncol = 2, byrow = TRUE)
 
 
@@ -394,8 +394,8 @@ est_tbbmt_s_bbox = SpatialPolygons(list(Polygons(list(est_tbbmt_s_coords), ID = 
 
 ```{r}
 cpt_bt_east = matrix(c(179.99, 71.0,
-               156.0, 71.0,
-               156.0, 59.0, 
+               170.0, 71.0,
+               170.0, 59.0, 
                179.99, 59.0), 
              ncol = 2, byrow = TRUE)
 
@@ -456,6 +456,14 @@ plot(cpt_bt_east_bbox_ee, add=TRUE)
 ```{r eval=FALSE, include=FALSE}
 st_write(ckmt_nst_nsct_sf, "../outputs/bbox/ckmt_nst_nsct.shp", driver="ESRI Shapefile") 
 st_write(tcst_n_sf, "../outputs/bbox/tcst_n.shp", driver="ESRI Shapefile") 
+
+st_write(tcst_s_sf, "../outputs/bbox/tcst_s.shp", driver="ESRI Shapefile") 
+
+st_write(est_tbbmt_n_sf, "../outputs/bbox/est_tbbmt_n.shp", driver="ESRI Shapefile") 
+st_write(est_tbbmt_s_sf, "../outputs/bbox/est_tbbmt_s.shp", driver="ESRI Shapefile") 
+
+st_write(cpt_bt_west_sf, "../outputs/bbox/cpt_bt_west.shp", driver="ESRI Shapefile") 
+st_write(cpt_bt_east_sf, "../outputs/bbox/cpt_bt_east.shp", driver="ESRI Shapefile") 
 
 
 
