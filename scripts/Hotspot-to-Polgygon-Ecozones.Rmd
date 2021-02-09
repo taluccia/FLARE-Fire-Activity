@@ -50,7 +50,32 @@ https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
-# Data: Hotspots
+# Bounding Box Ecozones
+## Data
+```{r}
+
+ckmt_nst_nsct = readOGR("../data/ecozone_bbox/ckmt_nst_nsct.shp", "ckmt_nst_nsct")
+tcst_n = readOGR("../data/ecozone_bbox/tcst_n.shp", "tcst_n")
+tcst_s = readOGR("../data/ecozone_bbox/tcst_s.shp", "tcst_s")
+est_tbbmt_n = readOGR("../data/ecozone_bbox/est_tbbmt_n.shp", "est_tbbmt_n")
+est_tbbmt_s = readOGR("../data/ecozone_bbox/est_tbbmt_s.shp", "est_tbbmt_s")
+cpt_bt_west = readOGR("../data/ecozone_bbox/cpt_bt_west.shp", "cpt_bt_west")
+cpt_bt_east = readOGR("../data/ecozone_bbox/cpt_bt_east.shp", "cpt_bt_east")
+
+```
+
+## Covert to Equal Area
+```{r}
+ckmt_nst_nsct_ee = spTransform(ckmt_nst_nsct, CRS(ee_russia))
+tcst_n_ee = spTransform(tcst_n, CRS(ee_russia))
+tcst_s_ee = spTransform(tcst_s, CRS(ee_russia))
+est_tbbmt_n_ee = spTransform(est_tbbmt_n, CRS(ee_russia))
+est_tbbmt_s_ee = spTransform(est_tbbmt_s, CRS(ee_russia))
+cpt_bt_west_ee = spTransform(cpt_bt_west, CRS(ee_russia))
+cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
+```
+
+# Hotspot Data (MODIS and VIIRS)
 
 ## Read in MODIS only data (2001-2011)
 
@@ -70,7 +95,6 @@ hs2011 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2011/fire_archive_M6
 ```
 
 
-
 ## Read in Combined MODIS/VIIRS Data (2012-2020)
 ```{r}
 
@@ -86,20 +110,10 @@ hs2020 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_p
  
 ```
 
-# Data: Individual Ecozones
-```{r}
-eco_nsct = readOGR("../data/ecozones/eco_ee/gee_eco_nsct_ee.shp", "gee_eco_nsct_ee")
-
-eco_tcst = readOGR("../data/ecozones/eco_ee/gee_eco_tcst_ee.shp", "gee_eco_tcst_ee")
-eco_est_tbbmt = readOGR("../data/ecozones/eco_ee/gee_eco_est_tbbmt_ee.shp", "gee_eco_est_tbbmt_ee")
-eco_ckmt_nst = readOGR("../data/ecozones/eco_ee/gee_eco_ckmt_nst_ee.shp", "gee_eco_ckmt_nst_ee")
-eco_cpt_bt_east = readOGR("../data/ecozones/eco_ee/gee_eco_cpt_bt_east_ee.shp", "gee_eco_cpt_bt_east_ee")
-eco_cpt_bt_west = readOGR("../data/ecozones/eco_ee/gee_eco_cpt_bt_west_ee.shp", "gee_eco_cpt_bt_west_ee")
-```
 
 
 
-# project to equal area russia
+## project to equal area russia
 ```{r}
 hs2001_ee = spTransform(hs2001, CRS(ee_russia))
 hs2002_ee = spTransform(hs2002, CRS(ee_russia))
@@ -137,271 +151,205 @@ hs2020_ee = spTransform(hs2020, CRS(ee_russia))
 
 # Split and run by ecozone and Year
 
-### 2001
 
 
-```{r}
 
-plot(hs2001_ee, pch=16, col="red")
-```
-original code
-
-```{r}
-plot(hs2001)
-```
+# By Ecozone BBOX
+## ckmt_nst_nsct_ee
+### Reduce hotspot data to BBox
 
 ```{r}
-plot(hs2001_ee)
-plot(eco_west_bbox_ee, add=TRUE)
-plot(eco_east_bbox_ee, add=TRUE)
-plot(eco_chukchi_bbox_ee, add=TRUE)
-```
-```{r}
-hs2001_ee_eco_east = hs2001_ee[eco_east_bbox_ee, ]
-```
-```{r}
-plot(hs2001_ee_eco_east)
-```
-```{r}
-hs2001_ee_3k_eco_east = gBuffer(hs2001_ee_eco_east, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2001_ee_sub = hs2001_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2002_ee_sub = hs2002_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2003_ee_sub = hs2003_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2004_ee_sub = hs2004_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2005_ee_sub = hs2005_ee[ckmt_nst_nsct_ee, ]
 ```
 
 ```{r}
-hs2001_ee_3k_nh_eco_east = remove.holes(hs2001_ee_3k_eco_east)
+ckmt_nst_nsct_2006_ee_sub = hs2006_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2007_ee_sub = hs2007_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2008_ee_sub = hs2008_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2009_ee_sub = hs2009_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2010_ee_sub = hs2010_ee[ckmt_nst_nsct_ee, ]
 ```
 
 ```{r}
-hs2001_eco_east_wgs = spTransform(hs2001_ee_3k_nh_eco_east, CRS( wgs_proj))
+ckmt_nst_nsct_2011_ee_sub = hs2011_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2012_ee_sub = hs2012_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2013_ee_sub = hs2013_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2014_ee_sub = hs2014_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2015_ee_sub = hs2015_ee[ckmt_nst_nsct_ee, ]
 ```
 
 ```{r}
-hs2001_3k_wgs_eco_east = st_as_sf(hs2001_eco_east_wgs)
+ckmt_nst_nsct_2016_ee_sub = hs2016_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2017_ee_sub = hs2017_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2018_ee_sub = hs2018_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2019_ee_sub = hs2019_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_2020_ee_sub = hs2020_ee[ckmt_nst_nsct_ee, ]
 ```
 
-
-```{r eval=FALSE, include=FALSE}
-st_write(hs2001_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2001.shp", driver="ESRI Shapefile")
-
-```
-
-
-
-# Reduce hotspot data to FLARE  BBox
+### Buffer by 3k
 
 ```{r}
-hs2001_ee_sub = hs2001_ee[eco_ee, ]
-hs2002_ee_sub = hs2002_ee[eco_ee, ]
-hs2003_ee_sub = hs2003_ee[eco_ee, ]
-hs2004_ee_sub = hs2004_ee[eco_ee, ]
-hs2005_ee_sub = hs2005_ee[eco_ee, ]
-```
-
-
-```{r}
-hs2006_ee_sub = hs2006_ee[eco_ee, ]
-hs2007_ee_sub = hs2007_ee[eco_ee, ]
-hs2008_ee_sub = hs2008_ee[eco_ee, ]
-hs2009_ee_sub = hs2009_ee[eco_ee, ]
-hs2010_ee_sub = hs2010_ee[eco_ee, ]
+ckmt_nst_nsct_2001_ee_3k = gBuffer(ckmt_nst_nsct_2001_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2002_ee_3k = gBuffer(ckmt_nst_nsct_2002_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2003_ee_3k = gBuffer(ckmt_nst_nsct_2003_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2004_ee_3k = gBuffer(ckmt_nst_nsct_2004_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2005_ee_3k = gBuffer(ckmt_nst_nsct_2005_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 ```{r}
-hs2011_ee_sub = hs2011_ee[eco_ee, ]
-hs2012_ee_sub = hs2012_ee[eco_ee, ]
-hs2013_ee_sub = hs2013_ee[eco_ee, ]
-hs2014_ee_sub = hs2014_ee[eco_ee, ]
-hs2015_ee_sub = hs2015_ee[eco_ee, ]
-```
-
-
-```{r}
-hs2016_ee_sub = hs2016_ee[eco_ee, ]
-hs2017_ee_sub = hs2017_ee[eco_ee, ]
-hs2018_ee_sub = hs2018_ee[eco_ee, ]
-hs2019_ee_sub = hs2019_ee[eco_ee, ]
-hs2020_ee_sub = hs2020_ee[eco_ee, ]
-
+ckmt_nst_nsct_2006_ee_3k = gBuffer(ckmt_nst_nsct_2006_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2007_ee_3k = gBuffer(ckmt_nst_nsct_2007_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2008_ee_3k = gBuffer(ckmt_nst_nsct_2008_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2009_ee_3k = gBuffer(ckmt_nst_nsct_2009_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2010_ee_3k = gBuffer(ckmt_nst_nsct_2010_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 ```{r}
-plot(hs2020_ee_sub)
-plot(eco_ee, add=TRUE)
-
-```
-
-
-# Buffer by 3k
-
-```{r}
-hs2001_ee_3k = gBuffer(hs2001_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2002_ee_3k = gBuffer(hs2002_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2003_ee_3k = gBuffer(hs2003_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2004_ee_3k = gBuffer(hs2004_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2005_ee_3k = gBuffer(hs2005_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-```
-
-
-```{r}
-hs2006_ee_3k = gBuffer(hs2006_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2007_ee_3k = gBuffer(hs2007_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2008_ee_3k = gBuffer(hs2008_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2009_ee_3k = gBuffer(hs2009_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2010_ee_3k = gBuffer(hs2010_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2011_ee_3k = gBuffer(ckmt_nst_nsct_2011_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2012_ee_3k = gBuffer(ckmt_nst_nsct_2012_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2013_ee_3k = gBuffer(ckmt_nst_nsct_2013_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2014_ee_3k = gBuffer(ckmt_nst_nsct_2014_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2015_ee_3k = gBuffer(ckmt_nst_nsct_2015_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 ```{r}
-hs2011_ee_3k = gBuffer(hs2011_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2012_ee_3k = gBuffer(hs2012_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2013_ee_3k = gBuffer(hs2013_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2014_ee_3k = gBuffer(hs2014_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2015_ee_3k = gBuffer(hs2015_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2016_ee_3k = gBuffer(ckmt_nst_nsct_2016_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2017_ee_3k = gBuffer(ckmt_nst_nsct_2017_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2018_ee_3k = gBuffer(ckmt_nst_nsct_2018_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2019_ee_3k = gBuffer(ckmt_nst_nsct_2019_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+ckmt_nst_nsct_2020_ee_3k = gBuffer(ckmt_nst_nsct_2020_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
-
+### Remove holes in polygons
 ```{r}
-hs2016_ee_3k = gBuffer(hs2016_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2017_ee_3k = gBuffer(hs2017_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2018_ee_3k = gBuffer(hs2018_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2019_ee_3k = gBuffer(hs2019_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-hs2020_ee_3k = gBuffer(hs2020_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-
-```
-
-# Remove holes in polygons
-
-```{r}
-hs2001_ee_3k_nh = remove.holes(hs2001_ee_3k)
-hs2002_ee_3k_nh = remove.holes(hs2002_ee_3k)
-hs2003_ee_3k_nh = remove.holes(hs2003_ee_3k)
-hs2004_ee_3k_nh = remove.holes(hs2004_ee_3k)
-hs2005_ee_3k_nh = remove.holes(hs2005_ee_3k)
-```
-
-
-```{r}
-hs2006_ee_3k_nh = remove.holes(hs2006_ee_3k)
-hs2007_ee_3k_nh = remove.holes(hs2007_ee_3k)
-hs2008_ee_3k_nh = remove.holes(hs2008_ee_3k)
-hs2009_ee_3k_nh = remove.holes(hs2009_ee_3k)
-hs2010_ee_3k_nh = remove.holes(hs2010_ee_3k)
+ckmt_nst_nsct_2001_ee_3k_nh = remove.holes(ckmt_nst_nsct_2001_ee_3k)
+ckmt_nst_nsct_2002_ee_3k_nh = remove.holes(ckmt_nst_nsct_2002_ee_3k)
+ckmt_nst_nsct_2003_ee_3k_nh = remove.holes(ckmt_nst_nsct_2003_ee_3k)
+ckmt_nst_nsct_2004_ee_3k_nh = remove.holes(ckmt_nst_nsct_2004_ee_3k)
+ckmt_nst_nsct_2005_ee_3k_nh = remove.holes(ckmt_nst_nsct_2005_ee_3k)
 ```
 
 ```{r}
-hs2011_ee_3k_nh = remove.holes(hs2011_ee_3k)
-hs2012_ee_3k_nh = remove.holes(hs2012_ee_3k)
-hs2013_ee_3k_nh = remove.holes(hs2013_ee_3k)
-hs2014_ee_3k_nh = remove.holes(hs2014_ee_3k)
-hs2015_ee_3k_nh = remove.holes(hs2015_ee_3k)
-```
-
-
-```{r}
-hs2016_ee_3k_nh = remove.holes(hs2016_ee_3k)
-hs2017_ee_3k_nh = remove.holes(hs2017_ee_3k)
-hs2018_ee_3k_nh = remove.holes(hs2018_ee_3k)
-hs2019_ee_3k_nh = remove.holes(hs2019_ee_3k)
-hs2020_ee_3k_nh = remove.holes(hs2020_ee_3k)
-
-```
-
-## reproject to WGS for GEE
-
-```{r}
-hs2001_ee_3k_wgs = spTransform(hs2001_ee_3k_nh, CRS( wgs_proj))
-hs2002_ee_3k_wgs = spTransform(hs2002_ee_3k_nh, CRS( wgs_proj))
-hs2003_ee_3k_wgs = spTransform(hs2003_ee_3k_nh, CRS( wgs_proj))
-hs2004_ee_3k_wgs = spTransform(hs2004_ee_3k_nh, CRS( wgs_proj))
-hs2005_ee_3k_wgs = spTransform(hs2005_ee_3k_nh, CRS( wgs_proj))
-```
-
-
-```{r}
-hs2006_ee_3k_wgs = spTransform(hs2006_ee_3k_nh, CRS( wgs_proj))
-hs2007_ee_3k_wgs = spTransform(hs2007_ee_3k_nh, CRS( wgs_proj))
-hs2008_ee_3k_wgs = spTransform(hs2008_ee_3k_nh, CRS( wgs_proj))
-hs2009_ee_3k_wgs = spTransform(hs2009_ee_3k_nh, CRS( wgs_proj))
-hs2010_ee_3k_wgs = spTransform(hs2010_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2006_ee_3k_nh = remove.holes(ckmt_nst_nsct_2006_ee_3k)
+ckmt_nst_nsct_2007_ee_3k_nh = remove.holes(ckmt_nst_nsct_2007_ee_3k)
+ckmt_nst_nsct_2008_ee_3k_nh = remove.holes(ckmt_nst_nsct_2008_ee_3k)
+ckmt_nst_nsct_2009_ee_3k_nh = remove.holes(ckmt_nst_nsct_2009_ee_3k)
+ckmt_nst_nsct_2010_ee_3k_nh = remove.holes(ckmt_nst_nsct_2010_ee_3k)
 ```
 
 ```{r}
-hs2011_ee_3k_wgs = spTransform(hs2011_ee_3k_nh, CRS( wgs_proj))
-hs2012_ee_3k_wgs = spTransform(hs2012_ee_3k_nh, CRS( wgs_proj))
-hs2013_ee_3k_wgs = spTransform(hs2013_ee_3k_nh, CRS( wgs_proj))
-hs2014_ee_3k_wgs = spTransform(hs2014_ee_3k_nh, CRS( wgs_proj))
-hs2015_ee_3k_wgs = spTransform(hs2015_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2011_ee_3k_nh = remove.holes(ckmt_nst_nsct_2011_ee_3k)
+ckmt_nst_nsct_2012_ee_3k_nh = remove.holes(ckmt_nst_nsct_2012_ee_3k)
+ckmt_nst_nsct_2013_ee_3k_nh = remove.holes(ckmt_nst_nsct_2013_ee_3k)
+ckmt_nst_nsct_2014_ee_3k_nh = remove.holes(ckmt_nst_nsct_2014_ee_3k)
+ckmt_nst_nsct_2015_ee_3k_nh = remove.holes(ckmt_nst_nsct_2015_ee_3k)
 ```
 
 ```{r}
-hs2016_ee_3k_wgs = spTransform(hs2016_ee_3k_nh, CRS( wgs_proj))
-hs2017_ee_3k_wgs = spTransform(hs2017_ee_3k_nh, CRS( wgs_proj))
-hs2018_ee_3k_wgs = spTransform(hs2018_ee_3k_nh, CRS( wgs_proj))
-hs2019_ee_3k_wgs = spTransform(hs2019_ee_3k_nh, CRS( wgs_proj))
-hs2020_ee_3k_wgs = spTransform(hs2020_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2016_ee_3k_nh = remove.holes(ckmt_nst_nsct_2016_ee_3k)
+ckmt_nst_nsct_2017_ee_3k_nh = remove.holes(ckmt_nst_nsct_2017_ee_3k)
+ckmt_nst_nsct_2018_ee_3k_nh = remove.holes(ckmt_nst_nsct_2018_ee_3k)
+ckmt_nst_nsct_2019_ee_3k_nh = remove.holes(ckmt_nst_nsct_2019_ee_3k)
+ckmt_nst_nsct_2020_ee_3k_nh = remove.holes(ckmt_nst_nsct_2020_ee_3k)
 ```
 
-## Sp to sf
-
+### reproject to WGS for GEE
 ```{r}
-hs2001_3k_wgs = st_as_sf(hs2001_ee_3k_wgs)
-hs2002_3k_wgs = st_as_sf(hs2002_ee_3k_wgs)
-hs2003_3k_wgs = st_as_sf(hs2003_ee_3k_wgs)
-hs2004_3k_wgs = st_as_sf(hs2004_ee_3k_wgs)
-hs2005_3k_wgs = st_as_sf(hs2005_ee_3k_wgs)
-```
-
-
-```{r}
-hs2006_3k_wgs = st_as_sf(hs2006_ee_3k_wgs)
-hs2007_3k_wgs = st_as_sf(hs2007_ee_3k_wgs)
-hs2008_3k_wgs = st_as_sf(hs2008_ee_3k_wgs)
-hs2009_3k_wgs = st_as_sf(hs2009_ee_3k_wgs)
-hs2010_3k_wgs = st_as_sf(hs2010_ee_3k_wgs)
+ckmt_nst_nsct_2001_ee_3k_wgs = spTransform(ckmt_nst_nsct_2001_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2002_ee_3k_wgs = spTransform(ckmt_nst_nsct_2002_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2003_ee_3k_wgs = spTransform(ckmt_nst_nsct_2003_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2004_ee_3k_wgs = spTransform(ckmt_nst_nsct_2004_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2005_ee_3k_wgs = spTransform(ckmt_nst_nsct_2005_ee_3k_nh, CRS( wgs_proj))
 ```
 
 ```{r}
-hs2011_3k_wgs = st_as_sf(hs2011_ee_3k_wgs)
-hs2012_3k_wgs = st_as_sf(hs2012_ee_3k_wgs)
-hs2013_3k_wgs = st_as_sf(hs2013_ee_3k_wgs)
-hs2014_3k_wgs = st_as_sf(hs2014_ee_3k_wgs)
-hs2015_3k_wgs = st_as_sf(hs2015_ee_3k_wgs)
+ckmt_nst_nsct_2006_ee_3k_wgs = spTransform(ckmt_nst_nsct_2006_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2007_ee_3k_wgs = spTransform(ckmt_nst_nsct_2007_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2008_ee_3k_wgs = spTransform(ckmt_nst_nsct_2008_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2009_ee_3k_wgs = spTransform(ckmt_nst_nsct_2009_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2010_ee_3k_wgs = spTransform(ckmt_nst_nsct_2010_ee_3k_nh, CRS( wgs_proj))
 ```
 
 ```{r}
-hs2016_3k_wgs = st_as_sf(hs2016_ee_3k_wgs)
-hs2017_3k_wgs = st_as_sf(hs2017_ee_3k_wgs)
-hs2018_3k_wgs = st_as_sf(hs2018_ee_3k_wgs)
-hs2019_3k_wgs = st_as_sf(hs2019_ee_3k_wgs)
-hs2020_3k_wgs = st_as_sf(hs2020_ee_3k_wgs)
+ckmt_nst_nsct_2011_ee_3k_wgs = spTransform(ckmt_nst_nsct_2011_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2012_ee_3k_wgs = spTransform(ckmt_nst_nsct_2012_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2013_ee_3k_wgs = spTransform(ckmt_nst_nsct_2013_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2014_ee_3k_wgs = spTransform(ckmt_nst_nsct_2014_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2015_ee_3k_wgs = spTransform(ckmt_nst_nsct_2015_ee_3k_nh, CRS( wgs_proj))
 ```
 
-## Write to file
+```{r}
+ckmt_nst_nsct_2016_ee_3k_wgs = spTransform(ckmt_nst_nsct_2016_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2017_ee_3k_wgs = spTransform(ckmt_nst_nsct_2017_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2018_ee_3k_wgs = spTransform(ckmt_nst_nsct_2018_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2019_ee_3k_wgs = spTransform(ckmt_nst_nsct_2019_ee_3k_nh, CRS( wgs_proj))
+ckmt_nst_nsct_2020_ee_3k_wgs = spTransform(ckmt_nst_nsct_2020_ee_3k_nh, CRS( wgs_proj))
+```
+
+### Sp to sf
+
+```{r}
+ckmt_nst_nsct_2001_3k_wgs = st_as_sf(ckmt_nst_nsct_2001_ee_3k_wgs)
+ckmt_nst_nsct_2002_3k_wgs = st_as_sf(ckmt_nst_nsct_2002_ee_3k_wgs)
+ckmt_nst_nsct_2003_3k_wgs = st_as_sf(ckmt_nst_nsct_2003_ee_3k_wgs)
+ckmt_nst_nsct_2004_3k_wgs = st_as_sf(ckmt_nst_nsct_2004_ee_3k_wgs)
+ckmt_nst_nsct_2005_3k_wgs = st_as_sf(ckmt_nst_nsct_2005_ee_3k_wgs)
+```
+
+```{r}
+ckmt_nst_nsct_2006_3k_wgs = st_as_sf(ckmt_nst_nsct_2006_ee_3k_wgs)
+ckmt_nst_nsct_2007_3k_wgs = st_as_sf(ckmt_nst_nsct_2007_ee_3k_wgs)
+ckmt_nst_nsct_2008_3k_wgs = st_as_sf(ckmt_nst_nsct_2008_ee_3k_wgs)
+ckmt_nst_nsct_2009_3k_wgs = st_as_sf(ckmt_nst_nsct_2009_ee_3k_wgs)
+ckmt_nst_nsct_2010_3k_wgs = st_as_sf(ckmt_nst_nsct_2010_ee_3k_wgs)
+```
+
+```{r}
+ckmt_nst_nsct_2011_3k_wgs = st_as_sf(ckmt_nst_nsct_2011_ee_3k_wgs)
+ckmt_nst_nsct_2012_3k_wgs = st_as_sf(ckmt_nst_nsct_2012_ee_3k_wgs)
+ckmt_nst_nsct_2013_3k_wgs = st_as_sf(ckmt_nst_nsct_2013_ee_3k_wgs)
+ckmt_nst_nsct_2014_3k_wgs = st_as_sf(ckmt_nst_nsct_2014_ee_3k_wgs)
+ckmt_nst_nsct_2015_3k_wgs = st_as_sf(ckmt_nst_nsct_2015_ee_3k_wgs)
+```
+
+```{r}
+ckmt_nst_nsct_2016_3k_wgs = st_as_sf(ckmt_nst_nsct_2016_ee_3k_wgs)
+ckmt_nst_nsct_2017_3k_wgs = st_as_sf(ckmt_nst_nsct_2017_ee_3k_wgs)
+ckmt_nst_nsct_2018_3k_wgs = st_as_sf(ckmt_nst_nsct_2018_ee_3k_wgs)
+ckmt_nst_nsct_2019_3k_wgs = st_as_sf(ckmt_nst_nsct_2019_ee_3k_wgs)
+ckmt_nst_nsct_2020_3k_wgs = st_as_sf(ckmt_nst_nsct_2020_ee_3k_wgs)
+```
+
+### Write to file
 Create a shapefile
 
 ```{r eval=FALSE, include=FALSE}
-st_write(hs2001_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2001.shp", driver="ESRI Shapefile")  
-st_write(hs2002_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2002.shp", driver="ESRI Shapefile") 
-st_write(hs2003_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2003.shp", driver="ESRI Shapefile") 
-st_write(hs2004_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2004.shp", driver="ESRI Shapefile") 
-st_write(hs2005_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2005.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2001_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2001.shp", driver="ESRI Shapefile")  
+st_write(ckmt_nst_nsct_2002_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2002.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2003_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2003.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2004_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2004.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2005_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2005.shp", driver="ESRI Shapefile") 
 
-st_write(hs2006_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2006.shp", driver="ESRI Shapefile") 
-st_write(hs2007_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2007.shp", driver="ESRI Shapefile") 
-st_write(hs2008_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2008.shp", driver="ESRI Shapefile") 
-st_write(hs2009_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2009.shp", driver="ESRI Shapefile") 
-st_write(hs2010_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2010.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2006_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2006.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2007_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2007.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2008_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2008.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2009_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2009.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2010_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2010.shp", driver="ESRI Shapefile") 
 
 
-st_write(hs2011_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2011.shp", driver="ESRI Shapefile")  
-st_write(hs2012_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2012.shp", driver="ESRI Shapefile") 
-st_write(hs2013_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2013.shp", driver="ESRI Shapefile") 
-st_write(hs2014_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2014.shp", driver="ESRI Shapefile") 
-st_write(hs2015_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2015.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2011_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2011.shp", driver="ESRI Shapefile")  
+st_write(ckmt_nst_nsct_2012_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2012.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2013_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2013.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2014_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2014.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2015_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2015.shp", driver="ESRI Shapefile") 
 
-st_write(hs2016_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2016.shp", driver="ESRI Shapefile") 
-st_write(hs2017_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2017.shp", driver="ESRI Shapefile") 
-st_write(hs2018_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2018.shp", driver="ESRI Shapefile") 
-st_write(hs2019_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2019.shp", driver="ESRI Shapefile") 
-st_write(hs2020_3k_wgs, "../outputs/hotspot-poly/3kwgs84_hotspot_2020.shp", driver="ESRI Shapefile") 
- 
+st_write(ckmt_nst_nsct_2016_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2016.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2017_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2017.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2018_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2018.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2019_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2019.shp", driver="ESRI Shapefile") 
+st_write(ckmt_nst_nsct_2020_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2020.shp", driver="ESRI Shapefile") 
 ```
-
