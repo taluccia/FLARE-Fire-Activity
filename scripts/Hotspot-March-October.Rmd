@@ -6,7 +6,7 @@ output: html_document
 ---
 
 # Overview
-Convert Hotspot/VIIRS point data to polygons. This is to limit the extent of the vector function in GEE to delinieate fire perimeters.
+
 
 
 Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
@@ -16,12 +16,10 @@ Description of [Modis and VIIRS data](https://earthdata.nasa.gov/earth-observati
 VIIRS launch October 2011, fire season data available 2012-present
 MODIS launch    , available 2001-present
 
-Take all annual hotspot data and make polygons 2001-2020, where 2012-2020 is the combine MODIS/VIIRS Data
+Subset data March to October, after this point data will be converted to polygon data
  
 What is included in this script:
 
-Note:
-Because these data sets area large spatial data sets, we will set this up to run annual data across each bounding box.
 # Clear workspace
 
 ```{r}
@@ -106,4 +104,73 @@ head(hs)
 ```
 ```{r}
 hs_month = hs %>% filter(ACQ_DATE >= "2001/03/01" & ACQ_DATE <="2001/10/31")
+```
+
+
+```{r}
+head(hs_month)
+tail(hs_month)
+```
+
+# For each year
+```{r}
+hs2001_month = hs2001 %>% filter(ACQ_DATE >= "2001/03/01" & ACQ_DATE <="2001/10/31")
+hs2002_month = hs2002 %>% filter(ACQ_DATE >= "2002/03/01" & ACQ_DATE <="2002/10/31")
+hs2003_month = hs2003 %>% filter(ACQ_DATE >= "2003/03/01" & ACQ_DATE <="2003/10/31")
+hs2004_month = hs2004 %>% filter(ACQ_DATE >= "2004/03/01" & ACQ_DATE <="2004/10/31")
+hs2005_month = hs2005 %>% filter(ACQ_DATE >= "2005/03/01" & ACQ_DATE <="2005/10/31")
+```
+
+
+```{r}
+hs2006_month = hs2006 %>% filter(ACQ_DATE >= "2006/03/01" & ACQ_DATE <="2006/10/31")
+hs2007_month = hs2007 %>% filter(ACQ_DATE >= "2007/03/01" & ACQ_DATE <="2007/10/31")
+hs2008_month = hs2008 %>% filter(ACQ_DATE >= "2008/03/01" & ACQ_DATE <="2008/10/31")
+hs2009_month = hs2009 %>% filter(ACQ_DATE >= "2009/03/01" & ACQ_DATE <="2009/10/31")
+hs2010_month = hs2010 %>% filter(ACQ_DATE >= "2010/03/01" & ACQ_DATE <="2010/10/31")
+```
+
+```{r}
+hs2011_month = hs2011 %>% filter(ACQ_DATE >= "2011/03/01" & ACQ_DATE <="2011/10/31")
+hs2012_month = hs2012 %>% filter(ACQ_DATE >= "2012/03/01" & ACQ_DATE <="2012/10/31")
+hs2013_month = hs2013 %>% filter(ACQ_DATE >= "2013/03/01" & ACQ_DATE <="2013/10/31")
+hs2014_month = hs2014 %>% filter(ACQ_DATE >= "2014/03/01" & ACQ_DATE <="2014/10/31")
+hs2015_month = hs2015 %>% filter(ACQ_DATE >= "2015/03/01" & ACQ_DATE <="2015/10/31")
+```
+
+
+```{r}
+hs2016_month = hs2016 %>% filter(ACQ_DATE >= "2016/03/01" & ACQ_DATE <="2016/10/31")
+hs2017_month = hs2017 %>% filter(ACQ_DATE >= "2017/03/01" & ACQ_DATE <="2017/10/31")
+hs2018_month = hs2018 %>% filter(ACQ_DATE >= "2018/03/01" & ACQ_DATE <="2018/10/31")
+hs2019_month = hs2019 %>% filter(ACQ_DATE >= "2019/03/01" & ACQ_DATE <="2019/10/31")
+hs2020_month = hs2020 %>% filter(ACQ_DATE >= "2020/03/01" & ACQ_DATE <="2020/10/31")
+```
+
+### Write to file
+Create a shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(hs2001_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2001.shp", driver="ESRI Shapefile")
+st_write(hs2002_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2002.shp", driver="ESRI Shapefile")
+st_write(hs2003_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2003.shp", driver="ESRI Shapefile")
+st_write(hs2004_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2004.shp", driver="ESRI Shapefile")
+st_write(hs2005_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2005.shp", driver="ESRI Shapefile")
+st_write(hs2006_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2006.shp", driver="ESRI Shapefile")
+st_write(hs2007_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2007.shp", driver="ESRI Shapefile")
+st_write(hs2008_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2008.shp", driver="ESRI Shapefile")
+st_write(hs2009_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2009.shp", driver="ESRI Shapefile")
+st_write(hs2010_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2010.shp", driver="ESRI Shapefile")
+
+st_write(hs2011_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2011.shp", driver="ESRI Shapefile")
+st_write(hs2012_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2012.shp", driver="ESRI Shapefile")
+st_write(hs2013_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2013.shp", driver="ESRI Shapefile")
+st_write(hs2014_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2014.shp", driver="ESRI Shapefile")
+st_write(hs2015_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2015.shp", driver="ESRI Shapefile")
+st_write(hs2016_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2016.shp", driver="ESRI Shapefile")
+st_write(hs2017_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2017.shp", driver="ESRI Shapefile")
+st_write(hs2018_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2018.shp", driver="ESRI Shapefile")
+st_write(hs2019_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2019.shp", driver="ESRI Shapefile")
+st_write(hs2020_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2020.shp", driver="ESRI Shapefile")
+
 ```
