@@ -1,0 +1,109 @@
+---
+title: "Subset Annual Modis and VIIRS to March-October"
+author: "Anna Talucci"
+date: "2/10/2021"
+output: html_document
+---
+
+# Overview
+Convert Hotspot/VIIRS point data to polygons. This is to limit the extent of the vector function in GEE to delinieate fire perimeters.
+
+
+Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.php)
+
+Description of [Modis and VIIRS data](https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
+
+VIIRS launch October 2011, fire season data available 2012-present
+MODIS launch    , available 2001-present
+
+Take all annual hotspot data and make polygons 2001-2020, where 2012-2020 is the combine MODIS/VIIRS Data
+ 
+What is included in this script:
+
+Note:
+Because these data sets area large spatial data sets, we will set this up to run annual data across each bounding box.
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+library(lubridate)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+
+# Hotspot Data (MODIS and VIIRS)
+
+## Read in MODIS only data (2001-2011)
+
+```{r}
+hs = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
+```
+
+```{r M6-files-2001-11 eval=FALSE, include=FALSE}
+hs2001 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
+hs2002 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2002.shp", "fire_archive_M6_2002") 
+hs2003 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2003.shp", "fire_archive_M6_2003") 
+hs2004 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2004.shp", "fire_archive_M6_2004") 
+hs2005 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2005.shp", "fire_archive_M6_2005") 
+
+hs2006 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2006.shp", "fire_archive_M6_2006") 
+hs2007 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2007.shp", "fire_archive_M6_2007") 
+hs2008 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2008.shp", "fire_archive_M6_2008") 
+hs2009 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2009.shp", "fire_archive_M6_2009") 
+hs2010 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2010.shp", "fire_archive_M6_2010") 
+hs2011 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2011.shp", "fire_archive_M6_2011") 
+```
+
+
+## Read in Combined MODIS/VIIRS Data (2012-2020)
+```{r M6-V1-2012-2020 eval=FALSE, include=FALSE}
+
+hs2012 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2012.shp", "M6_V1_2012")
+hs2013 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2013.shp", "M6_V1_2013")
+hs2014 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2014.shp", "M6_V1_2014")
+hs2015 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2015.shp", "M6_V1_2015")
+hs2016 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2016.shp", "M6_V1_2016")
+hs2017 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2017.shp", "M6_V1_2017")
+hs2018 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2018.shp", "M6_V1_2018")
+hs2019 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2019.shp", "M6_V1_2019")
+hs2020 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2020.shp", "M6_V1_2020")
+ 
+```
+
+# Process dataset
+## Subset Hotspot data March to October
+
+```{r}
+head(hs)
+```
+```{r}
+hs_month = hs %>% filter(ACQ_DATE >= "2001/03/01" & ACQ_DATE <="2001/10/31")
+```
