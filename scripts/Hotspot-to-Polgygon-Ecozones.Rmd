@@ -20,6 +20,13 @@ Take all annual hotspot data and make polygons 2001-2020, where 2012-2020 is the
  
 What is included in this script:
 
+Note:
+Because these data sets area large spatial data sets, we will set this up to run annual data across each bounding box.
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
 # Packages
 
 ```{r include=FALSE}
@@ -54,13 +61,13 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 ## Data
 ```{r}
 
-ckmt_nst_nsct = readOGR("../data/ecozone_bbox/ckmt_nst_nsct.shp", "ckmt_nst_nsct")
-tcst_n = readOGR("../data/ecozone_bbox/tcst_n.shp", "tcst_n")
-tcst_s = readOGR("../data/ecozone_bbox/tcst_s.shp", "tcst_s")
-est_tbbmt_n = readOGR("../data/ecozone_bbox/est_tbbmt_n.shp", "est_tbbmt_n")
-est_tbbmt_s = readOGR("../data/ecozone_bbox/est_tbbmt_s.shp", "est_tbbmt_s")
-cpt_bt_west = readOGR("../data/ecozone_bbox/cpt_bt_west.shp", "cpt_bt_west")
-cpt_bt_east = readOGR("../data/ecozone_bbox/cpt_bt_east.shp", "cpt_bt_east")
+ckmt_nst_nsct = readOGR("../data/bbox/ecozone_bbox/ckmt_nst_nsct.shp", "ckmt_nst_nsct")
+tcst_n = readOGR("../data/bbox/ecozone_bbox/tcst_n.shp", "tcst_n")
+tcst_s = readOGR("../data/bbox/ecozone_bbox/tcst_s.shp", "tcst_s")
+est_tbbmt_n = readOGR("../data/bbox/ecozone_bbox/est_tbbmt_n.shp", "est_tbbmt_n")
+est_tbbmt_s = readOGR("../data/bbox/ecozone_bbox/est_tbbmt_s.shp", "est_tbbmt_s")
+cpt_bt_west = readOGR("../data/bbox/ecozone_bbox/cpt_bt_west.shp", "cpt_bt_west")
+cpt_bt_east = readOGR("../data/bbox/ecozone_bbox/cpt_bt_east.shp", "cpt_bt_east")
 
 ```
 
@@ -80,38 +87,94 @@ cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
 ## Read in MODIS only data (2001-2011)
 
 ```{r}
-hs2001 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2001/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
-hs2002 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2002/fire_archive_M6_2002.shp", "fire_archive_M6_2002") 
-hs2003 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2003/fire_archive_M6_2003.shp", "fire_archive_M6_2003") 
-hs2004 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2004/fire_archive_M6_2004.shp", "fire_archive_M6_2004") 
-hs2005 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2005/fire_archive_M6_2005.shp", "fire_archive_M6_2005") 
+hs2001 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
+```
 
-hs2006 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2006/fire_archive_M6_2006.shp", "fire_archive_M6_2006") 
-hs2007 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2007/fire_archive_M6_2007.shp", "fire_archive_M6_2007") 
-hs2008 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2008/fire_archive_M6_2008.shp", "fire_archive_M6_2008") 
-hs2009 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2009/fire_archive_M6_2009.shp", "fire_archive_M6_2009") 
-hs2010 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2010/fire_archive_M6_2010.shp", "fire_archive_M6_2010") 
-hs2011 = readOGR("../data/FIRMS_Annual_PointData/DL_FIRE_M6_2011/fire_archive_M6_2011.shp", "fire_archive_M6_2011") 
+```{r M6-files-2001-11 eval=FALSE, include=FALSE}
+hs2001 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
+hs2002 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2002.shp", "fire_archive_M6_2002") 
+hs2003 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2003.shp", "fire_archive_M6_2003") 
+hs2004 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2004.shp", "fire_archive_M6_2004") 
+hs2005 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2005.shp", "fire_archive_M6_2005") 
+
+hs2006 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2006.shp", "fire_archive_M6_2006") 
+hs2007 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2007.shp", "fire_archive_M6_2007") 
+hs2008 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2008.shp", "fire_archive_M6_2008") 
+hs2009 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2009.shp", "fire_archive_M6_2009") 
+hs2010 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2010.shp", "fire_archive_M6_2010") 
+hs2011 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2011.shp", "fire_archive_M6_2011") 
 ```
 
 
 ## Read in Combined MODIS/VIIRS Data (2012-2020)
+```{r M6-V1-2012-2020 eval=FALSE, include=FALSE}
+
+hs2012 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2012.shp", "M6_V1_2012")
+hs2013 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2013.shp", "M6_V1_2013")
+hs2014 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2014.shp", "M6_V1_2014")
+hs2015 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2015.shp", "M6_V1_2015")
+hs2016 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2016.shp", "M6_V1_2016")
+hs2017 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2017.shp", "M6_V1_2017")
+hs2018 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2018.shp", "M6_V1_2018")
+hs2019 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2019.shp", "M6_V1_2019")
+hs2020 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2020.shp", "M6_V1_2020")
+ 
+```
+
+# Process dataset
+## Subset Hotspot data Marhc to October
 ```{r}
 
-hs2012 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2012.shp", "hotspot_point_2012")
-hs2013 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2013.shp", "hotspot_point_2013")
-hs2014 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2014.shp", "hotspot_point_2014")
-hs2015 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2015.shp", "hotspot_point_2015")
-hs2016 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2016.shp", "hotspot_point_2016")
-hs2017 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2017.shp", "hotspot_point_2017")
-hs2018 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2018.shp", "hotspot_point_2018")
-hs2019 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2019.shp", "hotspot_point_2019")
-hs2020 = readOGR("../data/FIRMS_Annual_PointData/hotspot-point-combine/hotspot_point_2020.shp", "hotspot_point_2020")
- 
+```
+
+## project to equal area russia
+```{r}
+hs2001_ee = spTransform(hs2001, CRS(ee_russia))
+```
+
+## Subset area to BBOX ecozone
+```{r}
+ckmt_nst_nsct_2001_ee_sub = hs2001_ee[ckmt_nst_nsct_ee, ]
+
+
+
+
+```
+
+### Buffer by 3k
+
+```{r}
+ckmt_nst_nsct_2001_ee_3k = gBuffer(ckmt_nst_nsct_2001_ee_sub, width = 3000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+### Remove holes in polygons
+```{r}
+ckmt_nst_nsct_2001_ee_3k_nh = remove.holes(ckmt_nst_nsct_2001_ee_3k)
+```
+
+### reproject to WGS for GEE
+```{r}
+ckmt_nst_nsct_2001_ee_3k_wgs = spTransform(ckmt_nst_nsct_2001_ee_3k_nh, CRS( wgs_proj))
+```
+
+
+### Sp to sf
+
+```{r}
+ckmt_nst_nsct_2001_3k_wgs = st_as_sf(ckmt_nst_nsct_2001_ee_3k_wgs)
+```
+
+### Write to file
+Create a shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(ckmt_nst_nsct_2001_3k_wgs, "../outputs/hotspot-poly/hotspot_ckmt_nst_nsct_2001.shp", driver="ESRI Shapefile")
 ```
 
 
 
+
+# OLD CODE
 
 ## project to equal area russia
 ```{r}
