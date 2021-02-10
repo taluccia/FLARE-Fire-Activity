@@ -38,6 +38,7 @@ library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
 library(dplyr)
 library(spatialEco)
+library(lubridate)
 ```
 
 # Projections
@@ -87,7 +88,7 @@ cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
 ## Read in MODIS only data (2001-2011)
 
 ```{r}
-hs2001 = readOGR("../data/FIRMS_Annual_PointData/fire_archive_M6_2001.shp", "fire_archive_M6_2001") 
+hs = readOGR("../data/hotspot-march-october/hotspot_mar-oct_2001.shp", "fire_archive_M6_2001") 
 ```
 
 ```{r M6-files-2001-11 eval=FALSE, include=FALSE}
@@ -122,19 +123,21 @@ hs2020 = readOGR("../data/FIRMS_Annual_PointData/M6_V1_2020.shp", "M6_V1_2020")
 ```
 
 # Process dataset
-## Subset Hotspot data Marhc to October
-```{r}
-
-```
 
 ## project to equal area russia
 ```{r}
-hs2001_ee = spTransform(hs2001, CRS(ee_russia))
+hs_ee = spTransform(hs, CRS(ee_russia))
 ```
 
 ## Subset area to BBOX ecozone
 ```{r}
-ckmt_nst_nsct_2001_ee_sub = hs2001_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
 
 
 
