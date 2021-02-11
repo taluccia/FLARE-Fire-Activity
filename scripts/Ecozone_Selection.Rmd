@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Overview
-This code uses the WWF Ecozones shapefile available from (insert website address). We subset the ecozones for NE Siberia to include the following:
+This code uses the [WWF Ecozones shapefile](https://www.worldwildlife.org/publications/terrestrial-ecoregions-of-the-world). We subset the ecozones for NE Siberia to include the following:
 
 1. Bering tundra
 2. Chukchi peninsula tundra
