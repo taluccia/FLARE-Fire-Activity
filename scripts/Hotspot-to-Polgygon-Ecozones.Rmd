@@ -85,10 +85,10 @@ cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
 
 # Hotspot Data (MODIS and VIIRS)
 
-## Read in MODIS only data (2001-2011)
+## Read in data **(change year on data and saving at end)**
 
 ```{r}
-hs = readOGR("../data/hotspot-march-october/hotspot_mar-oct_2001.shp", "hotspot_mar-oct_2001") 
+hs = readOGR("../data/hotspot-march-october/hotspot_mar-oct_2002.shp", "hotspot_mar-oct_2002") 
 ```
 
 # Process dataset
@@ -162,13 +162,21 @@ cpt_bt_east_hs_wgs_sf = st_as_sf(cpt_bt_east_hs_wgs)
 Create a shapefile
 
 ```{r eval=FALSE, include=FALSE}
-st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2001.shp", driver="ESRI Shapefile")
-st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2001.shp", driver="ESRI Shapefile")
-st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2001.shp", driver="ESRI Shapefile")
-st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2001.shp", driver="ESRI Shapefile")
-st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2001.shp", driver="ESRI Shapefile")
-st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2001.shp", driver="ESRI Shapefile")
-st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2001.shp", driver="ESRI Shapefile")
+st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2002.shp", driver="ESRI Shapefile")
+st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2002.shp", driver="ESRI Shapefile")
+st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2002.shp", driver="ESRI Shapefile")
+st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2002.shp", driver="ESRI Shapefile")
+st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2002.shp", driver="ESRI Shapefile")
+st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2002.shp", driver="ESRI Shapefile")
+st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2002.shp", driver="ESRI Shapefile")
 ```
+
+
+
+
+
+
+
+
 
 
