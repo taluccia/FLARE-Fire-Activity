@@ -64,9 +64,21 @@ hs2010 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2010.shp", "fir
 hs2011 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2011.shp", "fire_archive_M6_2011") 
 ```
 
+```{r M6-files-2012-2020 }
+hs2012 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2012.shp", "fire_archive_M6_2012") 
+hs2013 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2013.shp", "fire_archive_M6_2013") 
+hs2014 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2014.shp", "fire_archive_M6_2014") 
+hs2015 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2015.shp", "fire_archive_M6_2015") 
+
+hs2016 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2016.shp", "fire_archive_M6_2016") 
+hs2017 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2017.shp", "fire_archive_M6_2017") 
+hs2018 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2018.shp", "fire_archive_M6_2018") 
+hs2019 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2019.shp", "fire_archive_M6_2019") 
+hs2020 = st_read("../data/FIRMS_Annual_PointData/fire_archive_M6_2020.shp", "fire_archive_M6_2020") 
+```
 
 ## Read in Combined MODIS/VIIRS Data (2012-2020)
-```{r M6-V1-2012-2020 }
+```{r M6-V1-2012-2020, eval=FALSE, include=FALSE}
 
 hs2012 = st_read("../data/FIRMS_Annual_PointData/M6_V1_2012.shp", "M6_V1_2012")
 hs2013 = st_read("../data/FIRMS_Annual_PointData/M6_V1_2013.shp", "M6_V1_2013")
@@ -131,28 +143,28 @@ hs2020_month = hs2020 %>% filter(ACQ_DATE >= "2020/03/01" & ACQ_DATE <="2020/10/
 Create a shapefile
 
 ```{r eval=FALSE, include=FALSE}
-st_write(hs2001_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2001.shp", driver="ESRI Shapefile")
-st_write(hs2002_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2002.shp", driver="ESRI Shapefile")
-st_write(hs2003_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2003.shp", driver="ESRI Shapefile")
-st_write(hs2004_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2004.shp", driver="ESRI Shapefile")
-st_write(hs2005_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2005.shp", driver="ESRI Shapefile")
-st_write(hs2006_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2006.shp", driver="ESRI Shapefile")
-st_write(hs2007_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2007.shp", driver="ESRI Shapefile")
-st_write(hs2008_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2008.shp", driver="ESRI Shapefile")
-st_write(hs2009_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2009.shp", driver="ESRI Shapefile")
-st_write(hs2010_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2010.shp", driver="ESRI Shapefile")
-st_write(hs2011_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2011.shp", driver="ESRI Shapefile")
+st_write(hs2001_month, "../outputs/M6-march-october/M6_mar-oct_2001.shp", driver="ESRI Shapefile")
+st_write(hs2002_month, "../outputs/M6-march-october/M6_mar-oct_2002.shp", driver="ESRI Shapefile")
+st_write(hs2003_month, "../outputs/M6-march-october/M6_mar-oct_2003.shp", driver="ESRI Shapefile")
+st_write(hs2004_month, "../outputs/M6-march-october/M6_mar-oct_2004.shp", driver="ESRI Shapefile")
+st_write(hs2005_month, "../outputs/M6-march-october/M6_mar-oct_2005.shp", driver="ESRI Shapefile")
+st_write(hs2006_month, "../outputs/M6-march-october/M6_mar-oct_2006.shp", driver="ESRI Shapefile")
+st_write(hs2007_month, "../outputs/M6-march-october/M6_mar-oct_2007.shp", driver="ESRI Shapefile")
+st_write(hs2008_month, "../outputs/M6-march-october/M6_mar-oct_2008.shp", driver="ESRI Shapefile")
+st_write(hs2009_month, "../outputs/M6-march-october/M6_mar-oct_2009.shp", driver="ESRI Shapefile")
+st_write(hs2010_month, "../outputs/M6-march-october/M6_mar-oct_2010.shp", driver="ESRI Shapefile")
+st_write(hs2011_month, "../outputs/M6-march-october/M6_mar-oct_2011.shp", driver="ESRI Shapefile")
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(hs2012_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2012.shp", driver="ESRI Shapefile")
-st_write(hs2013_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2013.shp", driver="ESRI Shapefile")
-st_write(hs2014_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2014.shp", driver="ESRI Shapefile")
-st_write(hs2015_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2015.shp", driver="ESRI Shapefile")
-st_write(hs2016_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2016.shp", driver="ESRI Shapefile")
-st_write(hs2017_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2017.shp", driver="ESRI Shapefile")
-st_write(hs2018_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2018.shp", driver="ESRI Shapefile")
-st_write(hs2019_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2019.shp", driver="ESRI Shapefile")
-st_write(hs2020_month, "../outputs/hotspot-march-october/hotspot_mar-oct_2020.shp", driver="ESRI Shapefile")
+st_write(hs2012_month, "../outputs/M6-march-october/M6_mar-oct_2012.shp", driver="ESRI Shapefile")
+st_write(hs2013_month, "../outputs/M6-march-october/M6_mar-oct_2013.shp", driver="ESRI Shapefile")
+st_write(hs2014_month, "../outputs/M6-march-october/M6_mar-oct_2014.shp", driver="ESRI Shapefile")
+st_write(hs2015_month, "../outputs/M6-march-october/M6_mar-oct_2015.shp", driver="ESRI Shapefile")
+st_write(hs2016_month, "../outputs/M6-march-october/M6_mar-oct_2016.shp", driver="ESRI Shapefile")
+st_write(hs2017_month, "../outputs/M6-march-october/M6_mar-oct_2017.shp", driver="ESRI Shapefile")
+st_write(hs2018_month, "../outputs/M6-march-october/M6_mar-oct_2018.shp", driver="ESRI Shapefile")
+st_write(hs2019_month, "../outputs/M6-march-october/M6_mar-oct_2019.shp", driver="ESRI Shapefile")
+st_write(hs2020_month, "../outputs/M6-march-october/M6_mar-oct_2020.shp", driver="ESRI Shapefile")
 
 ```
