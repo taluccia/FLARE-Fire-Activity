@@ -13,7 +13,7 @@ Data acquired from [FIRMS](https://firms.modaps.eosdis.nasa.gov/download/create.
 
 Description of [Modis and VIIRS data](https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms)
 
-VIIRS launch October 2011, fire season data available 2012-present
+VIIRS launch October 2012, fire season data available 2012-present
 MODIS launch    , available 2001-present
 
 Take all annual hotspot data and make polygons 2001-2020, where 2012-2020 is the combine MODIS/VIIRS Data
@@ -88,88 +88,142 @@ cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
 ## Read in data **(change year on data and saving at end)**
 
 ```{r}
-hs = readOGR("../data/hotspot-march-october/hotspot_mar-oct_2002.shp", "hotspot_mar-oct_2002") 
+hs = readOGR("../data/M6-march-october/M6_mar-oct_2012.shp", "M6_mar-oct_2012") 
 ```
-
-# Process dataset
 
 ## project to equal area russia
 ```{r}
 hs_ee = spTransform(hs, CRS(ee_russia))
 ```
 
-## Subset area to BBOX ecozone
+```{r}
+plot(hs_ee)
+```
+
+# Visualize points
+## CKMT_NSCT
 ```{r}
 ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
+plot(ckmt_nst_nsct_hs)
+```
+
+## TCST_N
+```{r}
 tcst_n_hs = hs_ee[tcst_n_ee, ]
+plot(tcst_n_hs)
+```
+
+
+## TCST_S
+```{r}
 tcst_s_hs = hs_ee[tcst_s_ee, ]
+plot(tcst_s_hs)
+```
+
+## EST_TBBMT_N
+```{r}
 est_tbbmt_n_hs = hs_ee[est_tbbmt_n_ee, ]
+plot(est_tbbmt_n_hs)
+```
+
+## EST_TBBMT_S
+```{r}
 est_tbbmt_s_hs = hs_ee[est_tbbmt_s_ee, ]
-cpt_bt_west_hs = hs_ee[cpt_bt_west_ee, ]
+plot(est_tbbmt_s_hs)
+```
+## CPT_BT_EAST
+```{r}
 cpt_bt_east_hs = hs_ee[cpt_bt_east_ee, ]
+plot(cpt_bt_east_hs)
 ```
 
-### Buffer by 3k
-
+## CPT_BT_WEST
 ```{r}
-ckmt_nst_nsct_hs_3k = gBuffer(ckmt_nst_nsct_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-tcst_n_hs_3k = gBuffer(tcst_n_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-tcst_s_hs_3k = gBuffer(tcst_s_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-est_tbbmt_n_hs_3k = gBuffer(est_tbbmt_n_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-est_tbbmt_s_hs_3k = gBuffer(est_tbbmt_s_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-cpt_bt_west_hs_3k = gBuffer(cpt_bt_west_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-cpt_bt_east_hs_3k = gBuffer(cpt_bt_east_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
-
-```
-
-### Remove holes in polygons
-```{r}
-ckmt_nst_nsct_hs_3k_nh = remove.holes(ckmt_nst_nsct_hs_3k)
-tcst_n_hs_3k_nh = remove.holes(tcst_n_hs_3k)
-tcst_s_hs_3k_nh = remove.holes(tcst_s_hs_3k)
-est_tbbmt_n_hs_3k_nh = remove.holes(est_tbbmt_n_hs_3k)
-est_tbbmt_s_hs_3k_nh = remove.holes(est_tbbmt_s_hs_3k)
-cpt_bt_west_hs_3k_nh = remove.holes(cpt_bt_west_hs_3k)
-cpt_bt_east_hs_3k_nh = remove.holes(cpt_bt_east_hs_3k)
-```
-
-### reproject to WGS for GEE
-```{r}
-ckmt_nst_nsct_hs_wgs = spTransform(ckmt_nst_nsct_hs_3k_nh, CRS( wgs_proj))
-tcst_n_hs_wgs = spTransform(tcst_n_hs_3k_nh, CRS( wgs_proj))
-tcst_s_hs_wgs = spTransform(tcst_s_hs_3k_nh, CRS( wgs_proj))
-est_tbbmt_n_hs_wgs = spTransform(est_tbbmt_n_hs_3k_nh, CRS( wgs_proj))
-est_tbbmt_s_hs_wgs = spTransform(est_tbbmt_s_hs_3k_nh, CRS( wgs_proj))
-cpt_bt_west_hs_wgs = spTransform(cpt_bt_west_hs_3k_nh, CRS( wgs_proj))
-cpt_bt_east_hs_wgs = spTransform(cpt_bt_east_hs_3k_nh, CRS( wgs_proj))
-
+cpt_bt_west_hs = hs_ee[cpt_bt_west_ee, ]
+plot(cpt_bt_west_hs)
 ```
 
 
-### Sp to sf
+
+
+
+# Process by separate ecozones bounding boxes
+
+## CKMT_NSCT
 
 ```{r}
+ckmt_nst_nsct_hs_3k = gBuffer(ckmt_nst_nsct_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+ckmt_nst_nsct_hs_3k_nh = remove.holes(ckmt_nst_nsct_hs_3k) # Remove holes in polygons
+ckmt_nst_nsct_hs_wgs = spTransform(ckmt_nst_nsct_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
 ckmt_nst_nsct_hs_wgs_sf = st_as_sf(ckmt_nst_nsct_hs_wgs)
-tcst_n_hs_wgs_sf = st_as_sf(tcst_n_hs_wgs)
-tcst_s_hs_wgs_sf = st_as_sf(tcst_s_hs_wgs)
-est_tbbmt_n_hs_wgs_sf = st_as_sf(est_tbbmt_n_hs_wgs)
-est_tbbmt_s_hs_wgs_sf = st_as_sf(est_tbbmt_s_hs_wgs)
-cpt_bt_west_hs_wgs_sf = st_as_sf(cpt_bt_west_hs_wgs)
-cpt_bt_east_hs_wgs_sf = st_as_sf(cpt_bt_east_hs_wgs)
+st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2012.shp", driver="ESRI Shapefile")
 ```
 
-### Write to file
-Create a shapefile
 
-```{r eval=FALSE, include=FALSE}
-st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2002.shp", driver="ESRI Shapefile")
-st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2002.shp", driver="ESRI Shapefile")
-st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2002.shp", driver="ESRI Shapefile")
-st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2002.shp", driver="ESRI Shapefile")
-st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2002.shp", driver="ESRI Shapefile")
-st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2002.shp", driver="ESRI Shapefile")
-st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2002.shp", driver="ESRI Shapefile")
+## TCST_N
+
+```{r}
+tcst_n_hs_3k = gBuffer(tcst_n_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")# Buffer by 3k
+tcst_n_hs_3k_nh = remove.holes(tcst_n_hs_3k)# Remove holes in polygons
+tcst_n_hs_wgs = spTransform(tcst_n_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+tcst_n_hs_wgs_sf = st_as_sf(tcst_n_hs_wgs) # Sp to sf
+st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2012.shp", driver="ESRI Shapefile")# Write to file
 ```
+
+## TCST_S
+```{r}
+tcst_s_hs_3k = gBuffer(tcst_s_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+tcst_s_hs_3k_nh = remove.holes(tcst_s_hs_3k)# Remove holes in polygons
+tcst_s_hs_wgs = spTransform(tcst_s_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+tcst_s_hs_wgs_sf = st_as_sf(tcst_s_hs_wgs) # Sp to sf
+st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2012.shp", driver="ESRI Shapefile")# Write to file
+```
+
+
+## EST_TBBMT_N
+
+```{r}
+est_tbbmt_n_hs_3k = gBuffer(est_tbbmt_n_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+est_tbbmt_n_hs_3k_nh = remove.holes(est_tbbmt_n_hs_3k)# Remove holes in polygons
+est_tbbmt_n_hs_wgs = spTransform(est_tbbmt_n_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+est_tbbmt_n_hs_wgs_sf = st_as_sf(est_tbbmt_n_hs_wgs) # Sp to sf
+st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2012.shp", driver="ESRI Shapefile")# Write to file
+```
+
+## EST_TBBMT_S
+
+```{r}
+est_tbbmt_s_hs_3k = gBuffer(est_tbbmt_s_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+est_tbbmt_s_hs_3k_nh = remove.holes(est_tbbmt_s_hs_3k)# Remove holes in polygons
+est_tbbmt_s_hs_wgs = spTransform(est_tbbmt_s_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+est_tbbmt_s_hs_wgs_sf = st_as_sf(est_tbbmt_s_hs_wgs) # Sp to sf
+st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2012.shp", driver="ESRI Shapefile")# Write to file
+```
+## CPT_BT_EAST
+
+```{r}
+cpt_bt_east_hs_3k = gBuffer(cpt_bt_east_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+cpt_bt_east_hs_3k_nh = remove.holes(cpt_bt_east_hs_3k)# Remove holes in polygons
+cpt_bt_east_hs_wgs = spTransform(cpt_bt_east_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+cpt_bt_east_hs_wgs_sf = st_as_sf(cpt_bt_east_hs_wgs) # Sp to sf
+st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2012.shp", driver="ESRI Shapefile")# Write to file
+
+```
+
+
+## CPT_BT_WEST
+
+```{r}
+cpt_bt_west_hs_3k = gBuffer(cpt_bt_west_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+cpt_bt_west_hs_3k_nh = remove.holes(cpt_bt_west_hs_3k)# Remove holes in polygons
+cpt_bt_west_hs_wgs = spTransform(cpt_bt_west_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
+cpt_bt_west_hs_wgs_sf = st_as_sf(cpt_bt_west_hs_wgs) # Sp to sf
+st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2012.shp", driver="ESRI Shapefile")# Write to file
+```
+
+
+
+
 
 
 
