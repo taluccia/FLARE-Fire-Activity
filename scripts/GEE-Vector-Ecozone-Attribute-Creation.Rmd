@@ -1,0 +1,118 @@
+---
+title: "GEE Vector Ecozone Attribute Creation"
+author: "Anna Talucci"
+date: "3/11/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Create attributes
+- ID based on row number
+- area in meters squared, area_m
+- area in Hectares, area_ha
+- Year of the burn, fire_yr
+- Removed fires less than 400 ha
+- Ecozone
+- Arctic/subarctic
+
+## Data
+
+### Ecozone
+```{r}
+ecozone = st_read("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+```
+
+### Arctic Circle
+Arctic Circle shapefile came from [Natural Earth](https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-geographic-lines/)
+
+```{r}
+eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_crop_ee") 
+```
+
+
+## Area Attributes
+```{r}
+all_shp_at = all_shp %>%
+  dplyr::mutate(ID_obj = row_number()) %>% 
+  dplyr::mutate(area_m = as.numeric(round(st_area(all_shp),1))) %>% 
+  dplyr::mutate(area_ha = as.numeric(round(area_m*0.0001, 1))) %>% 
+  dplyr::mutate(fire_yr = 2001) %>%
+  filter(area_ha >= 400)
+```
+
+```{r}
+head(all_shp_at)
+```
+
+
+## Ecozone attributes
+
+```{r}
+all_shp_eco_at1 = st_join(all_shp_at, ecozone) 
+```
+
+```{r}
+all_shp_eco_at2 = st_join(all_shp_eco_at1, eco_arctic) 
+```
+
+dplyr::mutate(location = replace_na(location, "subarctic"))
+
+
+
+```{r}
+str(all_shp_eco_at2)
+```
+
+```{r}
+head(all_shp_eco_at2)
+```
+x <- c(1, 1, 2, 2, 3, NA)
+addNA(x)
+```{r}
+all_shp_eco_at2 %>% as.character(location) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+
+```
+
+
+
+```{r}
+
+all_shp_eco_at %>% 
+  group_by(ECO_NAME) %>% 
+  summarise(n = n()) 
+```
+### Remove polgyons outside of ecozones
+
+```{r}
+all_shp_eco_at %>% 
+  group_by(ECO_NAME) %>% 
+  drop_na(ECO_NAME) %>%
+  summarise(n = n()) 
+```
+```{r}
+all_shp_eco_at2 %>% 
+  group_by(ECO_NAME) %>% 
+  drop_na(ECO_NAME) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+```
+## Arctic/Subarctic Attributes
+```{r}
+plot(all_shp_eco_at1$geometry)
+plot(arctic_ee$geometry, add=TRUE)
+```
+
+st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+```{r}
+st_join(all_shp_eco_at1, eco_arctic)
+```
+
+
+# Write to shapefile
+
+```{r eval=FALSE, include=FALSE}
+st_write(all_shp_at, "../outputs/clean-shapefile-ecozone/test2001.shp", driver="ESRI Shapefile") 
+
+```
