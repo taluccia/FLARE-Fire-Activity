@@ -97,6 +97,10 @@ head(f01_arctic)
 ```
 
 ```{r}
+str(f01_arctic)
+```
+
+```{r}
 f01_arctic = st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
 f02_arctic = st_join(f02, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
 f03_arctic = st_join(f03, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
@@ -201,7 +205,7 @@ st_write(f20_arctic, "../outputs/perimeter_summary/arctic/perimeters2020.shp", d
 ```
 
 
-## Arctic + ecozone
+##  Arctic + ecozone
 
 ```{r}
 st_write(f01_ecozone, "../outputs/perimeter_summary/arctic_ecozone/perimeters2001.shp", driver="ESRI Shapefile") 
