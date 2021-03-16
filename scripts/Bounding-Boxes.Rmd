@@ -30,6 +30,16 @@ wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
 
 ```
 
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
 # Create Bounding Box for FLARE
 
 Define coordinates in a matrix as Longitude, lattitude from Upper Left to Upper right, to lower right, to lower left 
@@ -54,15 +64,7 @@ coords_neSiberia = matrix(c(118.0, 74.26,
              ncol = 2, byrow = TRUE)
 ```
 
-## Arctic Circle coordinates 
 
-```{r}
-coords_ArcticCircle = matrix(c(118.0, 74.26,
-               190.25, 74.26,
-               190.25, 66.5, 
-               118.0, 66.5), 
-             ncol = 2, byrow = TRUE)
-```
 
 ## Far NE Siberia coordinates 
 
@@ -97,9 +99,7 @@ Fne_coord = Polygon(coords_FneSiberia)
 yak_coord = Polygon(coords_yak)
 ```
 
-```{r}
-AC_coord = Polygon(coords_ArcticCircle)
-```
+
 
 
 ```{r}
@@ -112,10 +112,6 @@ Fne_poly = SpatialPolygons(list(Polygons(list(Fne_coord), ID = "a")), proj4strin
 yak_poly = SpatialPolygons(list(Polygons(list(yak_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
 ```
 
-```{r}
-AC_poly = SpatialPolygons(list(Polygons(list(AC_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
-
-```
 
 
 ## Plot
@@ -162,6 +158,121 @@ st_write(yak_sf, "../outputs/bbox/yakutsk_bbox.shp", driver="ESRI Shapefile")
 st_write(AC_sf, "../outputs/bbox/ArcticCircle_bbox.shp", driver="ESRI Shapefile")
 ```
 
+# Arctic Circle Bounding Box
+Arctic Circle shapefile came from [Natural Earth](https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-geographic-lines/)
+
+```{r}
+circle = st_read("../data/ne_110m_geographic_lines/ne_110m_geographic_lines.shp", "ne_110m_geographic_lines") 
+```
+```{r}
+arctic = circle %>% filter(name=="Arctic Circle")
+```
+
+```{r}
+head(arctic)
+```
+
+```{r}
+arctic$geometry
+```
+
+
+## define coordinates 
+Long, Lat
+UL 129.9975, 63.7097
+UR 137.2975, 63.7097
+LR 137.2975, 61.3456
+LL 129.9975, 61.3456
+```{r}
+coords_ArcticCircle = matrix(c(75.0, 80.0,
+               190.25, 80.0,
+               190.25, 66.5, 
+               75.0, 66.5), 
+             ncol = 2, byrow = TRUE)
+```
+
+## convert to polygon
+
+```{r}
+AC_coord = Polygon(coords_ArcticCircle)
+```
+
+## add projection
+```{r}
+AC_poly = SpatialPolygons(list(Polygons(list(AC_coord), ID = "a")), proj4string=CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
+
+```
+
+## Convert to sf
+```{r}
+AC_sf = st_as_sf(AC_poly) 
+
+```
+
+## Equal Area to overlay on Ecozones
+```{r}
+AC_ee = spTransform(AC_poly, CRS(ee_russia))
+```
+
+
+```{r}
+arctic_ee = st_transform(arctic, ee_russia)
+```
+
+
+## Plot data
+```{r}
+plot(eco_ee)
+plot(AC_ee, add=TRUE)
+plot(arctic_ee, add=TRUE)
+```
+
+```{r}
+
+a = st_crop(eco_ee, arctic_ee)
+plot(a)
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(AC_sf, "../outputs/bbox/arctic_circle_ecozone.shp", driver="ESRI Shapefile") 
+
+```
+
+# Crop Ecozone for arctic boundary 
+```{r}
+ecozone1 = st_read("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+```
+
+```{r}
+eco_wgs = st_transform(ecozone1, wgs_proj)
+```
+ st_transform(crs("+proj=laea +lat_0=90 +lon_0=0 +x_0=0 +y_0=0 +ellps=sphere +units=m +no_defs"))
+```{r}
+eco_wgs_crop = eco_wgs %>% st_crop(y = st_bbox(c(xmin = -180, ymin = 66.45, xmax = 180, ymax = 90))) 
+```
+
+```{r}
+eco_crop_ee = st_transform(eco_wgs_crop, ee_russia)
+```
+
+```{r}
+plot(eco_crop_ee$geometry)
+plot(arctic_ee, add=TRUE)
+```
+
+```{r}
+head(eco_crop_ee)
+```
+
+```{r}
+arctic_eco_bounds = eco_crop_ee %>% dplyr::mutate(location = "arctic") %>% dplyr::select(location)
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(arctic_eco_bounds, "../outputs/bbox/ecozone_arctic_crop_ee.shp", driver="ESRI Shapefile") 
+
+```
 
 # Create Bounding Boxes for Ecozone Extent
 
