@@ -9,6 +9,65 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# Overview
+
+Here we take the cleaned vectors of fire perimeters and add attributes, clip to ecozone extent, add ecozone attributes, designate as arctic or sub arctic, and add attributes from hotspot data (e.g., fire start).
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(spatialEco)
+library(ggplot2)
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+
+# Data
+
+```{r}
+fires = st_read("../data/clean-shapefile-ecozone/combine_ecozones_2001.shp", "combine_ecozones_2001") 
+
+```
+
+## Fire perimeters
+
+## Ecozones Polygon
+```{r}
+ecozone = st_read("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+```
+
+## Arctic Polygon
+Cropped ecozones to arctic circle for arctic designation. 
+
+```{r}
+eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_crop_ee") 
+```
+
+
+
 
 # Create attributes
 - ID based on row number
@@ -19,95 +78,83 @@ knitr::opts_chunk$set(echo = TRUE)
 - Ecozone
 - Arctic/subarctic
 
-## Data
-
-### Ecozone
+## Add Area Attributes
 ```{r}
-ecozone = st_read("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
-```
-
-### Arctic Circle
-Arctic Circle shapefile came from [Natural Earth](https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-geographic-lines/)
-
-```{r}
-eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_crop_ee") 
-```
-
-
-## Area Attributes
-```{r}
-all_shp_at = all_shp %>%
+fires_at = fires %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
-  dplyr::mutate(area_m = as.numeric(round(st_area(all_shp),1))) %>% 
+  dplyr::mutate(area_m = as.numeric(round(st_area(fires),1))) %>% 
   dplyr::mutate(area_ha = as.numeric(round(area_m*0.0001, 1))) %>% 
-  dplyr::mutate(fire_yr = 2001) %>%
+  dplyr::mutate(fire_yr = 2001) 
+```
+
+%>%
   filter(area_ha >= 400)
-```
-
 ```{r}
-head(all_shp_at)
+head(fires_at)
 ```
 
 
-## Ecozone attributes
-
-```{r}
-all_shp_eco_at1 = st_join(all_shp_at, ecozone) 
-```
-
-```{r}
-all_shp_eco_at2 = st_join(all_shp_eco_at1, eco_arctic) 
-```
-
-dplyr::mutate(location = replace_na(location, "subarctic"))
 
 
 
 ```{r}
-str(all_shp_eco_at2)
+plot(st_geometry(ecozone), col = sf.colors(12, categorical = TRUE), border = 'grey', 
+     axes = TRUE)
+plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
+```
+
+## Add Ecozone attributes
+
+add ecozone and remove NA outside of ecozone
+%>% na.omit()
+```{r}
+fires_at_eco = st_join(fires_at, ecozone) %>% dplyr::select(FID:AREA, ECO_NAME:ECO_SYM, eco_code:geometry) %>% drop_na(eco_code)
 ```
 
 ```{r}
-head(all_shp_eco_at2)
+fires_at_eco
 ```
-x <- c(1, 1, 2, 2, 3, NA)
-addNA(x)
-```{r}
-all_shp_eco_at2 %>% as.character(location) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
-
-```
-
-
 
 ```{r}
-
-all_shp_eco_at %>% 
-  group_by(ECO_NAME) %>% 
-  summarise(n = n()) 
-```
-### Remove polgyons outside of ecozones
-
-```{r}
-all_shp_eco_at %>% 
-  group_by(ECO_NAME) %>% 
-  drop_na(ECO_NAME) %>%
-  summarise(n = n()) 
-```
-```{r}
-all_shp_eco_at2 %>% 
-  group_by(ECO_NAME) %>% 
-  drop_na(ECO_NAME) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
-```
-## Arctic/Subarctic Attributes
-```{r}
-plot(all_shp_eco_at1$geometry)
-plot(arctic_ee$geometry, add=TRUE)
+plot(st_geometry(ecozone), border = 'grey', 
+     axes = TRUE)
+plot(st_geometry(st_centroid(fires_at_eco)), pch = 3, col = 'red', add = TRUE)
 ```
 
-st_join(f01, arctic) %>% dplyr::mutate(location = replace_na(location, "subarctic"))
+
 ```{r}
-st_join(all_shp_eco_at1, eco_arctic)
+fires_at_eco_arc = st_join(fires_at_eco, eco_arctic) 
+
 ```
+
+
+```{r}
+
+str(fires_at_eco_arc)
+```
+
+Convert NA to subarctic.
+```{r}
+fires_at_eco_arc$location <- factor(fires_at_eco_arc$location, exclude = NULL, 
+               levels = c("arctic", NA), 
+               labels = c("arctic", "subarctic"))
+fires_at_eco_arc
+```
+
+
+
+```{r}
+plot(st_geometry(ecozone), border = 'grey', 
+     axes = TRUE)
+plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
+```
+
+## Add Hotspot attributes
+
+
+
+
+
 
 
 # Write to shapefile
