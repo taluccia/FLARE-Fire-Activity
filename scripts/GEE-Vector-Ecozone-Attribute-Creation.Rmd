@@ -61,7 +61,7 @@ hotspots = st_read("../data/M6-march-october/M6_mar-oct_2001.shp", "M6_mar-oct_2
 
 ## Ecozones Polygon
 ```{r}
-ecozones = st_read("../data/ecozones/ne_siberia_ecozones_ee.shp", "ne_siberia_ecozones_ee") 
+ecozones = st_read("../data/ecozones/ne_siberia_ecozones9_ee.shp", "ne_siberia_ecozones9_ee") 
 ```
 
 ## Arctic Polygon
@@ -102,7 +102,7 @@ fires_at = fires_ee %>%
 %>%
   filter(area_ha >= 400)
 ```{r}
-head(fires_at)
+fires_at
 ```
 
 
@@ -117,8 +117,11 @@ plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
 
 ## Add Ecozone attributes
 
+We use `st_join` to add the attributes of the ecozone for each fire. Fires are not restricted to within individual ecozone boundaries. In order to avoid a duplicate entry for a fire that spans two ecozones, we add the argument `largest=TRUE`, which assigns the ecozone that contrains the majority of the fire. 
+
+
 ```{r}
-fires_at_eco = st_join(fires_at, ecozones_ee) %>% dplyr::select(FID:AREA, ECO_NAME:ECO_SYM, eco_code:geometry) %>% drop_na(eco_code)
+fires_at_eco = st_join(fires_at, ecozones_ee, largest=TRUE) %>% dplyr::select(FID:AREA, ECO_NAME:ECO_SYM, eco_code:geometry) %>% drop_na(eco_code)
 ```
 
 ```{r}
@@ -133,7 +136,7 @@ plot(st_geometry(st_centroid(fires_at_eco)), pch = 3, col = 'red', add = TRUE)
 
 ## Add Arctic/Subarctic Location
 ```{r}
-fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ee) 
+fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ee, largest=TRUE) 
 ```
 
 ```{r}
@@ -155,6 +158,20 @@ plot(st_geometry(ecozones_ee), border = 'grey',
 plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
 ```
 
+### Check duplicates
+
+```{r}
+fires_at_eco_arc %>% group_by(ID_obj) %>% filter(n()>1) %>% summarize(n=n())
+```
+```{r}
+fires_at_eco_arc %>% group_by(ID_obj) %>% filter(ID_obj=="233") 
+```
+
+
+```{r eval=FALSE, include=FALSE}
+st_write(fires_at_eco_arc, "../outputs/test/test_fires_at_eco_arc.shp", driver="ESRI Shapefile") 
+
+```
 ## Add Hotspot attributes
 
 ### Function to summarize hotspot attributes
@@ -181,9 +198,6 @@ sum_pt_poly = function(x){
 
 ### Apply functions
 
-```{r}
-fires_at_eco_arc
-```
 
 ```{r}
 fires_at_eco_arc_hs = st_intersection(hotspots_ee, fires_at_eco_arc) %>% sum_pt_poly()
@@ -198,10 +212,40 @@ plot(st_geometry(ecozones_ee), border = 'grey',
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at_eco_arc_hs)), pch = 3, col = 'red', add = TRUE)
 ```
+### Drop geometry from hotspot attributes
+
+```{r}
+st_geometry(fires_at_eco_arc_hs) <- NULL
+```
+
+## Merge
+
+```{r}
+fires_at_eco_arc_hs_merge = merge(fires_at_eco_arc, fires_at_eco_arc_hs, by="ID_obj")
+```
+
+```{r}
+fires_at_eco_arc_hs_merge
+```
+
+
+```{r}
+plot(st_geometry(ecozones_ee), border = 'grey', 
+     axes = TRUE)
+plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', add = TRUE)
+```
+
+### Remove geometry and write attributes to CSV
+```{r}
+fires_at_eco_arc_hs_merge %>% 
+  st_set_geometry(NULL) %>% 
+        write.csv(., '../outputs/test/test_attributes.csv',  row.names = FALSE)
+  
+```
 
 # Write to shapefile
 
 ```{r eval=FALSE, include=FALSE}
-st_write(all_shp_at, "../outputs/clean-shapefile-ecozone/test2001.shp", driver="ESRI Shapefile") 
+st_write(fires_at_eco_arc_hs_merge, "../outputs/test/test_attributes.shp", driver="ESRI Shapefile") 
 
 ```
