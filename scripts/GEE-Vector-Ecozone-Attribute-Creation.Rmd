@@ -158,16 +158,7 @@ plot(st_geometry(ecozones_ee), border = 'grey',
 plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
 ```
 
-### Check duplicates
-
-```{r}
-fires_at_eco_arc %>% group_by(ID_obj) %>% filter(n()>1) %>% summarize(n=n())
-```
-```{r}
-fires_at_eco_arc %>% group_by(ID_obj) %>% filter(ID_obj=="233") 
-```
-
-
+### Save a est version to check
 ```{r eval=FALSE, include=FALSE}
 st_write(fires_at_eco_arc, "../outputs/test/test_fires_at_eco_arc.shp", driver="ESRI Shapefile") 
 
@@ -235,6 +226,13 @@ plot(st_geometry(ecozones_ee), border = 'grey',
 plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', add = TRUE)
 ```
 
+
+
+
+
+
+
+
 ### Remove geometry and write attributes to CSV
 ```{r}
 fires_at_eco_arc_hs_merge %>% 
@@ -244,8 +242,8 @@ fires_at_eco_arc_hs_merge %>%
 ```
 
 # Write to shapefile
-
+## Save  test version to inspect 
 ```{r eval=FALSE, include=FALSE}
-st_write(fires_at_eco_arc_hs_merge, "../outputs/test/test_attributes.shp", driver="ESRI Shapefile") 
+st_write(fires_at_eco_arc_hs_merge, "../outputs/test/test_attributes-remove_dup.shp", driver="ESRI Shapefile") 
 
 ```
