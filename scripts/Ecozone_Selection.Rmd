@@ -25,6 +25,7 @@ While we will need the attribute field for the final fire perimeters, they are n
 
 Here we split the ecozones needed into individual polygon shapefile with a couple of exceptions. We will combine Cherskii-Kolyma mountain tundra and Northeast Siberia taiga into one polygon for GEE. We will also combine Bering tundra Chukchi peninsula tundra, which will then be split by east and west hemisphere. Treat East Siberia Tiaga and Trans-Baikal Bald Mountain Tundra as one spatial unit.
 
+2021-03-19 -- add South Siberian forest steppe because of hole inside south easter portion of polygon
 
 # Library
 
@@ -92,7 +93,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 7. East Siberian taiga (EST)
 8. Trans-Baikal Bald Mountain tundra (TBBMT)
 ```{r}
-target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga", "Trans-Baikal Bald Mountain tundra")
+target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga", "Trans-Baikal Bald Mountain tundra", "South Siberian forest steppe")
 ```
 
 ## Apply filter
@@ -108,7 +109,8 @@ ne_subset = ecozone %>%
               ifelse(ECO_NAME %in% "Bering tundra", "BT",
                 ifelse(ECO_NAME %in% "Taimyr-Central Siberian tundra", "TCST",
                   ifelse(ECO_NAME %in% "Trans-Baikal Bald Mountain tundra", "TBBMT",
-            ifelse(ECO_NAME %in%  "East Siberian taiga", "EST", "NA")))))))))
+                         ifelse(ECO_NAME %in% "East Siberian taiga", "EST",
+            ifelse(ECO_NAME %in%  "South Siberian forest steppe", "SSFS", "NA"))))))))))
 ```
 
 
@@ -382,8 +384,8 @@ ggplot(est_tbbmt_wgs) +geom_sf()
 
 
 ```{r eval=FALSE, include=FALSE}
-st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones_ee.shp", driver="ESRI Shapefile") 
-st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones.shp", driver="ESRI Shapefile") 
+st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones9_ee.shp", driver="ESRI Shapefile") 
+st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones9.shp", driver="ESRI Shapefile") 
 ```
 
 ### Individual buffered ecozones for GEE
