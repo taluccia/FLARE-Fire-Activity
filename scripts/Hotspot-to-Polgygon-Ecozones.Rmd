@@ -88,7 +88,7 @@ cpt_bt_east_ee = spTransform(cpt_bt_east, CRS(ee_russia))
 ## Read in data **(change year on data and saving at end)**
 
 ```{r}
-hs = readOGR("../data/M6-march-october/M6_mar-oct_2020.shp", "M6_mar-oct_2020") 
+hs = readOGR("../data/M6-march-october/M6_mar-oct_2001.shp", "M6_mar-oct_2001") 
 ```
 
 ## project to equal area russia
@@ -100,11 +100,32 @@ hs_ee = spTransform(hs, CRS(ee_russia))
 plot(hs_ee)
 ```
 
+# Single  Ecozone Bounds
+eco_SinglePoly_ee
+```{r}
+eco_ee = readOGR("../data/ecozones/eco_SinglePoly_ee.shp", "eco_SinglePoly_ee") 
+```
+
+```{r}
+eco_hs = hs_ee[eco_ee, ]
+eco_hs_3k = gBuffer(eco_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
+eco_hs_3k_nh = remove.holes(eco_hs_3k) # Remove holes in polygons
+eco_hs_wgs = spTransform(eco_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
+eco_hs_wgs_sf = st_as_sf(eco_hs_wgs)
+```
+
+```{r}
+st_write(eco_hs_wgs_sf, "../outputs/test/test_singleEco_2001.shp", driver="ESRI Shapefile")
+```
+
+
+
 # Visualize points
 ## CKMT_NSCT
 ```{r}
 ckmt_nst_nsct_hs = hs_ee[ckmt_nst_nsct_ee, ]
 plot(ckmt_nst_nsct_hs)
+plot(ckmt_nst_nsct_ee, add=TRUE)
 ```
 
 ## TCST_N
@@ -125,6 +146,20 @@ plot(tcst_s_hs)
 est_tbbmt_n_hs = hs_ee[est_tbbmt_n_ee, ]
 plot(est_tbbmt_n_hs)
 ```
+
+
+### CHECK OVERLAP
+plot(st_geometry(ecozones_ee), border = 'grey', 
+     axes = TRUE)
+plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', add = TRUE)
+```{r}
+plot(est_tbbmt_n_ee, border = 'grey')
+plot(tcst_s_ee, add = TRUE)
+plot(est_tbbmt_n_hs, col = 'grey', add = TRUE)
+plot(tcst_s_hs, add = TRUE)
+
+```
+
 
 ## EST_TBBMT_S
 ```{r}
@@ -152,9 +187,16 @@ ckmt_nst_nsct_hs_3k = gBuffer(ckmt_nst_nsct_hs, width = 3000, capStyle="ROUND", 
 ckmt_nst_nsct_hs_3k_nh = remove.holes(ckmt_nst_nsct_hs_3k) # Remove holes in polygons
 ckmt_nst_nsct_hs_wgs = spTransform(ckmt_nst_nsct_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
 ckmt_nst_nsct_hs_wgs_sf = st_as_sf(ckmt_nst_nsct_hs_wgs)
-st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2020.shp", driver="ESRI Shapefile")
 ```
 
+```{r}
+st_write(ckmt_nst_nsct_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_ckmt_nst_nsct_2001.shp", driver="ESRI Shapefile")
+```
+
+```{r}
+plot(ckmt_nst_nsct, border = 'grey')
+plot(ckmt_nst_nsct_hs_wgs_sf, col = 'grey', add = TRUE)
+```
 
 ## TCST_N
 
@@ -163,7 +205,7 @@ tcst_n_hs_3k = gBuffer(tcst_n_hs, width = 3000, capStyle="ROUND", joinStyle="ROU
 tcst_n_hs_3k_nh = remove.holes(tcst_n_hs_3k)# Remove holes in polygons
 tcst_n_hs_wgs = spTransform(tcst_n_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 tcst_n_hs_wgs_sf = st_as_sf(tcst_n_hs_wgs) # Sp to sf
-st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2020.shp", driver="ESRI Shapefile")# Write to file
+st_write(tcst_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_n_2001.shp", driver="ESRI Shapefile")# Write to file
 ```
 
 ## TCST_S
@@ -172,7 +214,11 @@ tcst_s_hs_3k = gBuffer(tcst_s_hs, width = 3000, capStyle="ROUND", joinStyle="ROU
 tcst_s_hs_3k_nh = remove.holes(tcst_s_hs_3k)# Remove holes in polygons
 tcst_s_hs_wgs = spTransform(tcst_s_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 tcst_s_hs_wgs_sf = st_as_sf(tcst_s_hs_wgs) # Sp to sf
-st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2020.shp", driver="ESRI Shapefile")# Write to file
+```
+
+
+```{r}
+st_write(tcst_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_tcst_s_2001.shp", driver="ESRI Shapefile")# Write to file
 ```
 
 
@@ -183,9 +229,31 @@ est_tbbmt_n_hs_3k = gBuffer(est_tbbmt_n_hs, width = 3000, capStyle="ROUND", join
 est_tbbmt_n_hs_3k_nh = remove.holes(est_tbbmt_n_hs_3k)# Remove holes in polygons
 est_tbbmt_n_hs_wgs = spTransform(est_tbbmt_n_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 est_tbbmt_n_hs_wgs_sf = st_as_sf(est_tbbmt_n_hs_wgs) # Sp to sf
-st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2020.shp", driver="ESRI Shapefile")# Write to file
 ```
 
+```{r}
+st_write(est_tbbmt_n_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_n_2001.shp", driver="ESRI Shapefile")# Write to file
+```
+
+### CHECK OVERLAP
+```{r}
+plot(est_tbbmt_n, border = 'grey')
+plot(tcst_s, add = TRUE)
+plot(est_tbbmt_n_hs_wgs_sf, col = 'grey', add = TRUE)
+plot(tcst_s_hs_wgs_sf, add = TRUE)
+
+```
+```{r}
+plot(est_tbbmt_n, border = 'grey')
+plot(est_tbbmt_n_hs_wgs_sf, col = 'grey', add = TRUE)
+```
+
+```{r}
+plot(tcst_s)
+
+plot(tcst_s_hs_wgs_sf, add = TRUE)
+
+```
 ## EST_TBBMT_S
 
 ```{r}
@@ -193,7 +261,7 @@ est_tbbmt_s_hs_3k = gBuffer(est_tbbmt_s_hs, width = 3000, capStyle="ROUND", join
 est_tbbmt_s_hs_3k_nh = remove.holes(est_tbbmt_s_hs_3k)# Remove holes in polygons
 est_tbbmt_s_hs_wgs = spTransform(est_tbbmt_s_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 est_tbbmt_s_hs_wgs_sf = st_as_sf(est_tbbmt_s_hs_wgs) # Sp to sf
-st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2020.shp", driver="ESRI Shapefile")# Write to file
+st_write(est_tbbmt_s_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_est_tbbmt_s_2001.shp", driver="ESRI Shapefile")# Write to file
 ```
 ## CPT_BT_EAST
 
@@ -202,7 +270,7 @@ cpt_bt_east_hs_3k = gBuffer(cpt_bt_east_hs, width = 3000, capStyle="ROUND", join
 cpt_bt_east_hs_3k_nh = remove.holes(cpt_bt_east_hs_3k)# Remove holes in polygons
 cpt_bt_east_hs_wgs = spTransform(cpt_bt_east_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 cpt_bt_east_hs_wgs_sf = st_as_sf(cpt_bt_east_hs_wgs) # Sp to sf
-st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2020.shp", driver="ESRI Shapefile")# Write to file
+st_write(cpt_bt_east_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_east_2001.shp", driver="ESRI Shapefile")# Write to file
 
 ```
 
@@ -214,7 +282,7 @@ cpt_bt_west_hs_3k = gBuffer(cpt_bt_west_hs, width = 3000, capStyle="ROUND", join
 cpt_bt_west_hs_3k_nh = remove.holes(cpt_bt_west_hs_3k)# Remove holes in polygons
 cpt_bt_west_hs_wgs = spTransform(cpt_bt_west_hs_3k_nh, CRS( wgs_proj))# reproject to WGS for GEE
 cpt_bt_west_hs_wgs_sf = st_as_sf(cpt_bt_west_hs_wgs) # Sp to sf
-st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2020.shp", driver="ESRI Shapefile")# Write to file
+st_write(cpt_bt_west_hs_wgs_sf, "../outputs/hotspot-poly-ecozone/hspoly_cpt_bt_west_2001.shp", driver="ESRI Shapefile")# Write to file
 ```
 
 
