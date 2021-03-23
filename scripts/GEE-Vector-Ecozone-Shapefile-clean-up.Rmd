@@ -86,7 +86,17 @@ plot(all_shp$geometry)
 ```
 
 
+## Clean Polgygons
 
+1. Union is use to merge overlaping polygons 
+  + For example, where a fire spans the imagery boundaries producing multiple polygons, these are merged into a single polygon.
+2. Cast to Polygon
+  + This convers from a multipolygon to individual Polygons
+3. Remove Holes
+  + This removes any holes created in polgyons during the GEE vectorize process, or when mergeing polygons
+  + It is important to remove as holes can cause issues during geoprocesses.
+4. **Vectors have too many edges to use in GEE after processing - Need to integrate a smoothing function.**
+- 
 ```{r}
 all_shp_un = sf::st_union(all_shp)
 
@@ -98,12 +108,8 @@ all_shp_un_poly = sf::st_cast(all_shp_un, "POLYGON")
 all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly)
 ```
 
-
-
-
 ```{r eval=FALSE, include=FALSE}
 st_write(all_shp_un_poly, "../outputs/test/combine_ecozones_2001-test2.shp", driver="ESRI Shapefile") 
-
 ```
 
 
