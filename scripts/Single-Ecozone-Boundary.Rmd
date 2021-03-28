@@ -115,3 +115,67 @@ title("russia: red,ecozone: green")
 ```{r eval=FALSE, include=FALSE}
 st_write(eco_buf_110km_un_poly, "../outputs/ecozones/eco_SinglePoly_ee.shp", driver="ESRI Shapefile") 
 ```
+
+
+# Split into 2 groups for large data
+
+## Group 1 North East
+```{r}
+group1 = ecozone %>% 
+  filter(eco_code %in% c("CKMT", "NST", "NSCT", "CPT", "BT"))
+```
+
+```{r}
+ggplot(group1) + geom_sf()
+```
+
+# Apply buffer to ecozone
+```{r}
+grp1_buf_1km = st_buffer(group1, 1000)
+
+grp1_buf_1km_un = sf::st_union(grp1_buf_1km)
+
+grp1_buf_1km_un_poly <- sf::st_cast(grp1_buf_1km_un, "POLYGON")
+```
+
+```{r}
+plot(ru_ee$geometry, col = '#ff333388'); #x
+plot(grp1_buf_1km_un_poly, add=TRUE, col='#33ff3388')#y
+title("russia: red,ecozone: green")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(grp1_buf_1km_un_poly, "../outputs/ecozones/eco_NEPoly1_ee.shp", driver="ESRI Shapefile") 
+```
+
+## Group 2  Eastern Siberia
+```{r}
+group2 = ecozone %>% 
+  filter(eco_code %in% c("EST", "TBBMT", "TCST", "SSFS"))
+```
+
+```{r}
+ggplot(group2) + geom_sf()
+```
+
+# Apply buffer to ecozone
+```{r}
+grp2_buf_110km = st_buffer(group2, 110000)
+
+grp2_buf_110km_un = sf::st_union(grp2_buf_110km)
+
+grp2_buf_110km_un_poly <- sf::st_cast(grp2_buf_110km_un, "POLYGON")
+
+grp2_buf_1km = st_buffer(grp2_buf_110km_un_poly, -109000)
+```
+
+```{r}
+plot(ru_ee$geometry, col = '#ff333388'); #x
+plot(grp2_buf_1km , add=TRUE, col='#33ff3388')#y
+plot(group2, add=TRUE)
+title("russia: red,ecozone: green")
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(grp2_buf_1km, "../outputs/ecozones/eco_EPoly2_ee.shp", driver="ESRI Shapefile") 
+```
