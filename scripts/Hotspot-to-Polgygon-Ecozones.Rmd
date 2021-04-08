@@ -64,7 +64,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 ## Hotspot Data (MODIS)**(change year on data and saving at end)**
 ```{r}
-hs = readOGR("../data/M6-march-october/M6_mar-oct_2019.shp", "M6_mar-oct_2019") 
+hs = readOGR("../data/M6-march-october/M6_mar-oct_2003.shp", "M6_mar-oct_2003") 
 ```
 
 ### project to equal area russia
@@ -72,17 +72,68 @@ hs = readOGR("../data/M6-march-october/M6_mar-oct_2019.shp", "M6_mar-oct_2019")
 hs_ee = spTransform(hs, CRS(ee_russia))
 ```
 
-
-## Single  Ecozone Bounds
-
-All ecozones have been combined into a single polygon
+## Chukchi
 
 ```{r}
-eco_ee = readOGR("../data/ecozones/eco_SinglePoly_ee.shp", "eco_SinglePoly_ee") 
+ch_west = st_read("../data/ecozones/chukchi_east_west/cpt_bt_west.shp", "cpt_bt_west") 
 ```
 
+```{r}
+ch_east = st_read("../data/ecozones/chukchi_east_west/cpt_bt_east.shp", "cpt_bt_east") 
+```
 
+### Equal Area
+```{r}
+ch_west_ee = st_transform(ch_west, crs=ee_russia)
+ch_east_ee = st_transform(ch_east, crs=ee_russia)
+```
 
+# 2003 Data issue
+
+One of the hotspots sits on the 180/-180 longitude. This  locaton causes an issue once the polygons have been created and convered back to WGS  84 projection.
+
+```{r}
+hs_ee_sf = st_as_sf(hs_ee)
+```
+
+```{r}
+issue_pt = hs_ee_sf %>% filter(LONGITUDE > 179)
+issue_pt
+```
+```{r}
+remove_issue_pt = hs_ee_sf %>% filter(LONGITUDE != 179.9466)
+```
+
+```{r}
+plot(ch_west_ee$geometry);
+plot(remove_issue_pt, add=TRUE, col='red')
+```
+
+```{r}
+plot(ch_west_ee$geometry);
+plot(hs_ee_sf, add=TRUE, col='red');
+plot(issue_pt, add=TRUE, col='blue');
+```
+```{r}
+eco_ee = st_read("../data/ecozones/eco_SinglePoly_ee.shp", "eco_SinglePoly_ee") 
+```
+## 2003 pt to poly
+```{r eval=FALSE, include=FALSE}
+eco_hs = hs_ee_sf[eco_ee, ]
+
+remove_issue_pt = eco_hs %>% filter(LONGITUDE != 179.9466)
+
+eco_hs_3k = st_buffer(remove_issue_pt, dist = 3000, endCapStyle = "ROUND",
+joinStyle = "ROUND",) # Buffer by 3k
+
+eco_hs_3k_nh = nngeo::st_remove_holes(eco_hs_3k)
+
+eco_hs_3k_nh_wgs = st_transform(eco_hs_3k_nh, crs=wgs_proj)
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(eco_hs_3k_nh_wgs, "../outputs/hotspot-poly-single-eco/hspoly_singleEco_2003.shp", driver="ESRI Shapefile")
+```
 
 
 # Process point to polygon
@@ -96,6 +147,15 @@ This code uses a single polygon that covers all nine ecozones
 6. Write to shapefile
 
 ## For Single Poly
+All years except 2019 & 2020
+
+### Single  Ecozone Bounds
+All ecozones have been combined into a single polygon
+
+```{r}
+eco_ee = readOGR("../data/ecozones/eco_SinglePoly_ee.shp", "eco_SinglePoly_ee") 
+```
+
 ```{r}
 eco_hs = hs_ee[eco_ee, ]
 eco_hs_3k = gBuffer(eco_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
@@ -105,10 +165,10 @@ eco_hs_wgs_sf = st_as_sf(eco_hs_wgs)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(eco_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_singleEco_2020.shp", driver="ESRI Shapefile")
+st_write(eco_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_singleEco_2003.shp", driver="ESRI Shapefile")
 ```
 
-## For Large data year (2019 & 2020)
+## For Large data year (2003, 2019 & 2020)
 Split the region of interest (ROI; single polygon) into 3 ROIs.  Process the point to polygon on the 3 ROIs and then combine into single shapefile.
 
 ### For NE Poly 1
@@ -124,12 +184,14 @@ eco1_hs_wgs = spTransform(eco1_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for 
 eco1_hs_wgs_sf = st_as_sf(eco1_hs_wgs)
 ```
 
-
 ```{r eval=FALSE, include=FALSE}
 st_write(eco1_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_NE_Eco_2020.shp", driver="ESRI Shapefile")
 ```
 
-## For eastern portion of E Poly 2
+
+
+
+### For eastern portion of E Poly 2
 ```{r}
 eco_E_EPoly2_1_ee = readOGR("../data/ecozones/eco_E_EPoly2_1_ee.shp", "eco_E_EPoly2_1_ee") 
 ```
@@ -143,10 +205,15 @@ eco2_hs_wgs_sf = st_as_sf(eco2_hs_wgs)
 ```
 
 ```{r eval=FALSE, include=FALSE}
+eco2_hs_3k_nh_sf = st_as_sf(eco2_hs_3k_nh)
+st_write(eco3_hs_3k_nh_sf, "../outputs/test/eco2_hs_3k_nh_ee_2003.shp", driver="ESRI Shapefile")
+```
+
+```{r eval=FALSE, include=FALSE}
 st_write(eco2_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_EEPOLY_Eco_2020.shp", driver="ESRI Shapefile")
 ```
 
-## For western portion of E Poly 2
+### For western portion of E Poly 2
 ```{r}
 eco_W_EPoly2_2_ee =  readOGR("../data/ecozones/eco_W_EPoly2_2_ee.shp", "eco_W_EPoly2_2_ee") 
 ```
@@ -157,6 +224,11 @@ eco3_hs_3k = gBuffer(eco3_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND")
 eco3_hs_3k_nh = remove.holes(eco3_hs_3k) # Remove holes in polygons
 eco3_hs_wgs = spTransform(eco3_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
 eco3_hs_wgs_sf = st_as_sf(eco3_hs_wgs)
+```
+
+```{r eval=FALSE, include=FALSE}
+eco3_hs_3k_nh_sf = st_as_sf(eco3_hs_3k_nh)
+st_write(eco3_hs_3k_nh_sf, "../outputs/test/eco3_hs_3k_nh_ee_2003.shp", driver="ESRI Shapefile")
 ```
 
 ```{r eval=FALSE, include=FALSE}
