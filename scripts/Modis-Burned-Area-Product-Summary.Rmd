@@ -1,0 +1,215 @@
+---
+title: "Modis  Burned Area  Product"
+author: "Anna Talucci"
+date: "4/8/2021"
+output: html_document
+---
+
+# Overview
+Convert pixel counts from MODSI Burned Area product in Google Earth Engine to area burned and summarize by ecozones. 
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Packages
+
+```{r include=FALSE}
+library(sf)
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(lubridate)
+library(ggplot2)
+```
+
+
+# Define graph Theme and color Palette 
+
+## Hexcodes for ecozones
+Ecozone Name                       |  Hexcode
+-----------------------------------|--------------- 
+Bering tundra                      |  CB453D
+Cherskii-Kolyma mountain tundra    |  44CB30
+Chukchi Peninsula tundra           |  2E41C3
+East Siberian taiga                |  36A4B4
+Northeast Siberian coastal tundra  |  B83491
+Northeast Siberian taiga           |  B09C32    
+South Siberian forest steppe       |  AE3D5F
+Taimyr-Central Siberian tundra     |  2DC086
+Trans-Baikal Bald Mountain tundra  |  3261A1
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "3261A1")
+```
+
+# Data
+```{r}
+f01 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2001.csv")
+f02 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2002.csv")
+f03 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2003.csv")
+f04 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2004.csv")
+f05 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2005.csv")
+```
+
+```{r}
+f06 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2006.csv")
+f07 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2007.csv")
+f08 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2008.csv")
+f09 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2009.csv")
+f10 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2010.csv")
+```
+
+```{r}
+f11 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2011.csv")
+f12 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2012.csv")
+f13 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2013.csv")
+f14 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2014.csv")
+f15 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2015.csv")
+```
+
+```{r}
+f16 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2016.csv")
+f17 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2017.csv")
+f18 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2018.csv")
+f19 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2019.csv")
+f20 = read.csv(file = "../data/ModisBurnedAreaProductPixCt/modisBurnEco_2020.csv")
+```
+
+## look at headers
+```{r}
+head(f01)
+```
+
+# Define pixel variables 
+
+```{r}
+pixScale = 463.3127165275
+
+pixArea = pixScale^2
+
+pixArea
+```
+
+
+# Create list of data frames & list of years
+```{r}
+list_df = list(f01, f02, f03, f04,  f05, f06, f07, f08, f09, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20)
+
+list_yr = c("2001", "2002", "2003",  "2004", "2005", "2006",  "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014",  "2015",  "2016", "2017", "2018", "2019", "2020")
+```
+
+
+# Combine and Summarize
+Add fire year by dataframe and add columns to convert pixel count to area burned
+```{r}
+all_data = map2(list_df, list_yr, ~cbind(.x, fire_yr = .y)) %>% 
+  map(., ~ .x %>% 
+        dplyr::mutate(burn_m_sq = as.numeric(round(count*pixArea,1))) %>% 
+  dplyr::mutate(burn_ha = as.numeric(round(burn_m_sq*0.0001, 1))) %>% 
+  dplyr::select(AREA, area_km2, BIOME:ECO_SYM,  OBJECTID, REALM, eco_code, count, burn_m_sq, burn_ha, fire_yr)) %>%
+  bind_rows(.) 
+  
+```
+```{r}
+head(all_data)
+```
+
+## Summarize by ecozone and Year
+```{r}
+by_eco_yr = all_data %>% group_by(eco_code, fire_yr) %>% 
+  summarise( . ,
+             n = n(),
+             Mean = mean(round(burn_ha,1)),
+             SD = sd(round(burn_ha,1)),
+             Median = median(round(burn_ha,1)),
+             Minimum = min(round(burn_ha,1)),
+             Maximum = max(round(burn_ha,1)),
+             Total = sum(round(burn_ha,1)))
+```
+
+### Figure
+```{r}
+plot_area_eco = ggplot(by_eco_yr, aes(x=fire_yr, y=Total, fill=eco_code)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  scale_fill_manual(values=ecoPalette, name="Ecozone") +
+
+  theme_bw() + theme(legend.position = "right") + 
+  xlab('') +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) +
+  guides(fill = guide_legend(title.position = "top"))
+
+plot_area_eco
+```
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2021-04-08_modisBurnedAreaByEco.png", plot = plot_area_eco, width = 6, height = 4, units = c("in"), dpi=600 )
+```
+
+## Summarize by year
+```{r}
+by_year = all_data %>% group_by(fire_yr) %>% 
+  summarise( . ,
+             n = n(),
+             Mean = mean(round(burn_ha,1)),
+             SD = sd(round(burn_ha,1)),
+             Median = median(round(burn_ha,1)),
+             Minimum = min(round(burn_ha,1)),
+             Maximum = max(round(burn_ha,1)),
+             Total = sum(round(burn_ha,1)))
+
+by_year
+```
+
+### Figure
+
+```{r}
+plot_area = ggplot(by_year, aes(fire_yr, Total)) +
+  geom_bar(stat="identity", width = 0.5, fill="black") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  xlab('') +
+  theme_bw() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+
+plot_area
+```
+
+```{r}
+unique(all_data$ECO_NAME)
+```
+
+# Fiddling with imap
+```{r eval=FALSE, include=FALSE}
+map2(list_df, list_yr, ~cbind(.x, fire_yr = .y)) %>% 
+  map(., ~ .x %>% 
+        dplyr::mutate(burn_m_sq = as.numeric(round(count*pixArea,1))) %>% 
+  dplyr::mutate(burn_ha = as.numeric(round(burn_m_sq*0.0001, 1))) %>% 
+  dplyr::select(AREA, area_km2, BIOME:ECO_SYM,  OBJECTID, REALM, eco_code, count, burn_m_sq, burn_ha, fire_yr)) %>%
+  bind_rows(.) %>%
+  group_by(fire_yr) %>% 
+  summarise( . , total = sum(round(burn_ha,1))) %>%
+  imap(.,
+       ~{ggplot(., aes(fire_yr, total)) +
+  geom_bar(stat="identity", width = 0.5, fill="black") +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000), labels = c(0, 2, 4, 6, 8, 10)) +
+  xlab('') +
+  theme_bw() + theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+                  })
+  
+```
