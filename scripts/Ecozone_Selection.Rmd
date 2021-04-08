@@ -207,6 +207,10 @@ cpt_bt_east
 ```{r}
 ggplot(cpt_bt_east) + geom_sf()
 ```
+```{r eval=FALSE, include=FALSE}
+st_write(cpt_bt_east, "../outputs/ecozones/chukchi_east_west/cpt_bt_east.shp", driver="ESRI Shapefile")
+```
+
 
 ```{r}
 cpt_bt_west = ne_subset %>% 
@@ -220,6 +224,10 @@ cpt_bt_west
 
 ```{r}
 ggplot(cpt_bt_west) + geom_sf()
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(cpt_bt_west, "../outputs/ecozones/chukchi_east_west/cpt_bt_west.shp", driver="ESRI Shapefile")
 ```
 
 ## ne_subset
