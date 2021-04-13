@@ -11,7 +11,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Overview
 
-Using GEE Part 2 Vectors Ecozone, we remove holes, convert from multipoly to polygon, apply negative buffer, and combine into single shapefile
+Using part2-gee-vectors-SingleEco data file, we remove holes, convert from multipoly to polygon, apply negative buffer, and combine into single shapefile.
+
+In GEE, vectors were run within  hotspot polygons that spanned all 9 ecozones, but run on 7 separate composit images.
+
+1. ckmt_nst_nsct_flare_fires_YEAR
+2. cpt_bt_east_flare_fires_YEAR
+3. cpt_bt_west_flare_fires_YEAR
+4. est_tbbmt_n_flare_fires_YEAR
+5. est_tbbmt_s_flare_fires_YEAR
+6. tcst_n_flare_fires_YEAR
+7. tcst_s_flare_fires_YEAR
+
 
 What is included in this script:
 
@@ -56,13 +67,13 @@ est_tbbmt_s_flare_fires_2001
 tcst_n_flare_fires_2001
 tcst_s_flare_fires_2001
 ```{r}
-ckmt_nst_nsct = st_read("../data/GEE-test/ckmt_nst_nsct_fires_2001.shp", "ckmt_nst_nsct_fires_2001") 
-cpt_bt_east = st_read("../data/GEE-test/cpt_bt_east_fires_2001.shp", "cpt_bt_east_fires_2001") 
-cpt_bt_west = st_read("../data/GEE-test/cpt_bt_west_fires_2001.shp", "cpt_bt_west_fires_2001") 
-est_tbbmt_n = st_read("../data/GEE-test/est_tbbmt_n_fires_2001.shp", "est_tbbmt_n_fires_2001") 
-est_tbbmt_s = st_read("../data/GEE-test/est_tbbmt_s_fires_2001.shp", "est_tbbmt_s_fires_2001") 
-tcst_n = st_read("../data/GEE-test/tcst_n_fires_2001.shp", "tcst_n_fires_2001") 
-tcst_s = st_read("../data/GEE-test/tcst_s_fires_2001.shp", "tcst_s_fires_2001") 
+ckmt_nst_nsct = st_read("../data/part2-gee-vectors-SingleEco/ckmt_nst_nsct_fires_2001.shp", "ckmt_nst_nsct_fires_2001") 
+cpt_bt_east = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_east_fires_2001.shp", "cpt_bt_east_fires_2001") 
+cpt_bt_west = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_west_fires_2001.shp", "cpt_bt_west_fires_2001") 
+est_tbbmt_n = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_n_fires_2001.shp", "est_tbbmt_n_fires_2001") 
+est_tbbmt_s = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_s_fires_2001.shp", "est_tbbmt_s_fires_2001") 
+tcst_n = st_read("../data/part2-gee-vectors-SingleEco/tcst_n_fires_2001.shp", "tcst_n_fires_2001") 
+tcst_s = st_read("../data/part2-gee-vectors-SingleEco/tcst_s_fires_2001.shp", "tcst_s_fires_2001") 
 ```
 
 # Equal Area
@@ -109,7 +120,7 @@ all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(all_shp_un_poly, "../outputs/test/combine_ecozones_2001-test2.shp", driver="ESRI Shapefile") 
+st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-SingleEco/combine_ecozones_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
