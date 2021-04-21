@@ -81,7 +81,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 ```
 
 
-# Spatial Analysis
+# Select ecozones for region of interest
 
 ## Create target of require ecozones 
 1. Cherskii-Kolyma mountain tundra (CKMT)
@@ -92,6 +92,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 6. Taimyr-Central Siberian tundra (TCST)
 7. East Siberian taiga (EST)
 8. Trans-Baikal Bald Mountain tundra (TBBMT)
+9. South Siberian forest steppe (SSFT)
 ```{r}
 target = c("Cherskii-Kolyma mountain tundra", "Northeast Siberian coastal tundra","Chukchi Peninsula tundra", "Northeast Siberian taiga", "Bering tundra", "Taimyr-Central Siberian tundra", "East Siberian taiga", "Trans-Baikal Bald Mountain tundra", "South Siberian forest steppe")
 ```
@@ -138,7 +139,27 @@ ne_subset %>%
 ```{r}
 ne_subset$eco_code
 ```
-### Filter individual ecozones
+
+## ne_subset
+```{r}
+ne_subset_ee = st_transform(ne_subset, crs=ee_russia)
+```
+
+```{r}
+  
+ggplot(ne_subset_ee) + geom_sf()
+```
+
+## Save Shapefiles
+
+```{r eval=FALSE, include=FALSE}
+st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones9_ee.shp", driver="ESRI Shapefile") 
+st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones9.shp", driver="ESRI Shapefile") 
+```
+
+
+# Select individual Ecozones
+## Filter individual ecozones
 -- Cherskii-Kolyma mountain tundra (CKMT)
 -- Northeast Siberian coastal tundra (NSCT)
 -- Chukchi Peninsula tundra (CPT)
@@ -153,7 +174,7 @@ Treat CPT and BT as one spatail unit, but split by east/west hemisphere.
 Treat EST and TBBMT as one spatial unit.
 
 
-#### Northeast Siberian coastal tundra (NSCT)
+### Northeast Siberian coastal tundra (NSCT)
 ```{r}
 nsct = ne_subset %>% 
   filter(eco_code %in% "NSCT")
@@ -163,7 +184,7 @@ nsct = ne_subset %>%
 ggplot(nsct) + geom_sf()
 ```
 
-#### Taimyr-Central Siberian tundra (TCST)
+### Taimyr-Central Siberian tundra (TCST)
 ```{r}
 tcst = ne_subset %>% 
   filter(eco_code %in% "TCST")
@@ -173,7 +194,7 @@ tcst = ne_subset %>%
 ggplot(tcst) + geom_sf()
 ```
 
-#### East Siberian taiga (EST) & Trans-Baikal Bald Mountain tundra (TBBMT)
+### East Siberian taiga (EST) & Trans-Baikal Bald Mountain tundra (TBBMT)
 ```{r}
 est_tbbmt = ne_subset %>% 
   filter(eco_code %in% c("EST", "TBBMT"))
@@ -183,7 +204,7 @@ est_tbbmt = ne_subset %>%
 ggplot(est_tbbmt) + geom_sf()
 ```
 
-#### Cherskii-Kolyma mountain tundra (CKMT) & Northeast Siberian taiga (NST)
+### Cherskii-Kolyma mountain tundra (CKMT) & Northeast Siberian taiga (NST)
 
 ```{r}
 ckmt_nst = ne_subset %>% 
@@ -194,7 +215,7 @@ ckmt_nst = ne_subset %>%
 ggplot(ckmt_nst) + geom_sf()
 ```
 
-#### Chukchi Peninsula tundra (CPT) and Bering tundra (BT)
+### Chukchi Peninsula tundra (CPT) and Bering tundra (BT)
 ```{r}
 cpt_bt_east = ne_subset %>% 
   filter(eco_code %in% c("CPT", "BT")) %>%
@@ -230,17 +251,9 @@ ggplot(cpt_bt_west) + geom_sf()
 st_write(cpt_bt_west, "../outputs/ecozones/chukchi_east_west/cpt_bt_west.shp", driver="ESRI Shapefile")
 ```
 
-## ne_subset
-```{r}
-ne_subset_ee = st_transform(ne_subset, crs=ee_russia)
-```
 
-```{r}
-  
-ggplot(ne_subset_ee) + geom_sf()
-```
 
-## Steps to create individual polygons for GEE
+# Create individual polygons for GEE
 Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
 
 -- nsct
@@ -250,7 +263,7 @@ Convert to equal area projection, buffer, dissolve, covert back to WSG84, save
 -- cpt_bt_east
 -- cpt_bt_west
 
-### Covert to Equal Area projection
+## Covert to Equal Area projection
 st_transform(x, crs = st_crs(x), ...)
 
 ```{r}
@@ -268,7 +281,7 @@ cpt_bt_west_ee = st_transform(cpt_bt_west, crs=ee_russia)
 ggplot(nsct_ee) + geom_sf()
 ```
 
-### Buffer
+## Buffer
 
 ```{r}
 nsct_buf = st_buffer(nsct_ee, dist=3000, joinStyle="ROUND")
@@ -280,7 +293,7 @@ cpt_bt_west_buf = st_buffer(cpt_bt_west_ee, dist=3000, joinStyle="ROUND")
 ```
 
 
-### Remove overlap between buffers
+## Remove overlap between buffers
 ```{r}
 nsct_dis = st_cast(st_union(nsct_buf),"POLYGON")
 tcst_dis = st_cast(st_union(tcst_buf),"POLYGON")
@@ -291,7 +304,7 @@ cpt_bt_west_dis = st_cast(st_union(cpt_bt_west_buf),"POLYGON")
 ```
 
 
-# Save Individual Ecozone Polygons in Equal Area
+## Save GEE Ecozone Polygons in Equal Area
 ```{r eval=FALSE, include=FALSE}
 st_write(nsct_dis, "../outputs/ecozones/eco_ee/gee_eco_nsct_ee.shp", driver="ESRI Shapefile") 
 
@@ -388,13 +401,7 @@ ggplot(tcst_wgs) +geom_sf()
 est_tbbmt_wgs
 ggplot(est_tbbmt_wgs) +geom_sf()
 ```
-## Save Shapefiles
 
-
-```{r eval=FALSE, include=FALSE}
-st_write(ne_subset_ee, "../outputs/ecozones/ne_siberia_ecozones9_ee.shp", driver="ESRI Shapefile") 
-st_write(ne_subset, "../outputs/ecozones/ne_siberia_ecozones9.shp", driver="ESRI Shapefile") 
-```
 
 ### Individual buffered ecozones for GEE
 ```{r eval=FALSE, include=FALSE}
