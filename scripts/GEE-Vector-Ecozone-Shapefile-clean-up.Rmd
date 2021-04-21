@@ -65,13 +65,13 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 # Read in shapefile
 
 ```{r}
-ckmt_nst_nsct = st_read("../data/part2-gee-vectors-SingleEco/ckmt_nst_nsct_fires_2019.shp", "ckmt_nst_nsct_fires_2019") 
-cpt_bt_east = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_east_fires_2019.shp", "cpt_bt_east_fires_2019") 
-cpt_bt_west = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_west_fires_2019.shp", "cpt_bt_west_fires_2019") 
-est_tbbmt_n = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_n_fires_2019.shp", "est_tbbmt_n_fires_2019") 
-est_tbbmt_s = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_s_fires_2019.shp", "est_tbbmt_s_fires_2019") 
-tcst_n = st_read("../data/part2-gee-vectors-SingleEco/tcst_n_fires_2019.shp", "tcst_n_fires_2019") 
-tcst_s = st_read("../data/part2-gee-vectors-SingleEco/tcst_s_fires_2019.shp", "tcst_s_fires_2019") 
+ckmt_nst_nsct = st_read("../data/part2-gee-vectors-SingleEco/ckmt_nst_nsct_fires_2003.shp", "ckmt_nst_nsct_fires_2003") 
+cpt_bt_east = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_east_fires_2003.shp", "cpt_bt_east_fires_2003") 
+cpt_bt_west = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_west_fires_2003.shp", "cpt_bt_west_fires_2003") 
+est_tbbmt_n = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_n_fires_2003.shp", "est_tbbmt_n_fires_2003") 
+est_tbbmt_s = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_s_fires_2003.shp", "est_tbbmt_s_fires_2003") 
+tcst_n = st_read("../data/part2-gee-vectors-SingleEco/tcst_n_fires_2003.shp", "tcst_n_fires_2003") 
+tcst_s = st_read("../data/part2-gee-vectors-SingleEco/tcst_s_fires_2003.shp", "tcst_s_fires_2003") 
 ```
 
 # Equal Area
@@ -118,7 +118,7 @@ all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly)
 ```
 
 ```{r}
-st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-SingleEco/combine_ecozones_2019.shp", driver="ESRI Shapefile") 
+st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-SingleEco/combine_ecozones_2003.shp", driver="ESRI Shapefile") 
 ```
 
 
