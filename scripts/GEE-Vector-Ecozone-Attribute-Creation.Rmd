@@ -90,7 +90,7 @@ eco_arctic_ee = st_transform(eco_arctic, ee_russia)
 - Ecozone
 - Arctic/subarctic
 
-## Add Area Attributes
+## Area Burned Attributes
 ```{r}
 fires_at = fires_ee %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
@@ -115,17 +115,30 @@ plot(st_geometry(ecozones_ee), col = sf.colors(12, categorical = TRUE), border =
 plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
 ```
 
-## Add Ecozone attributes
+## Ecozone attributes
 
 We use `st_join` to add the attributes of the ecozone for each fire. Fires are not restricted to within individual ecozone boundaries. In order to avoid a duplicate entry for a fire that spans two ecozones, we add the argument `largest=TRUE`, which assigns the ecozone that contrains the majority of the fire. 
 
-
 ```{r}
-fires_at_eco = st_join(fires_at, ecozones_ee, largest=TRUE) %>% dplyr::select(FID:AREA, ECO_NAME:ECO_SYM, eco_code:geometry) %>% drop_na(eco_code)
+head(ecozones_ee)
+```
+### Rename columns for  ecozones
+Note about  attributes
+1. AREA - area for individual polygons
+2. area_km^2 - total area for each ecoregion ( 1 km^ is 100 ha)
+```{r}
+ren_ecozones_ee = ecozones_ee %>% 
+  rename(c("eco_objectID" = "OBJECTID", "eco_area" = "AREA" , "eco_realm" = "REALM", "eco_biome" = "BIOME")) %>%
+  dplyr::mutate(eco_area_ha = as.numeric(round(area_km2*100, 1)))
+```
+
+### Join ecozone attributes with fire perimeters
+```{r}
+fires_at_eco = st_join(fires_at, ren_ecozones_ee, largest=TRUE) %>% dplyr::select(FID:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% drop_na(eco_code)
 ```
 
 ```{r}
-fires_at_eco
+head(fires_at_eco)
 ```
 
 ```{r}
@@ -134,7 +147,7 @@ plot(st_geometry(ecozones_ee), border = 'grey',
 plot(st_geometry(st_centroid(fires_at_eco)), pch = 3, col = 'red', add = TRUE)
 ```
 
-## Add Arctic/Subarctic Location
+## Arctic/Subarctic designation
 ```{r}
 fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ee, largest=TRUE) 
 ```
@@ -158,13 +171,23 @@ plot(st_geometry(ecozones_ee), border = 'grey',
 plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
 ```
 
-### Save a est version to check
+### Save as test version to check
 ```{r eval=FALSE, include=FALSE}
 st_write(fires_at_eco_arc, "../outputs/test/test_fires_at_eco_arc.shp", driver="ESRI Shapefile") 
 
 ```
-## Add Hotspot attributes
 
+## Hotspot attributes
+```{r}
+str(hotspots_ee)
+```
+
+```{r}
+hotspots_ee %>% mutate(julian_date = yday(ACQ_DATE)) %>% 
+  separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) 
+```
+
+%>%summarize(min_acq_date = min(ACQ_DATE))
 ### Function to summarize hotspot attributes
 ```{r}
 sum_pt_poly = function(x){
@@ -187,16 +210,13 @@ sum_pt_poly = function(x){
 ```
 
 
-### Apply functions
-
-
 ```{r}
 fires_at_eco_arc_hs = st_intersection(hotspots_ee, fires_at_eco_arc) %>% sum_pt_poly()
 
 ```
 
 ```{r}
-fires_at_eco_arc_hs
+head(fires_at_eco_arc_hs)
 ```
 ```{r}
 plot(st_geometry(ecozones_ee), border = 'grey', 
@@ -209,14 +229,14 @@ plot(st_geometry(st_centroid(fires_at_eco_arc_hs)), pch = 3, col = 'red', add = 
 st_geometry(fires_at_eco_arc_hs) <- NULL
 ```
 
-## Merge
-
+## Merge  attributes
+Merge attributes into single shapefile
 ```{r}
 fires_at_eco_arc_hs_merge = merge(fires_at_eco_arc, fires_at_eco_arc_hs, by="ID_obj")
 ```
 
 ```{r}
-fires_at_eco_arc_hs_merge
+head(fires_at_eco_arc_hs_merge)
 ```
 
 
@@ -227,8 +247,25 @@ plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', 
 ```
 
 
+## Add unique fire ID
 
+```{r}
+head(fires_at_eco_arc_hs_merge)
+```
+Fire ID components
+1. RU
+2. YEAR
+3. Ecozone code
+4. Start date
 
+An add fire length in days
+
+```{r}
+fires_at_eco_arc_hs_merge %>%
+  mutate(burn_days = (max_julian_date - min_julian_date)) %>%
+  mutate(Fire_ID = paste("RU", fire_yr, eco_code, min_julian_date, sep = "-")) 
+
+```
 
 
 
