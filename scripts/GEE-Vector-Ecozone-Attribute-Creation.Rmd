@@ -51,7 +51,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 ## Fire perimeters
 
 ```{r}
-fires = st_read("../data/clean-shapefile-ecozone/combine_ecozones_2001.shp", "combine_ecozones_2001") 
+fires = st_read("../data/GEE-clean-shapefiles-SingleEco/combine_ecozones_2001.shp", "combine_ecozones_2001") 
 ```
 
 ## Hotspots
@@ -94,13 +94,12 @@ eco_arctic_ee = st_transform(eco_arctic, ee_russia)
 ```{r}
 fires_at = fires_ee %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
-  dplyr::mutate(area_m = as.numeric(round(st_area(fires_ee),1))) %>% 
-  dplyr::mutate(area_ha = as.numeric(round(area_m*0.0001, 1))) %>% 
+  dplyr::mutate(burned_area_m = as.numeric(round(st_area(fires_ee),1))) %>% 
+  dplyr::mutate(burned_area_ha = as.numeric(round(burned_area_m*0.0001, 1))) %>% 
   dplyr::mutate(fire_yr = 2001) 
 ```
 
-%>%
-  filter(area_ha >= 400)
+
 ```{r}
 fires_at
 ```
@@ -187,7 +186,7 @@ hotspots_ee %>% mutate(julian_date = yday(ACQ_DATE)) %>%
   separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) 
 ```
 
-%>%summarize(min_acq_date = min(ACQ_DATE))
+
 ### Function to summarize hotspot attributes
 ```{r}
 sum_pt_poly = function(x){
@@ -197,14 +196,12 @@ sum_pt_poly = function(x){
             max_julian_date = max(julian_date),
             mean_julian_date = mean(julian_date),
             median_julian_date = median(julian_date),
-            min_acq_month = min(acq_month),
-            min_acq_day = min(acq_day), 
-            max_acq_month = max(acq_month),
-            max_acq_day = max(acq_day), 
             min_confidence = min(CONFIDENCE), 
             max_confidence = max(CONFIDENCE), 
             mean_confidence = mean(CONFIDENCE), 
-            median_confidence = median(CONFIDENCE)) -> x
+            median_confidence = median(CONFIDENCE),
+            min_acq_date = min(ACQ_DATE), 
+            max_acq_date = max(ACQ_DATE)) -> x
   return(x)
 }
 ```
@@ -261,17 +258,18 @@ Fire ID components
 An add fire length in days
 
 ```{r}
-fires_at_eco_arc_hs_merge %>%
+fires_at_eco_arc_hs_merge_burn = fires_at_eco_arc_hs_merge %>%
+  separate(min_acq_date, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>%
   mutate(burn_days = (max_julian_date - min_julian_date)) %>%
-  mutate(Fire_ID = paste("RU", fire_yr, eco_code, min_julian_date, sep = "-")) 
+  mutate(Fire_ID = paste("RU_", fire_yr,"_", eco_code, "_", acq_year, acq_month, acq_day, sep = "")) 
 
 ```
 
 
 
 
-### Remove geometry and write attributes to CSV
-```{r}
+# Remove geometry and write attributes to CSV
+```{r eval=FALSE, include=FALSE}
 fires_at_eco_arc_hs_merge %>% 
   st_set_geometry(NULL) %>% 
         write.csv(., '../outputs/test/test_attributes.csv',  row.names = FALSE)
@@ -281,6 +279,6 @@ fires_at_eco_arc_hs_merge %>%
 # Write to shapefile
 ## Save  test version to inspect 
 ```{r eval=FALSE, include=FALSE}
-st_write(fires_at_eco_arc_hs_merge, "../outputs/test/test_attributes-remove_dup.shp", driver="ESRI Shapefile") 
+st_write(fires_at_eco_arc_hs_merge_burn, "../outputs/GEE-Attribute-Shapefiles/ru-fires-2001.shp", driver="ESRI Shapefile") 
 
 ```
