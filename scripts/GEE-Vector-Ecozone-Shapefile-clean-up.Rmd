@@ -96,10 +96,21 @@ est_tbbmt_s_ee = st_transform(est_tbbmt_s, crs=ee_russia)
 tcst_n_ee = st_transform(tcst_n, crs=ee_russia)
 tcst_s_ee = st_transform(tcst_s, crs=ee_russia)
 ```
+# Buffer (500 m)
+```{r}
+E_EPoly2_1_buff =st_buffer(E_EPoly2_1_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+```
 
+```{r}
+NEPoly1_buff =st_buffer(NEPoly1_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+```
+
+```{r}
+W_EPoly2_2_buff =st_buffer(W_EPoly2_2_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+```
 # Combine into one shapefile
 ```{r}
-all_shp = rbind(E_EPoly2_1_ee, NEPoly1_ee, W_EPoly2_2_ee)
+all_shp = rbind(E_EPoly2_1_buff, NEPoly1_buff, W_EPoly2_2_buff)
 ```
 
 ```{r eval=FALSE, include=FALSE}
