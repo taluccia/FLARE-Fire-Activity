@@ -1,0 +1,67 @@
+---
+title: "Hotspot polygon to Equal Area"
+author: "Anna Talucci"
+date: "4/24/2021"
+output: html_document
+---
+
+
+# Overview
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+library(lubridate)
+library(nngeo) # remove holes in polygons; works with sf objects 
+```
+
+# Projections
+
+WGS 84 need for gee
+```{r}
+wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
+```
+
+[Equal Area projection for Russia](https://gis.stackexchange.com/questions/264093/projection-for-russia-map) is needed for buffering hotspot data.
+
+The projection:
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Data
+
+```{r}
+
+hs_poly = st_read("../data/hotspot-poly-single-eco/hspoly_singleEco_2006.shp", "hspoly_singleEco_2006")
+```
+
+
+# Equal Area
+```{r}
+hs_poly_ea = st_transform(hs_poly, crs=ee_russia)
+```
+
+
+# Write 
+```{r}
+st_write(hs_poly_ea , "../outputs/hotspot-poly-EqualArea/hspoly_EA_2006.shp", driver="ESRI Shapefile")
+
+```
