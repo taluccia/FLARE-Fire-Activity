@@ -268,8 +268,8 @@ st_write(eco2_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_EEPOLY_Eco_2
 eco3_hs = eco_hs_ee_sp[eco_W_EPoly2_2_ee, ]
 eco3_hs_3k = gBuffer(eco3_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
 eco3_hs_3k_nh = remove.holes(eco3_hs_3k) # Remove holes in polygons
-eco3_hs_wgs = spTransform(eco3_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco3_hs_wgs_sf = st_as_sf(eco3_hs_wgs)
+
+eco3_hs_3k_nh _sf = st_as_sf(eco3_hs_3k_nh )
 ```
 
 
