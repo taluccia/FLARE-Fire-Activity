@@ -63,8 +63,14 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 ```
 
 # Read in shapefile
-
 ```{r}
+E_EPoly2_1 = st_read("../data/part2-gee-vectors-EqualArea/E_EPoly2_1_ee_fires_2001.shp", "E_EPoly2_1_ee_fires_2001") 
+NEPoly1 = st_read("../data/part2-gee-vectors-EqualArea/NEPoly1_ee_fires_2001.shp", "NEPoly1_ee_fires_2001") 
+W_EPoly2_2 = st_read("../data/part2-gee-vectors-EqualArea/W_EPoly2_2_ee_fires_2001.shp", "W_EPoly2_2_ee_fires_2001") 
+
+```
+
+```{r eval=FALSE, include=FALSE}
 ckmt_nst_nsct = st_read("../data/part2-gee-vectors-SingleEco/ckmt_nst_nsct_fires_2003.shp", "ckmt_nst_nsct_fires_2003") 
 cpt_bt_east = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_east_fires_2003.shp", "cpt_bt_east_fires_2003") 
 cpt_bt_west = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_west_fires_2003.shp", "cpt_bt_west_fires_2003") 
@@ -76,6 +82,12 @@ tcst_s = st_read("../data/part2-gee-vectors-SingleEco/tcst_s_fires_2003.shp", "t
 
 # Equal Area
 ```{r}
+E_EPoly2_1_ee = st_transform(E_EPoly2_1, crs=ee_russia)
+NEPoly1_ee = st_transform(NEPoly1, crs=ee_russia)
+W_EPoly2_2_ee = st_transform(W_EPoly2_2, crs=ee_russia)
+```
+
+```{r eval=FALSE, include=FALSE}
 ckmt_nst_nsct_ee = st_transform(ckmt_nst_nsct, crs=ee_russia)
 cpt_bt_east_ee = st_transform(cpt_bt_east, crs=ee_russia)
 cpt_bt_west_ee = st_transform(cpt_bt_west, crs=ee_russia)
@@ -87,6 +99,10 @@ tcst_s_ee = st_transform(tcst_s, crs=ee_russia)
 
 # Combine into one shapefile
 ```{r}
+all_shp = rbind(E_EPoly2_1_ee, NEPoly1_ee, W_EPoly2_2_ee)
+```
+
+```{r eval=FALSE, include=FALSE}
 all_shp = rbind(ckmt_nst_nsct_ee, cpt_bt_east_ee, cpt_bt_west_ee, est_tbbmt_n_ee, est_tbbmt_s_ee, tcst_n_ee, tcst_s_ee)
 ```
 
@@ -118,7 +134,7 @@ all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly)
 ```
 
 ```{r}
-st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-SingleEco/combine_ecozones_2003.shp", driver="ESRI Shapefile") 
+st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
