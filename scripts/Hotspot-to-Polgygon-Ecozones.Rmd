@@ -179,7 +179,7 @@ remove_issue_pt = hs_ee_sf %>% filter(LONGITUDE != 179.9466)# Filter out point
 eco_hs_ee_sp = as(remove_issue_pt, 'Spatial')# convert back to sp
 ```
 
-# Process Point to Polygon for Large data year 2019 & 2020)
+# Process Point to Polygon for Large data year 2003, 2019 & 2020)
 Split the region of interest (ROI; single polygon) into 3 ROIs.  Process the point to polygon on the 3 ROIs and then combine into single shapefile.
 
 1. Process point to polygon for each of three ecozone boundaries
@@ -192,12 +192,12 @@ Use eco_nepoly1_ee
 eco1_hs = hs_ee[eco_nepoly1_ee, ]
 eco1_hs_3k = gBuffer(eco1_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
 eco1_hs_3k_nh = remove.holes(eco1_hs_3k) # Remove holes in polygons
-eco1_hs_wgs = spTransform(eco1_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco1_hs_wgs_sf = st_as_sf(eco1_hs_wgs)
+
+eco1_hs_EA_sf = st_as_sf(eco1_hs_3k_nh)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(eco1_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_NE_Eco_2020.shp", driver="ESRI Shapefile")
+st_write(eco1_hs_EA_sf, "../outputs/hotspot-poly-EqualArea/hspoly_NE_Eco_EA_2003.shp", driver="ESRI Shapefile")
 ```
 
 ## For eastern portion of E Poly 2
@@ -207,12 +207,12 @@ Use ecozone boundary eco_E_EPoly2_1_ee
 eco2_hs = hs_ee[eco_E_EPoly2_1_ee, ]
 eco2_hs_3k = gBuffer(eco2_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
 eco2_hs_3k_nh = remove.holes(eco2_hs_3k) # Remove holes in polygons
-eco2_hs_wgs = spTransform(eco2_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco2_hs_wgs_sf = st_as_sf(eco2_hs_wgs)
+
+eco2_hs_EA_sf = st_as_sf(eco2_hs_3k_nh)
 ```
 
 ```{r eval=FALSE, include=FALSE}
-st_write(eco2_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_EEPOLY_Eco_2020.shp", driver="ESRI Shapefile")
+st_write(eco2_hs_EA_sf, "../outputs/hotspot-poly-EqualArea/hspoly_EEPOLY_Eco_EA_2003.shp", driver="ESRI Shapefile")
 ```
 
 ## For western portion of E Poly 2
@@ -221,61 +221,16 @@ st_write(eco2_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_EEPOLY_Eco_2
 eco3_hs = hs_ee[eco_W_EPoly2_2_ee, ]
 eco3_hs_3k = gBuffer(eco3_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
 eco3_hs_3k_nh = remove.holes(eco3_hs_3k) # Remove holes in polygons
-eco3_hs_wgs = spTransform(eco3_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco3_hs_wgs_sf = st_as_sf(eco3_hs_wgs)
+
+eco3_hs_EA_sf = st_as_sf(eco3_hs_3k_nh)
 ```
 
 
 
 ```{r eval=FALSE, include=FALSE}
-st_write(eco3_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_WEPoly_Eco_2020.shp", driver="ESRI Shapefile")
+st_write(eco3_hs_EA_sf, "../outputs/hotspot-poly-EqualArea/hspoly_WEPoly_Eco_EA_2003.shp", driver="ESRI Shapefile")
 ```
 
-## For 2003
-### For NE Poly 1
-Use eco_nepoly1_ee
-
-```{r}
-eco1_hs = eco_hs_ee_sp[eco_nepoly1_ee, ]
-eco1_hs_3k = gBuffer(eco1_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
-eco1_hs_3k_nh = remove.holes(eco1_hs_3k) # Remove holes in polygons
-eco1_hs_wgs = spTransform(eco1_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco1_hs_wgs_sf = st_as_sf(eco1_hs_wgs)
-```
-
-```{r eval=FALSE, include=FALSE}
-st_write(eco1_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_NE_Eco_2003.shp", driver="ESRI Shapefile")
-```
-
-### For eastern portion of E Poly 2
-Use ecozone boundary eco_E_EPoly2_1_ee
-
-```{r}
-eco2_hs = eco_hs_ee_sp[eco_E_EPoly2_1_ee, ]
-eco2_hs_3k = gBuffer(eco2_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
-eco2_hs_3k_nh = remove.holes(eco2_hs_3k) # Remove holes in polygons
-eco2_hs_wgs = spTransform(eco2_hs_3k_nh, CRS( wgs_proj)) # reproject to WGS for GEE
-eco2_hs_wgs_sf = st_as_sf(eco2_hs_wgs)
-```
-
-```{r eval=FALSE, include=FALSE}
-st_write(eco2_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_EEPOLY_Eco_2003.shp", driver="ESRI Shapefile")
-```
-
-### For western portion of E Poly 2
-
-```{r}
-eco3_hs = eco_hs_ee_sp[eco_W_EPoly2_2_ee, ]
-eco3_hs_3k = gBuffer(eco3_hs, width = 3000, capStyle="ROUND", joinStyle="ROUND") # Buffer by 3k
-eco3_hs_3k_nh = remove.holes(eco3_hs_3k) # Remove holes in polygons
-
-eco3_hs_3k_nh _sf = st_as_sf(eco3_hs_3k_nh )
-```
-
-
-```{r eval=FALSE, include=FALSE}
-st_write(eco3_hs_wgs_sf, "../outputs/hotspot-poly-single-eco/hspoly_WEPoly_Eco_2003.shp", driver="ESRI Shapefile")
-```
 
 ## Combine Hotspot poly into one file for 2019 & 2020
 1. Convert to sf object
@@ -301,9 +256,8 @@ merge_polys_un_poly_nh = nngeo::st_remove_holes(merge_polys_un_poly)
 plot(merge_polys_un_poly_nh)
 ```
 ```{r}
-merge_polys_un_poly_nh_wgs = st_transform(merge_polys_un_poly_nh, wgs_proj) # reproject to WGS for GEE
 
-st_write(merge_polys_un_poly_nh_wgs, "../outputs/hotspot-poly-single-eco/hspoly_singleEco_2003.shp", driver="ESRI Shapefile")
+st_write(merge_polys_un_poly_nh, "../outputs/hotspot-poly-single-eco/hspoly_EA_2003.shp", driver="ESRI Shapefile")
 ```
 
 
