@@ -50,7 +50,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 ```{r}
 
-hs_poly = st_read("../data/hotspot-poly-single-eco/hspoly_singleEco_2006.shp", "hspoly_singleEco_2006")
+hs_poly = st_read("../data/hotspot-poly-single-eco/hspoly_singleEco_2013.shp", "hspoly_singleEco_2013")
 ```
 
 
@@ -62,6 +62,6 @@ hs_poly_ea = st_transform(hs_poly, crs=ee_russia)
 
 # Write 
 ```{r}
-st_write(hs_poly_ea , "../outputs/hotspot-poly-EqualArea/hspoly_EA_2006.shp", driver="ESRI Shapefile")
+st_write(hs_poly_ea , "../outputs/hotspot-poly-EqualArea/hspoly_EA_2013.shp", driver="ESRI Shapefile")
 
 ```
