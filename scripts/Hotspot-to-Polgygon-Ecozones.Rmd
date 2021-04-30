@@ -257,7 +257,7 @@ plot(merge_polys_un_poly_nh)
 ```
 ```{r}
 
-st_write(merge_polys_un_poly_nh, "../outputs/hotspot-poly-single-eco/hspoly_EA_2003.shp", driver="ESRI Shapefile")
+st_write(merge_polys_un_poly_nh, "../outputs/hotspot-poly-EqualArea/hspoly_EA_2003.shp", driver="ESRI Shapefile")
 ```
 
 
