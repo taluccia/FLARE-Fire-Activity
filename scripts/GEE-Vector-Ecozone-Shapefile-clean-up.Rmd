@@ -48,10 +48,6 @@ library(nngeo)
 
 # Projections
 
-WGS 84 need for gee
-```{r}
-wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
-```
 
 Equal Area projection for russia need for buffering hotspot data
 https://gis.stackexchange.com/questions/264093/projection-for-russia-map
@@ -64,9 +60,9 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = st_read("../data/part2-gee-vectors-EqualArea/E_EPoly2_1_ee_fires_2001.shp", "E_EPoly2_1_ee_fires_2001") 
-NEPoly1 = st_read("../data/part2-gee-vectors-EqualArea/NEPoly1_ee_fires_2001.shp", "NEPoly1_ee_fires_2001") 
-W_EPoly2_2 = st_read("../data/part2-gee-vectors-EqualArea/W_EPoly2_2_ee_fires_2001.shp", "W_EPoly2_2_ee_fires_2001") 
+E_EPoly2_1 = st_read("../data/part2-gee-vectors-EqualArea/E_EPoly2_1_ee_fires90_2001.shp", "E_EPoly2_1_ee_fires90_2001") 
+NEPoly1 = st_read("../data/part2-gee-vectors-EqualArea/NEPoly1_ee_fires90_2001.shp", "NEPoly1_ee_fires90_2001") 
+W_EPoly2_2 = st_read("../data/part2-gee-vectors-EqualArea/W_EPoly2_2_ee_fires90_2001.shp", "W_EPoly2_2_ee_fires90_2001") 
 
 ```
 
@@ -108,9 +104,26 @@ NEPoly1_buff =st_buffer(NEPoly1_ee, dist=500, endCapStyle = "ROUND", joinStyle =
 ```{r}
 W_EPoly2_2_buff =st_buffer(W_EPoly2_2_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
 ```
+
+# Remove holes
+```{r}
+E_EPoly2_1_buff_nh = nngeo::st_remove_holes(E_EPoly2_1_buff)
+```
+
+```{r}
+NEPoly1_buff_nh = nngeo::st_remove_holes(NEPoly1_buff)
+```
+
+```{r}
+W_EPoly2_2_buff_nh = nngeo::st_remove_holes(W_EPoly2_2_buff)
+```
 # Combine into one shapefile
 ```{r}
-all_shp = rbind(E_EPoly2_1_buff, NEPoly1_buff, W_EPoly2_2_buff)
+all_shp1 = rbind(E_EPoly2_1_buff, NEPoly1_buff, W_EPoly2_2_buff)
+all_shp1
+```
+```{r}
+all_shp = rbind(E_EPoly2_1_buff_nh, NEPoly1_buff_nh, W_EPoly2_2_buff_nh)
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -118,7 +131,10 @@ all_shp = rbind(ckmt_nst_nsct_ee, cpt_bt_east_ee, cpt_bt_west_ee, est_tbbmt_n_ee
 ```
 
 ```{r}
-plot(all_shp$geometry)
+all_shp
+```
+```{r}
+plot(all_shp$geom)
 ```
 
 
@@ -141,11 +157,11 @@ all_shp_un_poly = sf::st_cast(all_shp_un, "POLYGON")
 
 
 ```{r}
-all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly)
+all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly, max_area = 0)
 ```
 
 ```{r}
-st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea_2001.shp", driver="ESRI Shapefile") 
+st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea90_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
