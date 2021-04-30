@@ -1,0 +1,106 @@
+---
+title: "Hole removal test"
+author: "Anna Talucci"
+date: "4/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(spatialEco)
+library(units)
+library(smoothr)
+```
+> require(raster);require(rgeos)
+> hole = shapefile("./holey.shp")
+Get the first ring of the first feature:
+
+> featureNumber=1 ; ringNumber=1
+> ring = SpatialPolygons(
+            list(
+              Polygons(
+                 list(
+                   hole@polygons[[featureNumber]]@Polygons[[ringNumber]]
+                  ),
+               ID=1)))
+               
+```{r}
+ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Read in shapefile
+```{r eval=FALSE, include=FALSE}
+E_EPoly2_1 = readOGR("../data/part2-gee-vectors-EqualArea/E_EPoly2_1_ee_fires90_2001.shp", "E_EPoly2_1_ee_fires90_2001") 
+```
+
+```{r}
+NEPoly1 = st_read("../data/part2-gee-vectors-EqualArea/NEPoly1_ee_fires90_2001.shp", "NEPoly1_ee_fires90_2001") 
+```
+
+```{r eval=FALSE, include=FALSE}
+W_EPoly2_2 = readOGR("../data/part2-gee-vectors-EqualArea/W_EPoly2_2_ee_fires90_2001.shp", "W_EPoly2_2_ee_fires90_2001") 
+
+```
+
+```{r eval=FALSE, include=FALSE}
+EE_ea = spTransform(E_EPoly2_1, CRS(ee_russia))
+```
+
+```{r}
+NE_ea = st_transform(NEPoly1, crs=ee_russia)
+```
+
+```{r eval=FALSE, include=FALSE}
+WE_ea = spTransform(W_EPoly2_2, CRS(ee_russia))
+```
+
+```{r}
+ne_buff =st_buffer(NE_ea, dist=600, endCapStyle = "ROUND", joinStyle = "ROUND")
+```
+
+```{r}
+ne_buff_un = sf::st_union(ne_buff)
+```
+
+```{r}
+ne_buff_un_poly = sf::st_cast(ne_buff_un, "POLYGON")
+```
+
+```{r}
+area_thresh <- units::set_units(1000, km^2)
+p_dropped <- fill_holes(ne_buff_un_poly, threshold = area_thresh)
+```
+
+```{r}
+p_dropped_rh = nngeo::st_remove_holes(p_dropped)
+```
+
+```{r}
+p_smoothed <- smooth(p_dropped_rh, method = "ksmooth", smoothness = 2)
+```
+
+```{r}
+p_spline <- smooth(p_dropped_rh, method = "spline")
+```
+
+```{r}
+p_smoothed
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(p_smoothed, "../outputs/test/test_fill_smooth-k_90m_2001.shp", driver="ESRI Shapefile")  
+```
+
+```{r eval=FALSE, include=FALSE}
+st_write(p_spline, "../outputs/test/test_fill_spline-k_90m_2001.shp", driver="ESRI Shapefile")  
+```
