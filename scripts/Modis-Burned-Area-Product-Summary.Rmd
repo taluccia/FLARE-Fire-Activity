@@ -139,6 +139,15 @@ by_eco_yr = all_data %>% group_by(eco_code, fire_yr) %>%
              Maximum = max(round(burn_ha,1)),
              Total = sum(round(burn_ha,1)))
 ```
+```{r}
+by_eco_yr %>% 
+  dplyr::select(eco_code, fire_yr, Total) %>% 
+  filter(fire_yr == 2001) %>% 
+        write.csv(., '../outputs/test/modis-burnArea-2001.csv',  row.names = FALSE)
+
+```
+
+
 
 ### Figure
 ```{r}
