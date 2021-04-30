@@ -56,7 +56,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 ## Fire perimeters
 ```{r}
-fires = st_read("../data/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea_2001.shp", "combine_ecozones_ea_2001") 
+fires = st_read("../data/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea90_2001.shp", "combine_ecozones_ea90_2001") 
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -65,7 +65,7 @@ fires = st_read("../data/GEE-clean-shapefiles-SingleEco/combine_ecozones_2005.sh
 
 ## Hotspots
 ```{r}
-hotspots = st_read("../data/M6-march-october/M6_mar-oct_2005.shp", "M6_mar-oct_2005") 
+hotspots = st_read("../data/M6-march-october/M6_mar-oct_2001.shp", "M6_mar-oct_2001") 
 ```
 
 ## Ecozones Polygon
@@ -274,7 +274,9 @@ fires_at_eco_arc_hs_merge_burn = fires_at_eco_arc_hs_merge %>%
 
 ```
 
-
+```{r}
+fires_at_eco_arc_hs_merge_burn_rh = nngeo::st_remove_holes(fires_at_eco_arc_hs_merge_burn, max_area = 1000)
+```
 
 
 # Remove geometry and write attributes to CSV
@@ -288,6 +290,6 @@ fires_at_eco_arc_hs_merge %>%
 # Write to shapefile
 ## Save  test version to inspect 
 ```{r}
-st_write(fires_at_eco_arc_hs_merge_burn, "../outputs/GEE-Attribute-Shapefiles-EqualArea/ru-fires-2001.shp", driver="ESRI Shapefile") 
+st_write(fires_at_eco_arc_hs_merge_burn_rh, "../outputs/GEE-Attribute-Shapefiles-EqualArea/ea-fires90-2001.shp", driver="ESRI Shapefile") 
 
 ```
