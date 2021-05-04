@@ -62,9 +62,9 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/E_EPoly2_1_ee_fires90_2001.shp", "E_EPoly2_1_ee_fires90_2001") 
-NEPoly1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/NEPoly1_ee_fires90_2001.shp", "NEPoly1_ee_fires90_2001") 
-W_EPoly2_2 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/W_EPoly2_2_ee_fires90_2001.shp", "W_EPoly2_2_ee_fires90_2001") 
+E_EPoly2_1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/E_EPoly2_1_ee_fires_2001.shp", "E_EPoly2_1_ee_fires_2001") 
+NEPoly1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/NEPoly1_ee_fires_2001.shp", "NEPoly1_ee_fires_2001") 
+W_EPoly2_2 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/W_EPoly2_2_ee_fires_2001.shp", "W_EPoly2_2_ee_fires_2001") 
 
 ```
 
@@ -73,9 +73,9 @@ W_EPoly2_2 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/W_EPoly2_2_ee_fire
 # Reproject in Equal area
 
 ```{r}
-E_EPoly2_1_ee = spTransform(E_EPoly2_1, CRS(ee_russia))
-NEPoly1_ee = spTransform(NEPoly1, CRS(ee_russia))
-W_EPoly2_2_ee = spTransform(W_EPoly2_2, CRS(ee_russia))
+E_EPoly2_1_ee = spTransform(E_EPoly2_1, CRS(ea_russia))
+NEPoly1_ee = spTransform(NEPoly1, CRS(ea_russia))
+W_EPoly2_2_ee = spTransform(W_EPoly2_2, CRS(ea_russia))
 ```
 
 # Buffer 
@@ -144,7 +144,7 @@ all_shp_cast = st_cast(all_shp_un,"POLYGON")
 
 # write Shapefile
 ```{r}
-st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
+st_write(all_shp_cast, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
