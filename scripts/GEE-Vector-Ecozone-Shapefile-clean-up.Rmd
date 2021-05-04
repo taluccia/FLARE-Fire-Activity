@@ -13,15 +13,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Using part2-gee-vectors-SingleEco data file, we remove holes, convert from multipoly to polygon, apply negative buffer, and combine into single shapefile.
 
-In GEE, vectors were run within  hotspot polygons that spanned all 9 ecozones, but run on 7 separate composit images.
+In GEE, vectors were run within  hotspot polygons across 3 ROI
 
-1. ckmt_nst_nsct_flare_fires_YEAR
-2. cpt_bt_east_flare_fires_YEAR
-3. cpt_bt_west_flare_fires_YEAR
-4. est_tbbmt_n_flare_fires_YEAR
-5. est_tbbmt_s_flare_fires_YEAR
-6. tcst_n_flare_fires_YEAR
-7. tcst_s_flare_fires_YEAR
+1. Union is use to merge overlaping polygons 
+  + For example, where a fire spans the imagery boundaries producing multiple polygons, these are merged into a single polygon.
+2. Cast to Polygon
+  + This convers from a multipolygon to individual Polygons
+3. Remove Holes
+  + This removes any holes created in polgyons during the GEE vectorize process, or when mergeing polygons
+  + It is important to remove as holes can cause issues during geoprocesses.
+4. **Vectors have too many edges to use in GEE after processing - Need to integrate a smoothing function.**
+
 
 
 # Clear workspace
@@ -55,113 +57,94 @@ https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
 
 ```{r}
-ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = st_read("../data/part2-gee-vectors-EqualArea/E_EPoly2_1_ee_fires90_2001.shp", "E_EPoly2_1_ee_fires90_2001") 
-NEPoly1 = st_read("../data/part2-gee-vectors-EqualArea/NEPoly1_ee_fires90_2001.shp", "NEPoly1_ee_fires90_2001") 
-W_EPoly2_2 = st_read("../data/part2-gee-vectors-EqualArea/W_EPoly2_2_ee_fires90_2001.shp", "W_EPoly2_2_ee_fires90_2001") 
+E_EPoly2_1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/E_EPoly2_1_ee_fires90_2001.shp", "E_EPoly2_1_ee_fires90_2001") 
+NEPoly1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/NEPoly1_ee_fires90_2001.shp", "NEPoly1_ee_fires90_2001") 
+W_EPoly2_2 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/W_EPoly2_2_ee_fires90_2001.shp", "W_EPoly2_2_ee_fires90_2001") 
 
 ```
 
-```{r eval=FALSE, include=FALSE}
-ckmt_nst_nsct = st_read("../data/part2-gee-vectors-SingleEco/ckmt_nst_nsct_fires_2003.shp", "ckmt_nst_nsct_fires_2003") 
-cpt_bt_east = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_east_fires_2003.shp", "cpt_bt_east_fires_2003") 
-cpt_bt_west = st_read("../data/part2-gee-vectors-SingleEco/cpt_bt_west_fires_2003.shp", "cpt_bt_west_fires_2003") 
-est_tbbmt_n = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_n_fires_2003.shp", "est_tbbmt_n_fires_2003") 
-est_tbbmt_s = st_read("../data/part2-gee-vectors-SingleEco/est_tbbmt_s_fires_2003.shp", "est_tbbmt_s_fires_2003") 
-tcst_n = st_read("../data/part2-gee-vectors-SingleEco/tcst_n_fires_2003.shp", "tcst_n_fires_2003") 
-tcst_s = st_read("../data/part2-gee-vectors-SingleEco/tcst_s_fires_2003.shp", "tcst_s_fires_2003") 
-```
 
-# Equal Area
+
+# Reproject in Equal area
+
 ```{r}
-E_EPoly2_1_ee = st_transform(E_EPoly2_1, crs=ee_russia)
-NEPoly1_ee = st_transform(NEPoly1, crs=ee_russia)
-W_EPoly2_2_ee = st_transform(W_EPoly2_2, crs=ee_russia)
+E_EPoly2_1_ee = spTransform(E_EPoly2_1, CRS(ee_russia))
+NEPoly1_ee = spTransform(NEPoly1, CRS(ee_russia))
+W_EPoly2_2_ee = spTransform(W_EPoly2_2, CRS(ee_russia))
 ```
 
-```{r eval=FALSE, include=FALSE}
-ckmt_nst_nsct_ee = st_transform(ckmt_nst_nsct, crs=ee_russia)
-cpt_bt_east_ee = st_transform(cpt_bt_east, crs=ee_russia)
-cpt_bt_west_ee = st_transform(cpt_bt_west, crs=ee_russia)
-est_tbbmt_n_ee = st_transform(est_tbbmt_n, crs=ee_russia)
-est_tbbmt_s_ee = st_transform(est_tbbmt_s, crs=ee_russia)
-tcst_n_ee = st_transform(tcst_n, crs=ee_russia)
-tcst_s_ee = st_transform(tcst_s, crs=ee_russia)
-```
-# Buffer (500 m)
+# Buffer 
+Buffer by 1000m (1km). Originally  a buffer was applied in GEE, but to maintain equal area projection we perform the buffer here at the begining to combine adjacent polygons.  
 ```{r}
-E_EPoly2_1_buff =st_buffer(E_EPoly2_1_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+E_EPoly2_1_buff = gBuffer(E_EPoly2_1_ee, width = 1000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 ```{r}
-NEPoly1_buff =st_buffer(NEPoly1_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+NEPoly1_buff = gBuffer(NEPoly1_ee, width = 1000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 ```{r}
-W_EPoly2_2_buff =st_buffer(W_EPoly2_2_ee, dist=500, endCapStyle = "ROUND", joinStyle = "ROUND")
+W_EPoly2_2_buff = gBuffer(W_EPoly2_2_ee, width = 1000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
-# Remove holes
+
+
+# Remove holes inside polygons
+
 ```{r}
-E_EPoly2_1_buff_nh = nngeo::st_remove_holes(E_EPoly2_1_buff)
+E_EPoly2_1_buff_nh = remove.holes(E_EPoly2_1_buff)
 ```
 
 ```{r}
-NEPoly1_buff_nh = nngeo::st_remove_holes(NEPoly1_buff)
+NEPoly1_buff_nh = remove.holes(NEPoly1_buff)
 ```
 
 ```{r}
-W_EPoly2_2_buff_nh = nngeo::st_remove_holes(W_EPoly2_2_buff)
+W_EPoly2_2_buff_nh = remove.holes(W_EPoly2_2_buff)
 ```
+
+
 # Combine into one shapefile
-```{r}
-all_shp1 = rbind(E_EPoly2_1_buff, NEPoly1_buff, W_EPoly2_2_buff)
-all_shp1
-```
+
 ```{r}
 all_shp = rbind(E_EPoly2_1_buff_nh, NEPoly1_buff_nh, W_EPoly2_2_buff_nh)
-```
-
-```{r eval=FALSE, include=FALSE}
-all_shp = rbind(ckmt_nst_nsct_ee, cpt_bt_east_ee, cpt_bt_west_ee, est_tbbmt_n_ee, est_tbbmt_s_ee, tcst_n_ee, tcst_s_ee)
 ```
 
 ```{r}
 all_shp
 ```
 ```{r}
-plot(all_shp$geom)
+plot(all_shp)
 ```
 
-
-## Clean Polgygons
-
-1. Union is use to merge overlaping polygons 
-  + For example, where a fire spans the imagery boundaries producing multiple polygons, these are merged into a single polygon.
-2. Cast to Polygon
-  + This convers from a multipolygon to individual Polygons
-3. Remove Holes
-  + This removes any holes created in polgyons during the GEE vectorize process, or when mergeing polygons
-  + It is important to remove as holes can cause issues during geoprocesses.
-4. **Vectors have too many edges to use in GEE after processing - Need to integrate a smoothing function.**
-- 
+# Apply negative buffer
 ```{r}
-all_shp_un = sf::st_union(all_shp)
-
-all_shp_un_poly = sf::st_cast(all_shp_un, "POLYGON")
+all_shp_nbuf = gBuffer(all_shp, width = -1000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
-
+# Convert from sp to sf
 ```{r}
-all_shp_un_poly_nh = nngeo::st_remove_holes(all_shp_un_poly, max_area = 0)
+all_shp_sf = st_as_sf(all_shp_nbuf)
 ```
 
+# Union overlapping  Polygons
 ```{r}
-st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea90_2001.shp", driver="ESRI Shapefile") 
+all_shp_un = sf::st_union(all_shp_sf)
+```
+
+# Covert from Multipolygon to Polygon
+```{r}
+all_shp_cast = st_cast(all_shp_un,"POLYGON")
+```
+
+# write Shapefile
+```{r}
+st_write(all_shp_un_poly, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
