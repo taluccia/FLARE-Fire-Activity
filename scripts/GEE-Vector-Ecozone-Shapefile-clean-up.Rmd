@@ -142,9 +142,16 @@ all_shp_un = sf::st_union(all_shp_sf)
 all_shp_cast = st_cast(all_shp_un,"POLYGON")
 ```
 
+# Apply smoothing function
+See [Smooth and Tidy Spatial Features](https://cran.r-project.org/web/packages/smoothr/vignettes/smoothr.html)
+
+```{r}
+all_shp_smooth = smooth(all_shp_cast, method = "ksmooth", smoothness = 2)
+```
+
 # write Shapefile
 ```{r}
-st_write(all_shp_cast, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
+st_write(all_shp_smooth, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
