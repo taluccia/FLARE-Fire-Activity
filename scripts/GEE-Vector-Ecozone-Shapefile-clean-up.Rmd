@@ -65,9 +65,9 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/E_EPoly2_1_ee_fires_2002.shp", "E_EPoly2_1_ee_fires_2002") 
-NEPoly1 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/NEPoly1_ee_fires_2002.shp", "NEPoly1_ee_fires_2002") 
-W_EPoly2_2 = readOGR("../data/2021-05-03_GEE-part2-vectors-EA/W_EPoly2_2_ee_fires_2002.shp", "W_EPoly2_2_ee_fires_2002") 
+E_EPoly2_1 = readOGR("../data/2Part2-Vectors-HarmEA/E_EPoly2_1_ee_HarmEaFires_2001.shp", "E_EPoly2_1_ee_HarmEaFires_2001") 
+NEPoly1 = readOGR("../data/Part2-Vectors-HarmEA/NEPoly1_ee_HarmEaFires_2001.shp", "NEPoly1_ee_HarmEaFires_2001") 
+W_EPoly2_2 = readOGR("../data/Part2-Vectors-HarmEA/W_EPoly2_2_ee_HarmEaFires_2001.shp", "W_EPoly2_2_ee_HarmEaFires_2001") 
 
 ```
 
@@ -153,7 +153,7 @@ See [Smooth and Tidy Spatial Features](https://cran.r-project.org/web/packages/s
 all_shp_smooth <- smooth(all_shp_cast, method = "ksmooth", smoothness = 2)
 ```
 
-# Simplify
+# Apply Simplify function
 
 Simplify with [mapshaper](https://cran.r-project.org/web/packages/rmapshaper/vignettes/rmapshaper.html).
 
@@ -164,7 +164,7 @@ all_shp_simp = ms_simplify(all_shp_smooth)
 
 # write Shapefile
 ```{r}
-st_write(all_shp_smooth, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2002.shp", driver="ESRI Shapefile") 
+st_write(all_shp_simp, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
 ```
 
 
