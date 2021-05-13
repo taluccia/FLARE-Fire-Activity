@@ -22,7 +22,8 @@ Develop fire perimeters from Landsat data
 4. GEE FLARE-Binary-Harm-EA ---  create binary Burned image the is Harmonized  across landsat archive and process in Alber's Equal area
 5. GEE FLARE-Vectorize-Harm-EA --- vectorize burned  ares in Binary image
 6. R GEE-Vector-Ecozone-Shapefile-clean.Rmd --- combine vectors  from 3 ROI then buffer, remove holes, combine over lapping polygons, smooth and simlify vectors
-7. R GEE-Vector-Ecozone-Attribute-Create.Rmd --- add attribiutes from hotspots, ecozones, calculate area burned, create unique ID
+7. R 2-GEE-Vector...---apply negative buffer to counter act previous buffer
+8. R GEE-Vector-Ecozone-Attribute-Create.Rmd --- add attribiutes from hotspots, ecozones, calculate area burned, create unique ID
 
 
 For Modis Burned area product
