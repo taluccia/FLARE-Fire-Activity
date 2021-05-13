@@ -5,8 +5,11 @@ date: "3/11/2021"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
 ```
 
 # Overview
@@ -37,18 +40,13 @@ library(lubridate)
 
 # Projections
 
-WGS 84 need for gee
-```{r}
-wgs_proj =  "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs "
-```
-
 Equal Area projection for russia need for buffering hotspot data
 https://gis.stackexchange.com/questions/264093/projection-for-russia-map
 
 +proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
 
 ```{r}
-ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+ea_ru = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
 ```
 
 
@@ -56,7 +54,7 @@ ee_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 ## Fire perimeters
 ```{r}
-fires = st_read("../data/GEE-clean-shapefiles-EqualArea/combine_ecozones_ea90_2001.shp", "combine_ecozones_ea90_2001") 
+fires = st_read("../outputs/2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2001.shp", "nbuf_equalarea_2001") 
 ```
 
 ```{r eval=FALSE, include=FALSE}
@@ -83,10 +81,10 @@ eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_
 # Convert to Equal Area
 
 ```{r}
-fires_ee = st_transform(fires, ee_russia)
-hotspots_ee = st_transform(hotspots, ee_russia)
-ecozones_ee = st_transform(ecozones, ee_russia)
-eco_arctic_ee = st_transform(eco_arctic, ee_russia)
+fires_ea = st_transform(fires, ea_ru)
+hotspots_ea = st_transform(hotspots, ea_ru)
+ecozones_ea = st_transform(ecozones, ea_ru)
+eco_arctic_ea = st_transform(eco_arctic, ea_ru)
 ```
 
 
@@ -101,9 +99,9 @@ eco_arctic_ee = st_transform(eco_arctic, ee_russia)
 
 ## Area Burned Attributes
 ```{r}
-fires_at = fires_ee %>%
+fires_at = fires_ea %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
-  dplyr::mutate(burned_area_m = as.numeric(round(st_area(fires_ee),1))) %>% 
+  dplyr::mutate(burned_area_m = as.numeric(round(st_area(fires_ea),1))) %>% 
   dplyr::mutate(burned_area_ha = as.numeric(round(burned_area_m*0.0001, 1))) %>% 
   dplyr::mutate(fire_yr = 2005) 
 ```
@@ -117,8 +115,8 @@ fires_at
 
 
 
-```{r}
-plot(st_geometry(ecozones_ee), col = sf.colors(12, categorical = TRUE), border = 'grey', 
+```{r eval=FALSE, include=FALSE}
+plot(st_geometry(ecozones_ea), col = sf.colors(12, categorical = TRUE), border = 'grey', 
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
 ```
@@ -128,36 +126,36 @@ plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
 We use `st_join` to add the attributes of the ecozone for each fire. Fires are not restricted to within individual ecozone boundaries. In order to avoid a duplicate entry for a fire that spans two ecozones, we add the argument `largest=TRUE`, which assigns the ecozone that contrains the majority of the fire. 
 
 ```{r}
-head(ecozones_ee)
+head(ecozones_ea)
 ```
 ### Rename columns for  ecozones
 Note about  attributes
 1. AREA - area for individual polygons
 2. area_km^2 - total area for each ecoregion ( 1 km^ is 100 ha)
 ```{r}
-ren_ecozones_ee = ecozones_ee %>% 
+ren_ecozones_ea = ecozones_ea %>% 
   rename(c("eco_objectID" = "OBJECTID", "eco_area" = "AREA" , "eco_realm" = "REALM", "eco_biome" = "BIOME")) %>%
   dplyr::mutate(eco_area_ha = as.numeric(round(area_km2*100, 1)))
 ```
 
 ### Join ecozone attributes with fire perimeters
 ```{r}
-fires_at_eco = st_join(fires_at, ren_ecozones_ee, largest=TRUE) %>% dplyr::select(FID:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% drop_na(eco_code)
+fires_at_eco = st_join(fires_at, ren_ecozones_ea, largest=TRUE) %>% dplyr::select(FID:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% drop_na(eco_code)
 ```
 
 ```{r}
 head(fires_at_eco)
 ```
 
-```{r}
-plot(st_geometry(ecozones_ee), border = 'grey', 
+```{r eval=FALSE, include=FALSE}
+plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at_eco)), pch = 3, col = 'red', add = TRUE)
 ```
 
 ## Arctic/Subarctic designation
 ```{r}
-fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ee, largest=TRUE) 
+fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ea, largest=TRUE) 
 ```
 
 ```{r}
@@ -173,8 +171,8 @@ fires_at_eco_arc$location <- factor(fires_at_eco_arc$location, exclude = NULL,
 fires_at_eco_arc
 ```
 
-```{r}
-plot(st_geometry(ecozones_ee), border = 'grey', 
+```{r eval=FALSE, include=FALSE}
+plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
 ```
@@ -187,11 +185,11 @@ st_write(fires_at_eco_arc, "../outputs/test/test_fires_at_eco_arc.shp", driver="
 
 ## Hotspot attributes
 ```{r}
-str(hotspots_ee)
+str(hotspots_ea)
 ```
 
 ```{r}
-hotspots_ee %>% mutate(julian_date = yday(ACQ_DATE)) %>% 
+hotspots_ea %>% mutate(julian_date = yday(ACQ_DATE)) %>% 
   separate(ACQ_DATE, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) 
 ```
 
@@ -217,15 +215,15 @@ sum_pt_poly = function(x){
 
 
 ```{r}
-fires_at_eco_arc_hs = st_intersection(hotspots_ee, fires_at_eco_arc) %>% sum_pt_poly()
+fires_at_eco_arc_hs = st_intersection(hotspots_ea, fires_at_eco_arc) %>% sum_pt_poly()
 
 ```
 
 ```{r}
 head(fires_at_eco_arc_hs)
 ```
-```{r}
-plot(st_geometry(ecozones_ee), border = 'grey', 
+```{r eval=FALSE, include=FALSE}
+plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at_eco_arc_hs)), pch = 3, col = 'red', add = TRUE)
 ```
@@ -246,8 +244,8 @@ head(fires_at_eco_arc_hs_merge)
 ```
 
 
-```{r}
-plot(st_geometry(ecozones_ee), border = 'grey', 
+```{r eval=FALSE, include=FALSE}
+plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
 plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', add = TRUE)
 ```

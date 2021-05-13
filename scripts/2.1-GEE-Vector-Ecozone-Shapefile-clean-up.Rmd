@@ -65,7 +65,7 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = readOGR("../data/2Part2-Vectors-HarmEA/E_EPoly2_1_ee_HarmEaFires_2001.shp", "E_EPoly2_1_ee_HarmEaFires_2001") 
+E_EPoly2_1 = readOGR("../data/Part2-Vectors-HarmEA/E_EPoly2_1_ee_HarmEaFires_2001.shp", "E_EPoly2_1_ee_HarmEaFires_2001") 
 NEPoly1 = readOGR("../data/Part2-Vectors-HarmEA/NEPoly1_ee_HarmEaFires_2001.shp", "NEPoly1_ee_HarmEaFires_2001") 
 W_EPoly2_2 = readOGR("../data/Part2-Vectors-HarmEA/W_EPoly2_2_ee_HarmEaFires_2001.shp", "W_EPoly2_2_ee_HarmEaFires_2001") 
 
@@ -121,18 +121,18 @@ all_shp = rbind(E_EPoly2_1_buff_nh, NEPoly1_buff_nh, W_EPoly2_2_buff_nh)
 ```{r}
 all_shp
 ```
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(all_shp)
 ```
 
 # Apply negative buffer
-```{r}
+```{r eval=FALSE, include=FALSE}
 all_shp_nbuf = gBuffer(all_shp, width = -1000, capStyle="ROUND", joinStyle="ROUND")
 ```
 
 # Convert from sp to sf
 ```{r}
-all_shp_sf = st_as_sf(all_shp_nbuf)
+all_shp_sf = st_as_sf(all_shp)
 ```
 
 # Union overlapping  Polygons
