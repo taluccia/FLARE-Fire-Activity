@@ -1,0 +1,68 @@
+---
+title: "test"
+author: "Anna Talucci"
+date: "5/13/2021"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(spatialEco)
+library(ggplot2)
+library(nngeo)
+library(rmapshaper)
+library(units)
+library(smoothr)
+```
+
+# Projections
+
+
+Equal Area projection for russia need for buffering hotspot data
+https://gis.stackexchange.com/questions/264093/projection-for-russia-map
+
++proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs 
+
+```{r}
+ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs "
+```
+
+# Read in shapefile
+```{r}
+vec = readOGR("../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", "combine_equalarea_2001") 
+```
+
+# Reproject in Equal area
+
+```{r}
+vec_ea = spTransform(vec, CRS(ea_russia))
+```
+
+# Apply negative buffer
+```{r}
+vec_nbuf = gBuffer(vec_ea, width = -1000, capStyle="ROUND", joinStyle="ROUND")
+```
+
+# Convert from sp to sf
+```{r}
+vec_sf = st_as_sf(vec_nbuf)
+```
+
+```{r}
+st_write(vec_sf, "../outputs/2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2001.shp", driver="ESRI Shapefile") 
+```
