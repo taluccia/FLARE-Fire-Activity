@@ -1,0 +1,106 @@
+---
+title: "2.4 To-CSV"
+author: "Anna Talucci"
+date: "5/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Overview
+
+Rename columns, save vector, then drop geometry and save csv
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(spatialEco)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Data
+## Shapefile
+```{r}
+fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2019.shp", "SiberiaFires_2019") 
+```
+
+# 
+```{r}
+head(fires)
+```
+
+# Column Names
+ID_obj =IDobj
+rmpshpr = FID
+brnd_r_m = SIZEm2
+brnd_r_h =SIZEha
+fire_yr = FireYr
+ec_bjID **Drop** 
+eco_are **Drop**       
+ECO_NAM = EcoName
+eco_rlm = EcoRlm
+eco_bim = EcoBiom
+ECO_NUM **Drop** 
+ECO_ID **Drop** 
+ECO_SYM **Drop** 
+are_km2 =Ecokm2
+eco_cod =EcoCode
+eco_r_h   **Drop** 
+locatin = ArcSub
+min_jln_dt = MinDay 
+mx_jln_ = MaxDay
+men_jln_dt =AvgDay
+mdn_jl_ = MedDay
+min_cnfdnc = MinConf
+mx_cnfd = MaxConf
+men_cnfdnc = AvgConf
+mdn_cnf = MedConf
+mn_cq_d = MinDate
+acq_yer **Drop** 
+acq_mnt **Drop** 
+acq_day    **Drop** 
+mx_cq_d = MaxDate
+brn_dys = TotDays             
+ Fire_ID = FireID
+
+# Rename Columns
+rename(data,  new_name = )
+
+```{r}
+fires_rename = fires %>% 
+  dplyr::select(ID_obj:fire_yr, ECO_NAM:eco_bim, are_km2:eco_cod, locatin:mn_cq_d, mx_cq_d:Fire_ID) %>% 
+  rename(IDobj = ID_obj, FID = rmpshpr, SIZEm2 = brnd_r_m, SIZEha = brnd_r_h, FireYr = fire_yr, EcoName = ECO_NAM, EcoRlm = eco_rlm, EcoBiom = eco_bim, Ecokm2 = are_km2, EcoCode = eco_cod, ArcSub = locatin, MinDay = min_jln_dt, MaxDay = mx_jln_, AvgDay = men_jln_dt, 
+MedDay = mdn_jl_, MinConf = min_cnfdnc, MaxConf = mx_cnfd, AvgConf = men_cnfdnc, MedConf = mdn_cnf, MinDate = mn_cq_d, MaxDate = mx_cq_d, TotDays = brn_dys, FireId = Fire_ID)
+
+```
+
+# Write to shapefile
+```{r}
+st_write(fires_rename, "../outputs/2.4-Vectors/SiberiaFires_2019.shp", driver="ESRI Shapefile") 
+```
+
+# Remove geometry and write attributes to CSV
+```{r}
+fires_rename %>% 
+  st_set_geometry(NULL) %>% 
+        write.csv(., '../outputs/2.4-CSV/SiberiaFires_2019.csv',  row.names = FALSE)
+  
+```
