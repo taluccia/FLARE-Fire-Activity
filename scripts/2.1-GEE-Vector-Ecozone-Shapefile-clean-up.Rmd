@@ -65,9 +65,9 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-E_EPoly2_1 = readOGR("../data/Part2-Vectors-HarmEA/E_EPoly2_1_ee_HarmEaFires_2001.shp", "E_EPoly2_1_ee_HarmEaFires_2001") 
-NEPoly1 = readOGR("../data/Part2-Vectors-HarmEA/NEPoly1_ee_HarmEaFires_2001.shp", "NEPoly1_ee_HarmEaFires_2001") 
-W_EPoly2_2 = readOGR("../data/Part2-Vectors-HarmEA/W_EPoly2_2_ee_HarmEaFires_2001.shp", "W_EPoly2_2_ee_HarmEaFires_2001") 
+E_EPoly2_1 = readOGR("../data/Part2-Vectors-HarmEA/E_EPoly2_1_ee_HarmEaFires_2019.shp", "E_EPoly2_1_ee_HarmEaFires_2019") 
+NEPoly1 = readOGR("../data/Part2-Vectors-HarmEA/NEPoly1_ee_HarmEaFires_2019.shp", "NEPoly1_ee_HarmEaFires_2019") 
+W_EPoly2_2 = readOGR("../data/Part2-Vectors-HarmEA/W_EPoly2_2_ee_HarmEaFires_2019.shp", "W_EPoly2_2_ee_HarmEaFires_2019") 
 
 ```
 
@@ -145,26 +145,12 @@ all_shp_un = sf::st_union(all_shp_sf)
 all_shp_cast = st_cast(all_shp_un,"POLYGON")
 ```
 
-# Apply smooth function
 
-See [Smooth and Tidy Spatial Features](https://cran.r-project.org/web/packages/smoothr/vignettes/smoothr.html)
-
-```{r}
-all_shp_smooth <- smooth(all_shp_cast, method = "ksmooth", smoothness = 2)
-```
-
-# Apply Simplify function
-
-Simplify with [mapshaper](https://cran.r-project.org/web/packages/rmapshaper/vignettes/rmapshaper.html).
-
-```{r}
-all_shp_simp = ms_simplify(all_shp_smooth)
-```
 
 
 # write Shapefile
 ```{r}
-st_write(all_shp_simp, "../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", driver="ESRI Shapefile") 
+st_write(all_shp_cast, "../outputs/2.1-GEE-clean-shapefiles-EqualArea/combine1_equalarea_2019.shp", driver="ESRI Shapefile") 
 ```
 
 
