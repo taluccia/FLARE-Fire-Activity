@@ -44,7 +44,7 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-vec = readOGR("../outputs/GEE-clean-shapefiles-EqualArea/combine_equalarea_2001.shp", "combine_equalarea_2001") 
+vec = readOGR("../data/2.1-GEE-clean-shapefiles-EqualArea/combine1_equalarea_2019.shp", "combine1_equalarea_2019") 
 ```
 
 # Reproject in Equal area
@@ -63,6 +63,24 @@ vec_nbuf = gBuffer(vec_ea, width = -1000, capStyle="ROUND", joinStyle="ROUND")
 vec_sf = st_as_sf(vec_nbuf)
 ```
 
+# Apply smooth function
+
+See [Smooth and Tidy Spatial Features](https://cran.r-project.org/web/packages/smoothr/vignettes/smoothr.html)
+
 ```{r}
-st_write(vec_sf, "../outputs/2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2001.shp", driver="ESRI Shapefile") 
+vec_smooth <- smooth(vec_sf, method = "ksmooth", smoothness = 2)
+```
+
+# Apply Simplify function
+
+Simplify with [mapshaper](https://cran.r-project.org/web/packages/rmapshaper/vignettes/rmapshaper.html).
+
+keep_shapes = TRUE, explode = TRUE)
+```{r}
+vec_simp = ms_simplify(vec_smooth, keep_shapes = FALSE, explode = TRUE)
+```
+
+
+```{r}
+st_write(vec_simp, "../outputs/2.2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2019.shp", driver="ESRI Shapefile") 
 ```
