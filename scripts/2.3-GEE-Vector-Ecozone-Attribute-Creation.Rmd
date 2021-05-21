@@ -16,11 +16,7 @@ rm(list=ls())
 
 Here we  add attributes, clip to ecozone extent, add ecozone attributes, designate as arctic or sub arctic, and add attributes from hotspot data (e.g., fire start).
 
-# Clear workspace
 
-```{r}
-rm(list=ls()) 
-```
 
 # Packages
 
@@ -54,16 +50,14 @@ ea_ru = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +ellps
 
 ## Fire perimeters
 ```{r}
-fires = st_read("../outputs/2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2001.shp", "nbuf_equalarea_2001") 
+fires = st_read("../data/2.2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2014.shp", "nbuf_equalarea_2014") 
 ```
 
-```{r eval=FALSE, include=FALSE}
-fires = st_read("../data/GEE-clean-shapefiles-SingleEco/combine_ecozones_2005.shp", "combine_ecozones_2005") 
-```
+
 
 ## Hotspots
 ```{r}
-hotspots = st_read("../data/M6-march-october/M6_mar-oct_2001.shp", "M6_mar-oct_2001") 
+hotspots = st_read("../data/M6-march-october/M6_mar-oct_2014.shp", "M6_mar-oct_2014") 
 ```
 
 ## Ecozones Polygon
@@ -103,7 +97,7 @@ fires_at = fires_ea %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
   dplyr::mutate(burned_area_m = as.numeric(round(st_area(fires_ea),1))) %>% 
   dplyr::mutate(burned_area_ha = as.numeric(round(burned_area_m*0.0001, 1))) %>% 
-  dplyr::mutate(fire_yr = 2005) 
+  dplyr::mutate(fire_yr = 2014) 
 ```
 
 
@@ -111,10 +105,7 @@ fires_at = fires_ea %>%
 fires_at
 ```
 
-
-
-
-
+# Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), col = sf.colors(12, categorical = TRUE), border = 'grey', 
      axes = TRUE)
@@ -128,6 +119,7 @@ We use `st_join` to add the attributes of the ecozone for each fire. Fires are n
 ```{r}
 head(ecozones_ea)
 ```
+
 ### Rename columns for  ecozones
 Note about  attributes
 1. AREA - area for individual polygons
@@ -138,15 +130,23 @@ ren_ecozones_ea = ecozones_ea %>%
   dplyr::mutate(eco_area_ha = as.numeric(round(area_km2*100, 1)))
 ```
 
-### Join ecozone attributes with fire perimeters
 ```{r}
-fires_at_eco = st_join(fires_at, ren_ecozones_ea, largest=TRUE) %>% dplyr::select(FID:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% drop_na(eco_code)
+head(ren_ecozones_ea)
 ```
 
+### Join ecozone attributes with fire perimeters
+st_make_valid(poly)
+```{r}
+fires_at_eco = st_join(st_make_valid(fires_at), ren_ecozones_ea, largest=TRUE) %>% dplyr::select(rmpshpr:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% 
+  drop_na(eco_code)
+```
+%>% dplyr::select(rmpshpr:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% 
+  drop_na(eco_code)
 ```{r}
 head(fires_at_eco)
 ```
 
+##  Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
@@ -277,17 +277,11 @@ fires_at_eco_arc_hs_merge_burn_rh = nngeo::st_remove_holes(fires_at_eco_arc_hs_m
 ```
 
 
-# Remove geometry and write attributes to CSV
-```{r eval=FALSE, include=FALSE}
-fires_at_eco_arc_hs_merge %>% 
-  st_set_geometry(NULL) %>% 
-        write.csv(., '../outputs/test/test_attributes.csv',  row.names = FALSE)
-  
-```
+
 
 # Write to shapefile
-## Save  test version to inspect 
 ```{r}
-st_write(fires_at_eco_arc_hs_merge_burn_rh, "../outputs/GEE-Attribute-Shapefiles-EqualArea/ea-fires90-2001.shp", driver="ESRI Shapefile") 
-
+st_write(fires_at_eco_arc_hs_merge_burn_rh, "../outputs/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2014.shp", driver="ESRI Shapefile") 
 ```
+
+
