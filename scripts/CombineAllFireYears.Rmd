@@ -1,0 +1,99 @@
+---
+title: "CombineAllFireYears"
+author: "Anna Talucci"
+date: "5/21/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+# Overview
+
+Combine all fires year shapefiles into one
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Data
+
+```{r}
+f01 = st_read("../data/2.4-Vectors/SiberiaFires_2001.shp", "SiberiaFires_2001") 
+f02 = st_read("../data/2.4-Vectors/SiberiaFires_2002.shp", "SiberiaFires_2002") 
+f03 = st_read("../data/2.4-Vectors/SiberiaFires_2003.shp", "SiberiaFires_2003") 
+f04 = st_read("../data/2.4-Vectors/SiberiaFires_2004.shp", "SiberiaFires_2004") 
+f05 = st_read("../data/2.4-Vectors/SiberiaFires_2005.shp", "SiberiaFires_2005") 
+```
+
+```{r}
+f06 = st_read("../data/2.4-Vectors/SiberiaFires_2006.shp", "SiberiaFires_2006") 
+f07 = st_read("../data/2.4-Vectors/SiberiaFires_2007.shp", "SiberiaFires_2007") 
+f08 = st_read("../data/2.4-Vectors/SiberiaFires_2008.shp", "SiberiaFires_2008") 
+f09 = st_read("../data/2.4-Vectors/SiberiaFires_2009.shp", "SiberiaFires_2009") 
+f10 = st_read("../data/2.4-Vectors/SiberiaFires_2010.shp", "SiberiaFires_2010") 
+```
+
+```{r}
+f11 = st_read("../data/2.4-Vectors/SiberiaFires_2011.shp", "SiberiaFires_2011") 
+f12 = st_read("../data/2.4-Vectors/SiberiaFires_2012.shp", "SiberiaFires_2012") 
+f13 = st_read("../data/2.4-Vectors/SiberiaFires_2013.shp", "SiberiaFires_2013") 
+f14 = st_read("../data/2.4-Vectors/SiberiaFires_2014.shp", "SiberiaFires_2014") 
+f15 = st_read("../data/2.4-Vectors/SiberiaFires_2015.shp", "SiberiaFires_2015") 
+```
+
+```{r}
+f16 = st_read("../data/2.4-Vectors/SiberiaFires_2016.shp", "SiberiaFires_2016") 
+f17 = st_read("../data/2.4-Vectors/SiberiaFires_2017.shp", "SiberiaFires_2017") 
+f18 = st_read("../data/2.4-Vectors/SiberiaFires_2018.shp", "SiberiaFires_2018") 
+f19 = st_read("../data/2.4-Vectors/SiberiaFires_2019.shp", "SiberiaFires_2019") 
+```
+
+```{r eval=FALSE, include=FALSE}
+f20 = st_read("../data/2.4-Vectors/SiberiaFires_2020.shp", "SiberiaFires_2020") 
+```
+
+```{r}
+head(f05)
+```
+
+```{r}
+all_fires = dplyr::bind_rows(f01, f02, f03, f04, f05, f06, f07, f08, f09, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19)
+```
+
+```{r}
+head(all_fires)
+```
+
+```{r}
+tail(all_fires)
+```
+
+
+# Write to shapefile
+```{r}
+st_write(all_fires, "../outputs/2.5-AllFires/SiberiaFires2001-2019.shp", driver="ESRI Shapefile") 
+```
+
+
+
+
