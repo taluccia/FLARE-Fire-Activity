@@ -39,7 +39,7 @@ library(lubridate)
 # Data
 ## Shapefile
 ```{r}
-fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2019.shp", "SiberiaFires_2019") 
+fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2004.shp", "SiberiaFires_2004") 
 ```
 
 # 
@@ -94,13 +94,13 @@ MedDay = mdn_jl_, MinConf = min_cnfdnc, MaxConf = mx_cnfd, AvgConf = men_cnfdnc,
 
 # Write to shapefile
 ```{r}
-st_write(fires_rename, "../outputs/2.4-Vectors/SiberiaFires_2019.shp", driver="ESRI Shapefile") 
+st_write(fires_rename, "../outputs/2.4-Vectors/SiberiaFires_2004.shp", driver="ESRI Shapefile") 
 ```
 
 # Remove geometry and write attributes to CSV
 ```{r}
 fires_rename %>% 
   st_set_geometry(NULL) %>% 
-        write.csv(., '../outputs/2.4-CSV/SiberiaFires_2019.csv',  row.names = FALSE)
+        write.csv(., '../outputs/2.4-CSV/SiberiaFires_2004.csv',  row.names = FALSE)
   
 ```
