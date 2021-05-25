@@ -66,18 +66,15 @@ f16 = st_read("../data/2.4-Vectors/SiberiaFires_2016.shp", "SiberiaFires_2016")
 f17 = st_read("../data/2.4-Vectors/SiberiaFires_2017.shp", "SiberiaFires_2017") 
 f18 = st_read("../data/2.4-Vectors/SiberiaFires_2018.shp", "SiberiaFires_2018") 
 f19 = st_read("../data/2.4-Vectors/SiberiaFires_2019.shp", "SiberiaFires_2019") 
-```
-
-```{r eval=FALSE, include=FALSE}
 f20 = st_read("../data/2.4-Vectors/SiberiaFires_2020.shp", "SiberiaFires_2020") 
 ```
 
 ```{r}
-head(f05)
+head(f20)
 ```
 
 ```{r}
-all_fires = dplyr::bind_rows(f01, f02, f03, f04, f05, f06, f07, f08, f09, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19)
+all_fires = dplyr::bind_rows(f01, f02, f03, f04, f05, f06, f07, f08, f09, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20)
 ```
 
 ```{r}
@@ -91,7 +88,7 @@ tail(all_fires)
 
 # Write to shapefile
 ```{r}
-st_write(all_fires, "../outputs/2.5-AllFires/SiberiaFires2001-2019.shp", driver="ESRI Shapefile") 
+st_write(all_fires, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
 ```
 
 

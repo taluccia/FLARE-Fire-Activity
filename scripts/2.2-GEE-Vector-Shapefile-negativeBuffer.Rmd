@@ -44,7 +44,7 @@ ea_russia = "+proj=aea +lat_1=50 +lat_2=70 +lat_0=56 +lon_0=100 +x_0=0 +y_0=0 +e
 
 # Read in shapefile
 ```{r}
-vec = readOGR("../data/2.1-GEE-clean-shapefiles-EqualArea/combine1_equalarea_2019.shp", "combine1_equalarea_2019") 
+vec = readOGR("../data/2.1-GEE-clean-shapefiles-EqualArea/combine1_equalarea_2020.shp", "combine1_equalarea_2020") 
 ```
 
 # Reproject in Equal area
@@ -82,5 +82,5 @@ vec_simp = ms_simplify(vec_smooth, keep_shapes = FALSE, explode = TRUE)
 
 
 ```{r}
-st_write(vec_simp, "../outputs/2.2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2019.shp", driver="ESRI Shapefile") 
+st_write(vec_simp, "../outputs/2.2-GEE-clean-shapefiles-EqualArea/nbuf_equalarea_2020.shp", driver="ESRI Shapefile") 
 ```
