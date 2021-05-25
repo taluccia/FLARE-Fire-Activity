@@ -87,10 +87,26 @@ tail(all_fires)
 
 
 # Write to shapefile
-```{r}
+```{r eval=FALSE, include=FALSE}
 st_write(all_fires, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
 ```
 
 
+# 
+
+```{r}
+all_fires
+```
+
+```{r}
+remove_large_triangles = all_fires %>% filter(!(FireYr == "2020" & IDobj=="3532")) %>% filter(!(FireYr == "2014" & IDobj=="2147"))
+```
+
+
+
+# Write to shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(remove_large_triangles, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
+```
 
 
