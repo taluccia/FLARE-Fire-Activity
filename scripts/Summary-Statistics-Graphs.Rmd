@@ -69,6 +69,7 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 ```{r}
 ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
 ```
+
 # Data 
 
 ```{r}
@@ -78,6 +79,19 @@ data = read.csv("../data/2.5-AllFires/SiberiaFires2001-2020.csv")
 ```{r}
 head(data)
 ```
+## Adjust data
+Convert class to factor
+```{r}
+data = data %>% mutate_at(vars(Class), 
+            list(factor)) 
+```
+
+```{r}
+class(data$Class)
+levels(data$Class)
+```
+
+
 # Summary Data tables
 
 ## Table 1
@@ -156,32 +170,34 @@ Table5 = data %>%
   group_by(FireYr, EcoName) %>% 
   summarise(Totkm2 = sum(SizeKm2), 
             EcoKm2 = min(Ecokm2)) %>%
-  mutate(frac = round(Totkm2/EcoKm2,5)) %>%
+  mutate(frac = round(Totkm2/EcoKm2,10)) %>%
   dplyr::select(FireYr, EcoName, frac)%>%
   as.data.frame(.) %>%
   mutate(prct=frac*100) %>%
   mutate(mfri = round(100/prct, 2)) %>%
-  write.csv(., '../outputs/3.1-Summary/Table4.csv',  row.names = FALSE)
+  write.csv(., '../outputs/3.1-Summary/Table5.csv',  row.names = FALSE)
 
     
   
 ```
 
+## Table 6 MFRI
 ```{r}
 data %>% 
   dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
   group_by(FireYr, EcoName) %>% 
   summarise(Totkm2 = sum(SizeKm2), 
             EcoKm2 = min(Ecokm2)) %>%
-  mutate(frac = round(Totkm2/EcoKm2,5)) %>%
+  mutate(frac = round(Totkm2/EcoKm2,10)) %>%
   dplyr::select(FireYr, EcoName, frac)%>%
   as.data.frame(.) %>%
   mutate(prct=frac*100) %>%
   mutate(YrMfri = round(100/prct, 2)) %>%
   group_by(EcoName) %>%
-  summarise(mfri = mean(YrMfri),
-            min = min(YrMfri),
-            max = max(YrMfri))
+  summarise(mfri = round(mean(YrMfri), 0),
+            min = round(min(YrMfri), 0),
+            max = round(max(YrMfri), 0)) %>%
+  write.csv(., '../outputs/3.1-Summary/Table6.csv',  row.names = FALSE)
 ```
 
 ```{r}
@@ -199,9 +215,9 @@ data %>%
 ```
 
 # Summary Data Figures
-## Fig 1---Area burned by Year and Ecozone
+## Figure 1---Area burned by Year and Ecozone
 ```{r}
-YrEco = data %>% group_by(FireYr, EcoName) %>%
+YrEco = data %>% group_by(FireYr, EcoName, EcoCode) %>%
   summarise(TotHa = sum(SizeHa))
 YrEco = as.data.frame(YrEco)
 YrEco
@@ -210,59 +226,26 @@ YrEco
 
   scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
 ```{r fig.height=6, fig.width=5}
-fig1_leg = ggplot(YrEco, aes(x=FireYr, y=TotHa, fill=EcoName)) +
+fig1 = ggplot(YrEco, aes(x=FireYr, y=TotHa, fill=EcoCode)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
   scale_fill_manual(values = ecoPalette, name="Ecozone") +
   xlab('') +
   bar_theme +
-  theme(legend.position = "bottom", legend.title = element_blank()) + 
-  guides(fill = guide_legend( ncol=2), 
+  theme(legend.position = c(.7, .9), legend.title = element_blank()) + 
+  guides(fill = guide_legend( ncol=3), 
          shape = guide_legend(override.aes = list(size = 0.4)), 
          color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
 
-fig1_leg
-```
-
-
-```{r}
-fig1 = ggplot(YrEco, aes(x=FireYr, y=TotHa, fill=EcoName)) +
-  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), 
-      breaks=c(0,  5000000, 10000000, 15000000, 20000000, 25000000, 30000000), 
-                     labels = c(0, 5, 10, 15, 20, 25, 30)) +
-  scale_fill_manual(values = ecoPalette, name="Ecozone") +
-  xlab('') +
-  bar_theme
-  
-
 fig1
 ```
-```{r}
-legend1 <- get_legend(
-  # create some space to the left of the legend
-  fig1_leg + theme(legend.box.margin = margin(t = 0, r = 0, b = 0, l = 0,))
-)
-```
 
-```{r eval=FALSE, fig.height=5, fig.width=6, include=FALSE}
-
-plot1 = cowplot::plot_grid(fig1, legend1, ncol = 1, rel_heights = c(1, .1), rel_widths = c(1, .5)) 
-plot1
-```
-
-```{r fig.height=5, fig.width=6}
-plot1 = ggdraw(fig1) +
-  draw_plot(legend1, x=.57, y=.78, width=.1, height=.1, scale=.1) 
-
-plot1
-```
 
 ```{r}
-ggsave("../figures/3.1-Summary/Figure1.png", plot = plot1, width = 6, height = 5, units = c("in"), dpi = 600)
+ggsave("../figures/3.1-Summary/Figure1.png", plot = fig1, width = 6, height = 5, units = c("in"), dpi = 600)
 ```
 
-# Percent area burned by Ecozone and Year
+## Figure 2---Percent area burned by Ecozone and Year
 ```{r}
 head(data)
 ```
@@ -270,113 +253,89 @@ head(data)
 ptcEco = as.data.frame(ptcEco)
 ptcEco
 ```{r}
-pctEco = data %>% dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
-  group_by(FireYr, EcoName) %>%
+pctEco = data %>% dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
   summarise(Totkm2 = sum(SizeKm2), 
             EcoKm2 = min(Ecokm2)) %>%
-  mutate(PctEco = round(Totkm2/EcoKm2 *100, 2))
-  
-
-
-pctEco = as.data.frame(pctEco)
-pctEco
-
+  mutate(PctEco = round(Totkm2/EcoKm2 *100, 2)) %>%
+  as.data.frame(.)
 ```
+
+
+```{r fig.height=6, fig.width=6}
+fig2 = ggplot(pctEco, aes(x=FireYr, y=PctEco)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  xlab('') +
+  ylab('Area Burned (%)') +
+  bar_theme +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6), 
+        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+fig2
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure2.png", plot = fig2, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+## Figure 3---Fire Size Class by year
 
 
 ```{r}
-ggplot(pctEco, aes(x=FireYr, y=PctEco)) +
-  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  facet_wrap(~EcoName, scales = "free") +
-  
+clar = data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
+  group_by(FireYr, EcoName, Class, EcoCode) %>%
+  summarise(totha = sum(SizeHa)) %>%
+  as.data.frame(.) %>%
+  mutate(milha = totha/1000000)
 
-  theme_bw() + theme(legend.position = "right") + 
-  
-  xlab('') +
-  ylab('Area Burned (%)') +
-  theme(panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black")) +
-  theme(axis.text.x = element_text(angle=65, vjust=0.6), 
-        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
-  guides(fill = guide_legend(title.position = "top"))
-
-
+clar
 ```
 
 
-# Fire Size Class by ecozone and year
+```{r fig.height=7, fig.width=6}
+fig3 = ggplot(clar, aes(x=FireYr, y=milha, fill=Class)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  
+scale_y_continuous(name = ('Area burned \n(millions of hectares)')) +
+  theme_bw() + theme(legend.position = "right") + 
+  
+  scale_fill_brewer(palette = "Spectral",  name="Fire Size Class") +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = "bottom", panel.grid.major = element_blank(), 
+        strip.background = element_rect(color=NA, fill="white", size=1.5, 
+                                        linetype="solid")) +
+  guides(fill = guide_legend(title.position = "top", nrow = 1))
+
+fig3
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure3.png", plot = fig3, width = 6, height = 7, units = c("in"), dpi = 600)
+```
+
+## Figure 4
 ```{r}
 head(data)
 ```
-%>%
-  group_by(FireYr, EcoName) %>%
-  summarise(Totkm2 = sum(SizeKm2), 
-            EcoKm2 = min(Ecokm2)) %>%
-  mutate(PctEco = round(Totkm2/EcoKm2 *100, 2))
+
+
 ```{r}
-clar = data %>% dplyr::select(FireYr, SizeHa, EcoName, Class) %>%
-  group_by(FireYr, EcoName, Class) %>%
-  summarise(totha = sum(SizeHa)) %>%
-  mutate_at(vars(Class), 
-            list(factor))
+ggplot(data, x=TotDays, y=milha, aes(fill=Class)) +
+
+  facet_wrap(~EcoCode, scales = "free_y") +
   
-
-
-clar = as.data.frame(clar)
-clar
-
-```
-
-```{r}
-str(clar)
-```
-
-```{r}
-ggplot(clar, aes(x=FireYr, y=totha, fill=Class)) +
-  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  facet_wrap(~EcoName, scales = "free") +
-  
-scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 2000000, 4000000, 6000000, 8000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 2, 4, 6, 8, 10, 15, 20, 25, 30)) +
+scale_y_continuous(name = ('Area burned \n(millions of hectares)')) +
   theme_bw() + theme(legend.position = "right") + 
   
-  scale_fill_brewer(palette = "Dark2",  name="Fire Size Class") +
+  scale_fill_brewer(palette = "Spectral",  name="Fire Size Class") +
   xlab('') +
-  ylab('Area burned by fire size class') +
-  theme(legend.position = "bottom", panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black")) +
-  theme(axis.text.x = element_text(angle=65, vjust=0.6), 
-        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
+  bar_theme +
+  theme(legend.position = "bottom", panel.grid.major = element_blank(), 
+        strip.background = element_rect(color=NA, fill="white", size=1.5, 
+                                        linetype="solid")) +
   guides(fill = guide_legend(title.position = "top", nrow = 1))
 
-
 ```
-
-```{r}
-ggplot(clar, aes(x=FireYr, y=totha, fill=Class)) +
-  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  facet_wrap(~EcoName, scales = "free") +
-  
-scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 500000, 1000000, 5000000,  10000000, 15000000, 20000000, 25000000, 30000000), labels = c("", "", "1", "5", "10", "15", "20", "25", "30")) +
-  theme_bw() + theme(legend.position = "right") + 
-  
-  scale_fill_brewer(palette = "Dark2",  name="Fire Size Class") +
-  xlab('') +
-  ylab('Area burned by fire size class') +
-  theme(legend.position = "none", panel.grid.major = element_blank()) +
-    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
-        axis.text.x = element_text(size = 10, color = "black"),
-        axis.text.y = element_text(size = 10, color = "black"),
-        axis.line = element_line(colour = "black")) +
-  theme(axis.text.x = element_text(angle=65, vjust=0.6), 
-        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
-  guides(fill = guide_legend(title.position = "top", nrow = 1))
-
-
-```
-
