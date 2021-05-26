@@ -70,6 +70,10 @@ cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2"
 ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
 ```
 
+
+```{r}
+arctic_palette2 = c("#80cdc1", "#dfc27d")
+```
 # Data 
 
 ```{r}
@@ -182,6 +186,7 @@ Table5 = data %>%
 ```
 
 ## Table 6 MFRI
+Based on Soja et al 2006
 ```{r}
 data %>% 
   dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
@@ -217,22 +222,21 @@ data %>%
 # Summary Data Figures
 ## Figure 1---Area burned by Year and Ecozone
 ```{r}
-YrEco = data %>% group_by(FireYr, EcoName, EcoCode) %>%
-  summarise(TotHa = sum(SizeHa))
-YrEco = as.data.frame(YrEco)
-YrEco
+data1 = data %>% group_by(FireYr, EcoName, EcoCode) %>%
+  summarise(TotHa = sum(SizeHa)) %>% 
+  as.data.frame(.)
+data1
 ```
 
 
-  scale_fill_brewer(palette = "Spectral", name = "Fire size class (ha)", labels = c("400-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", "100,000 +")) +
 ```{r fig.height=6, fig.width=5}
-fig1 = ggplot(YrEco, aes(x=FireYr, y=TotHa, fill=EcoCode)) +
+fig1 = ggplot(data1, aes(x=FireYr, y=TotHa, fill=EcoCode)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
   scale_fill_manual(values = ecoPalette, name="Ecozone") +
   xlab('') +
   bar_theme +
-  theme(legend.position = c(.7, .9), legend.title = element_blank()) + 
+  theme(legend.position = c(.7, .85), legend.title = element_blank()) + 
   guides(fill = guide_legend( ncol=3), 
          shape = guide_legend(override.aes = list(size = 0.4)), 
          color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
@@ -250,20 +254,20 @@ ggsave("../figures/3.1-Summary/Figure1.png", plot = fig1, width = 6, height = 5,
 head(data)
 ```
 
-ptcEco = as.data.frame(ptcEco)
-ptcEco
 ```{r}
-pctEco = data %>% dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+data2 = data %>% dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
   group_by(FireYr, EcoName, EcoCode) %>%
   summarise(Totkm2 = sum(SizeKm2), 
             EcoKm2 = min(Ecokm2)) %>%
   mutate(PctEco = round(Totkm2/EcoKm2 *100, 2)) %>%
   as.data.frame(.)
+
+data2
 ```
 
 
 ```{r fig.height=6, fig.width=6}
-fig2 = ggplot(pctEco, aes(x=FireYr, y=PctEco)) +
+fig2 = ggplot(data2, aes(x=FireYr, y=PctEco)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   facet_wrap(~EcoCode, scales = "free_y") +
   xlab('') +
@@ -283,18 +287,18 @@ ggsave("../figures/3.1-Summary/Figure2.png", plot = fig2, width = 6, height = 5,
 
 
 ```{r}
-clar = data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
+data3 = data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
   group_by(FireYr, EcoName, Class, EcoCode) %>%
   summarise(totha = sum(SizeHa)) %>%
   as.data.frame(.) %>%
   mutate(milha = totha/1000000)
 
-clar
+data3
 ```
 
 
 ```{r fig.height=7, fig.width=6}
-fig3 = ggplot(clar, aes(x=FireYr, y=milha, fill=Class)) +
+fig3 = ggplot(data3, aes(x=FireYr, y=milha, fill=Class)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   facet_wrap(~EcoCode, scales = "free_y") +
   
@@ -316,26 +320,105 @@ fig3
 ggsave("../figures/3.1-Summary/Figure3.png", plot = fig3, width = 6, height = 7, units = c("in"), dpi = 600)
 ```
 
-## Figure 4
+## Figure 4---Days burned & Fire Size
 ```{r}
 head(data)
 ```
+```{r}
+data4 = data %>%
+  dplyr::select(FireYr,EcoName, EcoCode, SizeHa, BurnDays, Class) %>%
+  group_by(FireYr) %>%
+  mutate(milha = SizeHa/1000000)
+
+
+
+data4        
+```
+```{r}
+data %>% filter(SizeHa > 9000000)
+```
+
+```{r}
+ggplot(data4, aes(x=BurnDays, y=milha, fill=Class)) + 
+  geom_point() +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  bar_theme 
+  
+
+```
+
+
+## Figure 5---Start/End
+
 
 
 ```{r}
-ggplot(data, x=TotDays, y=milha, aes(fill=Class)) +
+data5 = data %>%
+  dplyr::select(FireYr,EcoName, EcoCode, MinDay, MaxDay, AvgDay) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  summarise(start = round(mean(MinDay), 0),
+            end = round(mean(MaxDay), 0)) %>%
+  pivot_longer(col=start:end, names_to = "StartEnd", values_to = "date")
 
+
+
+data5        
+```
+
+```{r fig.height=7, fig.width=6}
+fig5 = ggplot(data5, aes(x=FireYr, y=date, color = StartEnd)) +
+  geom_line(size=1) +
+   scale_color_manual(values = c("#018571", "#a6611a"),  breaks = c("start", "end"), labels = c("Start", "End")) +
   facet_wrap(~EcoCode, scales = "free_y") +
+   
+  geom_hline(yintercept=182, color = "#fdae61", size=1, linetype = "longdash") +
   
-scale_y_continuous(name = ('Area burned \n(millions of hectares)')) +
-  theme_bw() + theme(legend.position = "right") + 
-  
-  scale_fill_brewer(palette = "Spectral",  name="Fire Size Class") +
-  xlab('') +
+
+  ylab("Julian date") +  
+  xlab("") +
   bar_theme +
   theme(legend.position = "bottom", panel.grid.major = element_blank(), 
         strip.background = element_rect(color=NA, fill="white", size=1.5, 
                                         linetype="solid")) +
   guides(fill = guide_legend(title.position = "top", nrow = 1))
 
+
+fig5
+``` 
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure5.png", plot = fig5, width = 6, height = 7, units = c("in"), dpi = 600)
 ```
+
+## Figure 6 Arctic/Subarctic
+
+```{r}
+data6 = data %>% dplyr::select(FireYr, EcoName, EcoCode, ArcSub, SizeHa) %>%
+  group_by(FireYr, ArcSub) %>%
+  summarise(TotHa = sum(SizeHa)) %>% 
+  as.data.frame(.)
+data6
+```
+
+
+```{r fig.height=6, fig.width=5}
+fig6 = ggplot(data6, aes(x=FireYr, y=TotHa, fill=ArcSub)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
+    scale_fill_manual(values=arctic_palette2, name="Location", labels = c("Arctic", "Subarctic")) +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = c(.7, .9), legend.title = element_blank()) + 
+  guides(fill = guide_legend( ncol=3), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
+
+fig6
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure6.png", plot = fig6, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+# References
+Soja, A. J., H. H. Shugart, A. Sukhinin, S. Conard, and P. W. Stackhouse. 2006. Satellite-Derived Mean Fire Return Intervals As Indicators Of Change In Siberia (1995–2002). Mitigation and Adaptation Strategies for Global Change 11:75–96.
