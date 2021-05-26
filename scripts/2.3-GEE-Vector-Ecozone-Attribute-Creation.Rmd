@@ -87,7 +87,7 @@ eco_arctic_ea = st_transform(eco_arctic, ea_ru)
 - area in meters squared, area_m
 - area in Hectares, area_ha
 - Year of the burn, fire_yr
-- Removed fires less than 400 ha
+
 - Ecozone
 - Arctic/subarctic
 
@@ -268,7 +268,7 @@ fires_at_eco_arc_hs_merge_burn = fires_at_eco_arc_hs_merge %>%
 
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 fires_at_eco_arc_hs_merge_burn_rh = nngeo::st_remove_holes(fires_at_eco_arc_hs_merge_burn, max_area = 1000)
 ```
 
