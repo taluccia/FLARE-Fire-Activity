@@ -86,13 +86,10 @@ tail(all_fires)
 ```
 
 
-# Write to shapefile
-```{r eval=FALSE, include=FALSE}
-st_write(all_fires, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
-```
 
 
-# 
+
+
 
 ```{r}
 all_fires
@@ -104,10 +101,7 @@ remove_large_triangles = all_fires %>% filter(!(FireYr == "2020" & IDobj=="3532"
 
 
 
-# Write to shapefile
-```{r eval=FALSE, include=FALSE}
-st_write(remove_large_triangles, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
-```
+
 
 # Add fire size class
 
@@ -146,21 +140,31 @@ fire_class = remove_large_triangles  %>%
 fire_class
 ```
 
-# Remove fires smaller than 200 ha
+# Addition Modifications to the data
+fires smaller than 200 ha (Based on Stocks, 2002)
+Remove perimeters with 0 confidence (based on [FIRMS](https://earthdata.nasa.gov/faq/firms-faq) and the dataset)
+Add 1 to total days to acount for fires that burn only during a single day (start and end on same date)
+
 ```{r}
-remove_small = fire_class %>% filter(SizeHa >= 200)
+data1 = fire_class %>% 
+  filter(SizeHa >= 200) %>%
+  filter(AvgConf > 0) %>%
+  mutate(BurnDays = TotDays +1)
 
 ```
 
-
+# Write to shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(data1, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
+```
 
 # Remove geometry and write attributes to CSV
-
-
 ```{r}
-remove_small %>% 
+data1 %>% 
   st_set_geometry(NULL) %>% 
         write.csv(., '../outputs/2.5-AllFires/SiberiaFires2001-2020.csv',  row.names = FALSE)
   
 ```
 
+# References
+Stocks, B. J., J. A. Mason, J. B. Todd, E. M. Bosch, B. M. Wotton, B. D. Amiro, M. D. Flannigan, K. G. Hirsch, K. A. Logan, D. L. Martell, and W. R. Skinner. 2002. Large forest fires in Canada, 1959–1997. Journal of Geophysical Research 108:8149.
