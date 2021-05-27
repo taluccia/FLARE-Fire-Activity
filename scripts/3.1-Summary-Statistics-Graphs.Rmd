@@ -25,6 +25,7 @@ library(raster)
 library(rgeos) # GIS Geometry
 library(foreign) # deals with dbf files
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(cowplot)
 library(RColorBrewer)
@@ -51,9 +52,20 @@ comp_theme = theme_bw() + theme(legend.position = "none") +
         axis.line = element_line(colour = "black"))
 ```
 
+### No Legend
 ```{r}
 bar_theme = theme_bw() + 
   theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
   theme(panel.grid.major = element_blank()) +
     theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
         axis.text.x = element_text(size = 10, color = "black"),
@@ -296,22 +308,23 @@ data3 = data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
 data3
 ```
 
-
+1 (200-499 ha), 2 (500-1000 ha), 3 (500-1,000 ha), 4 (2,000-10,000), 5 (5,000-10,000), 6 (10,000-20,000), 7 (20,000-50,000), 8 (50,000-100,000), 9 (>100,000)
 ```{r fig.height=7, fig.width=6}
 fig3 = ggplot(data3, aes(x=FireYr, y=milha, fill=Class)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   facet_wrap(~EcoCode, scales = "free_y") +
-  
 scale_y_continuous(name = ('Area burned \n(millions of hectares)')) +
-  theme_bw() + theme(legend.position = "right") + 
-  
-  scale_fill_brewer(palette = "Spectral",  name="Fire Size Class") +
+
+  scale_fill_brewer(palette = "Spectral",  name="Size class (ha)", labels = c("200-499", "500-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", ">100,000")) +
   xlab('') +
-  bar_theme +
-  theme(legend.position = "bottom", panel.grid.major = element_blank(), 
-        strip.background = element_rect(color=NA, fill="white", size=1.5, 
+  bar2_theme +
+  theme(legend.position = "bottom", 
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in'),  
+        panel.grid.major = element_blank(), 
+        strip.background = element_rect(color=NA, fill="white", size=.01, 
                                         linetype="solid")) +
-  guides(fill = guide_legend(title.position = "top", nrow = 1))
+  guides(fill = guide_legend(title="Size class (ha)", title.position = "top", nrow = 2, byrow=FALSE))
 
 fig3
 ```

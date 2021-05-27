@@ -144,6 +144,14 @@ fire_class
 fires smaller than 200 ha (Based on Stocks, 2002)
 Remove perimeters with 0 confidence (based on [FIRMS](https://earthdata.nasa.gov/faq/firms-faq) and the dataset)
 Add 1 to total days to acount for fires that burn only during a single day (start and end on same date)
+```{r}
+fire_class %>% filter(SizeHa<200 | AvgConf==0) 
+```
+
+```{r}
+fire_class %>% filter(AvgConf==0) 
+```
+
 
 ```{r}
 data1 = fire_class %>% 
@@ -151,6 +159,7 @@ data1 = fire_class %>%
   filter(AvgConf > 0) %>%
   mutate(BurnDays = TotDays +1)
 
+data1
 ```
 
 # Write to shapefile
