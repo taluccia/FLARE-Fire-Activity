@@ -72,7 +72,7 @@ Cropped ecozones to arctic circle for arctic designation.
 eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_crop_ee") 
 ```
 
-# Convert to Equal Area
+# Projection---Convert to Equal Area
 
 ```{r}
 fires_ea = st_transform(fires, ea_ru)
@@ -105,7 +105,7 @@ fires_at = fires_ea %>%
 fires_at
 ```
 
-# Plot
+### Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), col = sf.colors(12, categorical = TRUE), border = 'grey', 
      axes = TRUE)
