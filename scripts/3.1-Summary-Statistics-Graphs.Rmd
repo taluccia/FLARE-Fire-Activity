@@ -29,6 +29,7 @@ library(tidyr)
 library(ggplot2)
 library(cowplot)
 library(RColorBrewer)
+library(patchwork)
 ```
 
 # Define graph Theme and color Palette 
@@ -86,6 +87,10 @@ ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32"
 ```{r}
 arctic_palette2 = c("#80cdc1", "#dfc27d")
 ```
+"#66A61E" "#E6AB02" "#A6761D"
+```{r}
+boreal_palette = c("#66A61E", "#A6761D")
+```
 # Data 
 
 ```{r}
@@ -98,15 +103,28 @@ head(data)
 ## Adjust data
 Convert class to factor
 ```{r}
-data = data %>% mutate_at(vars(Class), 
-            list(factor)) 
+data = data %>% 
+  mutate_at(vars(Class), list(factor)) %>% 
+  mutate_at(vars(EcoBiom), list(factor)) %>% 
+  filter(EcoBiom!="8")
 ```
 
+```{r}
+unique(data$EcoBiom)
+```
 ```{r}
 class(data$Class)
 levels(data$Class)
 ```
 
+```{r}
+class(data$EcoBiom)
+levels(data$EcoBiom)
+```
+
+```{r}
+head(data)
+```
 
 # Summary Data tables
 
@@ -236,20 +254,23 @@ data %>%
 ```{r}
 data1 = data %>% group_by(FireYr, EcoName, EcoCode) %>%
   summarise(TotHa = sum(SizeHa)) %>% 
+  mutate(MHa=TotHa/1000000) %>%
   as.data.frame(.)
 data1
 ```
 
 
-```{r fig.height=6, fig.width=5}
+```{r fig.height=6, fig.width=6}
 fig1 = ggplot(data1, aes(x=FireYr, y=TotHa, fill=EcoCode)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
-  scale_fill_manual(values = ecoPalette, name="Ecozone") +
+  scale_fill_manual(values = cbbPalette, name="Ecozone") +
   xlab('') +
   bar_theme +
-  theme(legend.position = c(.7, .85), legend.title = element_blank()) + 
-  guides(fill = guide_legend( ncol=3), 
+  theme(legend.position = c(.6, .85), legend.title = element_blank(),
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in')) + 
+  guides(fill = guide_legend( ncol=2), 
          shape = guide_legend(override.aes = list(size = 0.4)), 
          color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
 
@@ -259,6 +280,29 @@ fig1
 
 ```{r}
 ggsave("../figures/3.1-Summary/Figure1.png", plot = fig1, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+## Figure 1.1 
+
+
+```{r fig.height=6, fig.width=6}
+fig1.1 = ggplot(data1, aes(x=FireYr, y=MHa)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  ylab('Area burned \n(millions of hectares)') +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = "none", legend.title = element_blank()) + 
+  guides(fill = guide_legend( ncol=3), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(axis.text.x = element_text(angle=65, vjust=0.6), 
+        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid"))
+
+fig1.1
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure1.1.png", plot = fig1.1, width = 6, height = 6, units = c("in"), dpi = 600)
 ```
 
 ## Figure 2---Percent area burned by Ecozone and Year
@@ -403,7 +447,7 @@ fig5
 ggsave("../figures/3.1-Summary/Figure5.png", plot = fig5, width = 6, height = 7, units = c("in"), dpi = 600)
 ```
 
-## Figure 6 Arctic/Subarctic
+## Figure 6---Arctic/Subarctic
 
 ```{r}
 data6 = data %>% dplyr::select(FireYr, EcoName, EcoCode, ArcSub, SizeHa) %>%
@@ -416,13 +460,14 @@ data6
 
 ```{r fig.height=6, fig.width=5}
 fig6 = ggplot(data6, aes(x=FireYr, y=TotHa, fill=ArcSub)) +
-  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = TRUE)) +
   scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
     scale_fill_manual(values=arctic_palette2, name="Location", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   bar_theme +
-  theme(legend.position = c(.7, .9), legend.title = element_blank()) + 
-  guides(fill = guide_legend( ncol=3), 
+  theme(legend.position = c(.7, .9), legend.title = element_blank(),       legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in'), ) + 
+  guides(fill = guide_legend( ncol=1), 
          shape = guide_legend(override.aes = list(size = 0.4)), 
          color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
 
@@ -433,5 +478,212 @@ fig6
 ggsave("../figures/3.1-Summary/Figure6.png", plot = fig6, width = 6, height = 5, units = c("in"), dpi = 600)
 ```
 
+## Figure 7---Frequency by Ecozone wrap
+
+
+
+```{r}
+data7 = data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.)
+
+data7
+```
+
+
+```{r fig.height=6, fig.width=6}
+fig7 = ggplot(data7, aes(x=FireYr, y=count)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  xlab('') +
+  ylab('Frequency (count)') +
+  bar_theme +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6), 
+        strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+fig7
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure7.png", plot = fig7, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+## Figure 8---Combined figure
+https://www.r-graph-gallery.com/line-chart-dual-Y-axis-ggplot2.html
+
+Combine figure 2 & 7
+
+```{r}
+data8 = data2 %>% full_join(data7)
+
+data8
+```
+
+  geom_line( aes(y=temperature), size=2, color=temperatureColor) + 
+  geom_line( aes(y=price / coeff), size=2, color=priceColor) +
+
+```{r}
+ggplot(data8, aes(x=FireYr)) +
+  
+  geom_bar(aes(y=PctEco), stat="identity", color="tomato", width = 0.5, position=position_dodge2(reverse=TRUE)) +
+  
+  geom_line(aes(y=count), color = "#00688B") +
+  facet_wrap(~EcoCode, scales = "free_y") +
+  scale_y_continuous(
+    
+    # Features of the first axis
+    name = "Area Burned (%)",
+    
+    # Add a second axis and specify its features
+    sec.axis = sec_axis(trans = ~.*0.03, name="Frequency")
+  ) + 
+  
+  bar_theme
+```
+
+## Figure 9---Boreal/Tundra
+
+```{r}
+data9 = data %>% dplyr::select(FireYr, EcoName, EcoCode, EcoRlm, EcoBiom, SizeHa) %>%
+  group_by(FireYr, EcoCode, EcoBiom, EcoRlm) %>%
+  summarise(TotHa = sum(SizeHa)) %>% 
+  as.data.frame(.)
+data9
+```
+
+```{r fig.height=6, fig.width=5}
+fig9 = ggplot(data9, aes(x=FireYr, y=TotHa, fill=EcoBiom)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
+    scale_fill_manual(values=boreal_palette, name="Location", labels = c("Boreal", "Tundra")) +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = c(.7, .9), legend.title = element_blank(),       legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in'), ) + 
+  guides(fill = guide_legend( ncol=1), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
+
+fig9
+```
+
+## Figure 10---Frequency by Ecozone
+
+
+```{r}
+data10 = data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.)
+
+data10
+```
+
+
+
+```{r fig.height=6, fig.width=6}
+fig10 = ggplot(data10, aes(x=FireYr, y=count, fill=EcoCode)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Frequency (Count)')) +
+  scale_fill_manual(values = cbbPalette, name="Ecozone") +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = c(.6, .85), legend.title = element_blank(),
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in')) + 
+  guides(fill = guide_legend( ncol=2), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
+
+fig10
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure10.png", plot = fig10, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+## Figure 11---Frequency byArctic
+
+
+```{r}
+data11 = data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode,ArcSub, Ecokm2) %>%
+  group_by(FireYr, ArcSub) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.)
+
+data11
+```
+
+
+
+```{r fig.height=6, fig.width=6}
+fig11 = ggplot(data11, aes(x=FireYr, y=count, fill=ArcSub)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = TRUE)) +
+  scale_y_continuous(name = ('Frequency (Count)')) +
+      scale_fill_manual(values=arctic_palette2, name="Location", labels = c("Arctic", "Subarctic")) +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = c(.6, .85), legend.title = element_blank(),
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in')) + 
+  guides(fill = guide_legend( ncol=1), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
+
+fig11
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure11.png", plot = fig11, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+
+## Figure 12---Frequency by Boreal
+
+
+```{r}
+data12 = data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, EcoBiom,Ecokm2) %>%
+  group_by(FireYr, EcoBiom) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.)
+
+data12
+```
+
+
+
+```{r fig.height=6, fig.width=6}
+fig12 = ggplot(data12, aes(x=FireYr, y=count, fill=EcoBiom)) +
+  geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
+  scale_y_continuous(name = ('Frequency (Count)')) +
+      scale_fill_manual(values=boreal_palette, name="Location", labels = c("Boreal", "Tundra")) +
+  xlab('') +
+  bar_theme +
+  theme(legend.position = c(.6, .85), legend.title = element_blank(),
+        legend.key.height = unit(.1, 'in'), 
+        legend.key.width = unit(.2, 'in')) + 
+  guides(fill = guide_legend( ncol=1), 
+         shape = guide_legend(override.aes = list(size = 0.4)), 
+         color = guide_legend(override.aes = list(size = 0.4))) + theme(legend.text = element_text(size = 8))
+
+fig12
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure12.png", plot = fig12, width = 6, height = 5, units = c("in"), dpi = 600)
+```
+
+# Combined Figures (cowplot)
+
+## Plot 1
+```{r fig.height=7, fig.width=6}
+
+cowplot::plot_grid(fig1 + theme(legend.position="none"), fig6, fig9, fig10, fig11, fig12)
+```
 # References
 Soja, A. J., H. H. Shugart, A. Sukhinin, S. Conard, and P. W. Stackhouse. 2006. Satellite-Derived Mean Fire Return Intervals As Indicators Of Change In Siberia (1995–2002). Mitigation and Adaptation Strategies for Global Change 11:75–96.
