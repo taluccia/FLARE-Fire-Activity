@@ -38,35 +38,35 @@ library(lubridate)
 # Data
 
 ```{r}
-f01 = st_read("../data/2.4-Vectors/SiberiaFires_2001.shp", "SiberiaFires_2001") 
-f02 = st_read("../data/2.4-Vectors/SiberiaFires_2002.shp", "SiberiaFires_2002") 
-f03 = st_read("../data/2.4-Vectors/SiberiaFires_2003.shp", "SiberiaFires_2003") 
-f04 = st_read("../data/2.4-Vectors/SiberiaFires_2004.shp", "SiberiaFires_2004") 
-f05 = st_read("../data/2.4-Vectors/SiberiaFires_2005.shp", "SiberiaFires_2005") 
+f01 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2001.shp", "SiberiaFires_v2_2001") 
+f02 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2002.shp", "SiberiaFires_v2_2002") 
+f03 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2003.shp", "SiberiaFires_v2_2003") 
+f04 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2004.shp", "SiberiaFires_v2_2004") 
+f05 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2005.shp", "SiberiaFires_v2_2005") 
 ```
 
 ```{r}
-f06 = st_read("../data/2.4-Vectors/SiberiaFires_2006.shp", "SiberiaFires_2006") 
-f07 = st_read("../data/2.4-Vectors/SiberiaFires_2007.shp", "SiberiaFires_2007") 
-f08 = st_read("../data/2.4-Vectors/SiberiaFires_2008.shp", "SiberiaFires_2008") 
-f09 = st_read("../data/2.4-Vectors/SiberiaFires_2009.shp", "SiberiaFires_2009") 
-f10 = st_read("../data/2.4-Vectors/SiberiaFires_2010.shp", "SiberiaFires_2010") 
+f06 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2006.shp", "SiberiaFires_v2_2006") 
+f07 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2007.shp", "SiberiaFires_v2_2007") 
+f08 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2008.shp", "SiberiaFires_v2_2008") 
+f09 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2009.shp", "SiberiaFires_v2_2009") 
+f10 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2010.shp", "SiberiaFires_v2_2010") 
 ```
 
 ```{r}
-f11 = st_read("../data/2.4-Vectors/SiberiaFires_2011.shp", "SiberiaFires_2011") 
-f12 = st_read("../data/2.4-Vectors/SiberiaFires_2012.shp", "SiberiaFires_2012") 
-f13 = st_read("../data/2.4-Vectors/SiberiaFires_2013.shp", "SiberiaFires_2013") 
-f14 = st_read("../data/2.4-Vectors/SiberiaFires_2014.shp", "SiberiaFires_2014") 
-f15 = st_read("../data/2.4-Vectors/SiberiaFires_2015.shp", "SiberiaFires_2015") 
+f11 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2011.shp", "SiberiaFires_v2_2011") 
+f12 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2012.shp", "SiberiaFires_v2_2012") 
+f13 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2013.shp", "SiberiaFires_v2_2013") 
+f14 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2014.shp", "SiberiaFires_v2_2014") 
+f15 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2015.shp", "SiberiaFires_v2_2015") 
 ```
 
 ```{r}
-f16 = st_read("../data/2.4-Vectors/SiberiaFires_2016.shp", "SiberiaFires_2016") 
-f17 = st_read("../data/2.4-Vectors/SiberiaFires_2017.shp", "SiberiaFires_2017") 
-f18 = st_read("../data/2.4-Vectors/SiberiaFires_2018.shp", "SiberiaFires_2018") 
-f19 = st_read("../data/2.4-Vectors/SiberiaFires_2019.shp", "SiberiaFires_2019") 
-f20 = st_read("../data/2.4-Vectors/SiberiaFires_2020.shp", "SiberiaFires_2020") 
+f16 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2016.shp", "SiberiaFires_v2_2016") 
+f17 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2017.shp", "SiberiaFires_v2_2017") 
+f18 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2018.shp", "SiberiaFires_v2_2018") 
+f19 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2019.shp", "SiberiaFires_v2_2019") 
+f20 = st_read("../data/2.4-Vectors/SiberiaFires_v2_2020.shp", "SiberiaFires_v2_2020") 
 ```
 
 ```{r}
@@ -164,14 +164,14 @@ data1
 
 # Write to shapefile
 ```{r eval=FALSE, include=FALSE}
-st_write(data1, "../outputs/2.5-AllFires/SiberiaFires2001-2020.shp", driver="ESRI Shapefile") 
+st_write(data1, "../outputs/2.5-AllFires/SiberiaFires_v2_2001-2020.shp", driver="ESRI Shapefile") 
 ```
 
 # Remove geometry and write attributes to CSV
 ```{r}
 data1 %>% 
   st_set_geometry(NULL) %>% 
-        write.csv(., '../outputs/2.5-AllFires/SiberiaFires2001-2020.csv',  row.names = FALSE)
+        write.csv(., '../outputs/2.5-AllFires/SiberiaFires_v2_2001-2020.csv',  row.names = FALSE)
   
 ```
 

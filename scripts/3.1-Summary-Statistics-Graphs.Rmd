@@ -94,11 +94,11 @@ boreal_palette = c("#66A61E", "#A6761D")
 # Data 
 
 ```{r}
-data = read.csv("../data/2.5-AllFires/SiberiaFires2001-2020.csv") 
+data = read.csv("../data/2.5-AllFires/SiberiaFires_v2_2001-2020.csv") 
 ```
 
 ```{r}
-head(data)
+data
 ```
 ## Adjust data
 Convert class to factor

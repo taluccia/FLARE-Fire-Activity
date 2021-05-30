@@ -32,6 +32,7 @@ library(tidyr)
 library(spatialEco)
 library(ggplot2)
 library(lubridate)
+library(forcats)
 ```
 
 # Projections
@@ -72,6 +73,30 @@ Cropped ecozones to arctic circle for arctic designation.
 eco_arctic = st_read("../data/bbox/ecozone_arctic_crop_ee.shp", "ecozone_arctic_crop_ee") 
 ```
 
+## Permafrost
+```{r}
+permafrost = st_read("../data/permafrost/permaice.shp", "permaice") 
+```
+
+## Yedoma
+```{r}
+yedoma1 = st_read("../data/IRYP_v1_shapefiles/QG1000k_yedoma_russia.shp", "QG1000k_yedoma_russia") 
+yedoma2 = st_read("../data/IRYP_v1_shapefiles/QG2500k_yedoma_russia.shp", "QG2500k_yedoma_russia") 
+yedoma3 = st_read("../data/IRYP_v1_shapefiles/SG500k_yedoma_russia.shp", "SG500k_yedoma_russia") 
+```
+
+```{r}
+head(yedoma1)
+head(yedoma2)
+head(yedoma3)
+```
+
+
+```{r}
+yedoma = dplyr::bind_rows(yedoma1, yedoma2, yedoma3) %>% mutate(yedoma="yes")
+
+```
+
 # Projection---Convert to Equal Area
 
 ```{r}
@@ -79,6 +104,8 @@ fires_ea = st_transform(fires, ea_ru)
 hotspots_ea = st_transform(hotspots, ea_ru)
 ecozones_ea = st_transform(ecozones, ea_ru)
 eco_arctic_ea = st_transform(eco_arctic, ea_ru)
+perma_ea = st_transform(permafrost, ea_ru)
+yedoma_ea = st_transform(yedoma, ea_ru)
 ```
 
 
@@ -91,9 +118,9 @@ eco_arctic_ea = st_transform(eco_arctic, ea_ru)
 - Ecozone
 - Arctic/subarctic
 
-## Area Burned Attributes
+## Data1---Area Burned Attributes
 ```{r}
-fires_at = fires_ea %>%
+data1 = fires_ea %>%
   dplyr::mutate(ID_obj = row_number()) %>% 
   dplyr::mutate(burned_area_m = as.numeric(round(st_area(fires_ea),1))) %>% 
   dplyr::mutate(burned_area_ha = as.numeric(round(burned_area_m*0.0001, 1))) %>% 
@@ -102,14 +129,14 @@ fires_at = fires_ea %>%
 
 
 ```{r}
-fires_at
+data1
 ```
 
 ### Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), col = sf.colors(12, categorical = TRUE), border = 'grey', 
      axes = TRUE)
-plot(st_geometry(st_centroid(fires_at)), pch = 3, col = 'red', add = TRUE)
+plot(st_geometry(st_centroid(data1)), pch = 3, col = 'red', add = TRUE)
 ```
 
 ## Ecozone attributes
@@ -134,49 +161,56 @@ ren_ecozones_ea = ecozones_ea %>%
 head(ren_ecozones_ea)
 ```
 
-### Join ecozone attributes with fire perimeters
+### Data2---Join ecozone attributes with fire perimeters
 st_make_valid(poly)
 ```{r}
-fires_at_eco = st_join(st_make_valid(fires_at), ren_ecozones_ea, largest=TRUE) %>% dplyr::select(rmpshpr:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% 
+data2 = st_join(st_make_valid(data1), ren_ecozones_ea, largest=TRUE) %>% dplyr::select(rmpshpr:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% 
   drop_na(eco_code)
 ```
 %>% dplyr::select(rmpshpr:eco_area, ECO_NAME:ECO_SYM, area_km2:geometry) %>% 
   drop_na(eco_code)
 ```{r}
-head(fires_at_eco)
+head(data2)
 ```
 
 ##  Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
-plot(st_geometry(st_centroid(fires_at_eco)), pch = 3, col = 'red', add = TRUE)
+plot(st_geometry(st_centroid(data2)), pch = 3, col = 'red', add = TRUE)
 ```
 
-## Arctic/Subarctic designation
+## Data3---Arctic/Subarctic designation
 ```{r}
-fires_at_eco_arc = st_join(fires_at_eco, eco_arctic_ea, largest=TRUE) 
+data3 = st_join(data2, eco_arctic_ea, largest=TRUE) 
 ```
 
 ```{r}
-str(fires_at_eco_arc)
+str(data3)
 ```
 
 ### Convert NA to subarctic
 For location, arctic and subarctic, we need to redefine the NA values as subartic
 ```{r}
-fires_at_eco_arc$location <- factor(fires_at_eco_arc$location, exclude = NULL, 
+levels(data3$location)
+```
+```{r}
+data4 = data3 %>% mutate_at(vars(location), funs(factor(data3$location, exclude = NULL, levels = c("arctic", NA), labels = c("arctic", "subarctic")))) 
+
+data4
+```
+```{r eval=FALSE, include=FALSE}
+data3$location <- factor(data3$location, exclude = NULL, 
                levels = c("arctic", NA), 
                labels = c("arctic", "subarctic"))
-fires_at_eco_arc
+data3
 ```
 
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
-plot(st_geometry(st_centroid(fires_at_eco_arc)), pch = 3, col = 'red', add = TRUE)
+plot(st_geometry(st_centroid(data3)), pch = 3, col = 'red', add = TRUE)
 ```
-
 
 
 ## Hotspot attributes
@@ -209,37 +243,38 @@ sum_pt_poly = function(x){
 }
 ```
 
-
+###Data 5
 ```{r}
-fires_at_eco_arc_hs = st_intersection(hotspots_ea, fires_at_eco_arc) %>% sum_pt_poly()
+data5 = st_intersection(hotspots_ea, data4) %>% sum_pt_poly()
 
 ```
 
 ```{r}
-head(fires_at_eco_arc_hs)
+head(data5)
 ```
+#### Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
-plot(st_geometry(st_centroid(fires_at_eco_arc_hs)), pch = 3, col = 'red', add = TRUE)
+plot(st_geometry(st_centroid(data4)), pch = 3, col = 'red', add = TRUE)
 ```
-### Drop geometry from hotspot attributes
+#### Drop geometry from hotspot attributes
 
 ```{r}
-st_geometry(fires_at_eco_arc_hs) <- NULL
+st_geometry(data5) <- NULL
 ```
 
-## Merge  attributes
-Merge attributes into single shapefile
+### Data 5---Merge  attributes
+Merge attributes from hotspots with into single shapefile
 ```{r}
-fires_at_eco_arc_hs_merge = merge(fires_at_eco_arc, fires_at_eco_arc_hs, by="ID_obj")
+data6 = merge(data4, data5, by="ID_obj")
 ```
 
 ```{r}
-head(fires_at_eco_arc_hs_merge)
+data6
 ```
 
-
+####Plot
 ```{r eval=FALSE, include=FALSE}
 plot(st_geometry(ecozones_ea), border = 'grey', 
      axes = TRUE)
@@ -247,10 +282,10 @@ plot(st_geometry(st_centroid(fires_at_eco_arc_hs_merge)), pch = 3, col = 'red', 
 ```
 
 
-## Add unique fire ID
+## Data 7---Add unique fire ID
 
 ```{r}
-head(fires_at_eco_arc_hs_merge)
+head(data6)
 ```
 Fire ID components
 1. RU
@@ -261,15 +296,62 @@ Fire ID components
 An add fire length in days
 
 ```{r}
-fires_at_eco_arc_hs_merge_burn = fires_at_eco_arc_hs_merge %>%
+data7 = data6 %>%
   separate(min_acq_date, c("acq_year","acq_month", "acq_day"), sep = "-", remove=FALSE) %>%
   mutate(burn_days = (max_julian_date - min_julian_date)) %>%
-  mutate(Fire_ID = paste("RU_", fire_yr,"_", eco_code, "_", acq_year, acq_month, acq_day, sep = "")) 
+  mutate(Fire_ID = paste("RU_", fire_yr,"_", eco_code, "_", acq_year, acq_month, acq_day, sep = "")) %>%
+  dplyr::select(ID_obj:max_acq_date, burn_days:Fire_ID, geometry)
 
 ```
 
-```{r eval=FALSE, include=FALSE}
-fires_at_eco_arc_hs_merge_burn_rh = nngeo::st_remove_holes(fires_at_eco_arc_hs_merge_burn, max_area = 1000)
+```{r}
+data7
+```
+
+## Data 8---Yedoma
+st_make_valid(poly)
+```{r}
+data8 = st_join(data7, st_make_valid(yedoma_ea), largest=TRUE) 
+```
+
+```{r}
+data8
+```
+```{r}
+str(data8)
+```
+
+### Convert NA **Might not need here**
+
+
+```{r}
+data9 = data8 %>% dplyr::select(ID_obj:Fire_ID, yedoma, geometry) %>%
+  mutate_at(vars(yedoma), funs(factor(data8$yedoma, exclude = NULL, levels = c("yes", NA), labels = c("yes", "no")))) 
+
+
+```
+
+
+
+## Data 9---permafrost
+st_make_valid(poly)
+```{r}
+data10 = st_join(data9, st_make_valid(perma_ea), largest=TRUE) 
+```
+
+```{r}
+data10
+```
+
+
+### Convert NA 
+
+
+```{r}
+data11 = data10 %>% dplyr::select(ID_obj:yedoma, COMBO:LANDFORM)
+
+data11
+  
 ```
 
 
@@ -277,7 +359,7 @@ fires_at_eco_arc_hs_merge_burn_rh = nngeo::st_remove_holes(fires_at_eco_arc_hs_m
 
 # Write to shapefile
 ```{r}
-st_write(fires_at_eco_arc_hs_merge_burn_rh, "../outputs/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2020.shp", driver="ESRI Shapefile") 
+st_write(data11, "../outputs/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_v2_2020.shp", driver="ESRI Shapefile") 
 ```
 
 

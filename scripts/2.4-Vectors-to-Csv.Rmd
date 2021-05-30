@@ -39,7 +39,7 @@ library(lubridate)
 # Data
 ## Shapefile
 ```{r}
-fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_2020.shp", "SiberiaFires_2020") 
+fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_v2_2020.shp", "SiberiaFires_v2_2020") 
 ```
 
 # 
@@ -80,27 +80,59 @@ acq_day    **Drop**
 mx_cq_d = MaxDate
 brn_dys = TotDays             
  Fire_ID = FireID
+ yedoma = Yedoma 
+ COMBO = PermCom
+ RELICT=  **Drop** 
+ EXTENT = PermExt
+ CONTENT = PermCon
+ LANDFOR = PermLan
 
 # Rename Columns
 rename(data,  new_name = )
 
 ```{r}
 fires_rename = fires %>% 
-  dplyr::select(ID_obj:fire_yr, ECO_NAM:eco_bim, are_km2:eco_cod, locatin:mn_cq_d, mx_cq_d:Fire_ID) %>% 
-  rename(IDobj = ID_obj, FID = rmpshpr, SIZEm2 = brnd_r_m, SIZEha = brnd_r_h, FireYr = fire_yr, EcoName = ECO_NAM, EcoRlm = eco_rlm, EcoBiom = eco_bim, Ecokm2 = are_km2, EcoCode = eco_cod, ArcSub = locatin, MinDay = min_jln_dt, MaxDay = mx_jln_, AvgDay = men_jln_dt, 
-MedDay = mdn_jl_, MinConf = min_cnfdnc, MaxConf = mx_cnfd, AvgConf = men_cnfdnc, MedConf = mdn_cnf, MinDate = mn_cq_d, MaxDate = mx_cq_d, TotDays = brn_dys, FireId = Fire_ID)
+  dplyr::select(ID_obj:fire_yr, ECO_NAM:eco_bim, are_km2:eco_cod, locatin:mn_cq_d, mx_cq_d:COMBO, EXTENT:LANDFOR) %>% 
+  rename(IDobj = ID_obj, 
+         FID = rmpshpr, 
+         SIZEm2 = brnd_r_m, 
+         SIZEha = brnd_r_h, 
+         FireYr = fire_yr, 
+         EcoName = ECO_NAM, 
+         EcoRlm = eco_rlm, 
+         EcoBiom = eco_bim, 
+         Ecokm2 = are_km2, 
+         EcoCode = eco_cod, 
+         ArcSub = locatin, 
+         MinDay = min_jln_dt, 
+         MaxDay = mx_jln_, 
+         AvgDay = men_jln_dt, 
+         MedDay = mdn_jl_, 
+         MinConf = min_cnfdnc, 
+         MaxConf = mx_cnfd, 
+         AvgConf = men_cnfdnc, 
+         MedConf = mdn_cnf, 
+         MinDate = mn_cq_d, 
+         MaxDate = mx_cq_d, 
+         TotDays = brn_dys, 
+         FireId = Fire_ID,  
+         Yedoma = yedoma,
+         PermCom = COMBO,
+         PermExt =  EXTENT,
+         PermCon = CONTENT,
+         PermLan = LANDFOR)
 
 ```
 
 # Write to shapefile
 ```{r}
-st_write(fires_rename, "../outputs/2.4-Vectors/SiberiaFires_2020.shp", driver="ESRI Shapefile") 
+st_write(fires_rename, "../outputs/2.4-Vectors/SiberiaFires_v2_2020.shp", driver="ESRI Shapefile") 
 ```
 
 # Remove geometry and write attributes to CSV
 ```{r}
 fires_rename %>% 
   st_set_geometry(NULL) %>% 
-        write.csv(., '../outputs/2.4-CSV/SiberiaFires_2020.csv',  row.names = FALSE)
+        write.csv(., '../outputs/2.4-CSV/SiberiaFires_v2_2020.csv',  row.names = FALSE)
   
 ```
