@@ -74,6 +74,8 @@ bar2_theme = theme_bw() +
         axis.line = element_line(colour = "black")) +
   theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
 ```
+
+
 ## Palettes
 ```{r}
 cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -247,6 +249,45 @@ data %>%
   mutate(prct=frac*100) %>%
   mutate(YrMfri = round(100/prct, 2)) %>%
   filter(EcoName=="Taimyr-Central Siberian tundra")
+```
+## Table 7 Ecozone Area
+```{r}
+data %>% dplyr::select(EcoName, Ecokm2) %>%
+  group_by(EcoName) %>%
+  summarise(area= min(Ecokm2)) %>%
+  summarise(sum(area))
+```
+
+## Table 8 Average Annual Area burned
+```{r}
+table8 = data %>% group_by(EcoName, FireYr) %>%
+  summarise(totHa = sum(SizeHa)) %>%
+  summarise(avg = mean(totHa), SD = sd(totHa)) %>%
+  as.data.frame(.) %>%
+   write.csv(., '../outputs/3.1-Summary/Table8.csv',  row.names = FALSE)
+   
+table8
+```
+
+## Table 9 Average Fire season length
+
+```{r}
+table9 = data %>% dplyr::select(FireYr, SizeHa, BurnDays, EcoName, EcoCode, MinDay, MaxDay, AvgDay) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  summarise(TotHa = sum(SizeHa),
+    start = round(min(MinDay), 0),
+      end = round(max(MaxDay), 0)) %>%
+    mutate(season = end-start) %>%
+  group_by(EcoName) %>%
+  summarise(avgSeason = mean(season),
+            sdSeason = sd(season),
+            minSeason = min(season), 
+            maxSeason = max(season)) %>%
+  as.data.frame(.) %>%
+  write.csv(., '../outputs/3.1-Summary/Table9.csv',  row.names = FALSE)
+
+table9
+   
 ```
 
 # Summary Data Figures
@@ -733,6 +774,42 @@ ggplot(data5, aes(x=FireYr, y=date, color = StartEnd)) +
 
 
 ``` 
+
+## Figure 14---Area burned and season Length
+```{r}
+head(data)
+```
+
+```{r}
+data14 = data %>%
+  dplyr::select(FireYr, SizeHa, BurnDays, EcoName, EcoCode, MinDay, MaxDay, AvgDay) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  summarise(TotHa = sum(SizeHa),
+    start = round(min(MinDay), 0),
+      end = round(max(MaxDay), 0)) %>%
+  mutate(season = end-start) %>%
+  mutate(Mha = TotHa/1000000)
+
+
+data14
+       
+```
+
+```{r fig.height=7, fig.width=6}
+fig14 = ggplot(data = data14, aes(x = Mha, y = season, color = EcoCode)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free_x", ncol=2 ) +
+  comp_theme +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+fig14
+```
+
+```{r}
+ggsave("../figures/3.1-Summary/Figure14.png", plot = fig14, width = 6, height = 7, units = c("in"), dpi = 600)
+```
 # Combined Figures (cowplot)
 
 ## Plot 1
