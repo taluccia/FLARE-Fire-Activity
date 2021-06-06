@@ -1,0 +1,76 @@
+---
+title: "Untitled"
+author: "Anna Talucci"
+date: "6/6/2021"
+output: html_document
+---
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+
+Combine all fires year shapefiles into one
+
+# Packages
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+```
+
+
+# Data
+
+
+```{r}
+fires = st_read("../data/2.4-Vectors/SiberiaFires_v2_2020.shp", "SiberiaFires_v2_2020") 
+```
+
+
+
+
+
+
+
+```{r}
+head(fires)
+```
+
+
+
+
+```{r}
+data = fires %>% dplyr::select(IDobj, SIZEha, FireYr, EcoCode, FireId, geometry)
+data
+
+```
+
+
+
+
+# Write to shapefile
+```{r}
+st_write(data, "../outputs/2.6-PerimetersForGEE/SiberiaFires_2020.shp", driver="ESRI Shapefile") 
+```
+
+
+
+
+
+
+
+
