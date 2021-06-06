@@ -32,6 +32,9 @@ For Modis Burned area product
 
 Analysis
 
+# Fire terminology
+
+[Fire Effects Information System Glossary](https://www.fs.fed.us/database/feis/glossary2.html#1)
 
 # References
 **Hotspot point Shapefile**

@@ -237,6 +237,7 @@ data %>%
   write.csv(., '../outputs/3.1-Summary/Table6.csv',  row.names = FALSE)
 ```
 
+
 ```{r}
 data %>% 
   dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
@@ -290,6 +291,26 @@ table9
    
 ```
 
+## Table 10 Fire Rotation
+Bond and Keely
+```{r}
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
+  group_by(FireYr, EcoName) %>% 
+  summarise(burnkm2 = sum(SizeKm2), 
+            EcoKm2 = min(Ecokm2)) %>%
+  mutate(propAnBurn = round(burnkm2/EcoKm2,10)) %>%
+  dplyr::select(FireYr, EcoName, propAnBurn)%>%
+  as.data.frame(.)  %>%
+  group_by(EcoName) %>%
+  summarise(propFire = sum(propAnBurn)) %>%
+  mutate(years=20) %>%
+  mutate(rotation=round(years/propFire, 0)) %>%
+  write.csv(., '../outputs/3.1-Summary/Table10.csv',  row.names = FALSE)
+
+```
+
+
 # Summary Data Figures
 ## Figure 1---Area burned by Year and Ecozone
 ```{r}
@@ -304,7 +325,7 @@ data1
 ```{r fig.height=6, fig.width=6}
 fig1 = ggplot(data1, aes(x=FireYr, y=TotHa, fill=EcoCode)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 5, 10, 15, 20, 25, 30)) +
   scale_fill_manual(values = cbbPalette, name="Ecozone") +
   xlab('') +
   bar_theme +
@@ -533,7 +554,7 @@ data6
 ```{r fig.height=6, fig.width=5}
 fig6 = ggplot(data6, aes(x=FireYr, y=TotHa, fill=ArcSub)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = TRUE)) +
-  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 5, 10, 15, 20, 25, 30)) +
     scale_fill_manual(values=arctic_palette2, name="Location", labels = c("Arctic", "Subarctic")) +
   xlab('') +
   bar_theme +
@@ -616,7 +637,7 @@ ggplot(data8, aes(x=FireYr)) +
   bar_theme
 ```
 
-## Figure 9---Boreal/Tundra
+## Figure 9---Taiga/Tundra
 
 ```{r}
 data9 = data %>% dplyr::select(FireYr, EcoName, EcoCode, EcoRlm, EcoBiom, SizeHa) %>%
@@ -629,8 +650,8 @@ data9
 ```{r fig.height=6, fig.width=5}
 fig9 = ggplot(data9, aes(x=FireYr, y=TotHa, fill=EcoBiom)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
-  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 1000000, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 1, 5, 10, 15, 20, 25, 30)) +
-    scale_fill_manual(values=boreal_palette, name="Location", labels = c("Boreal", "Tundra")) +
+  scale_y_continuous(name = ('Area burned \n(millions of hectares)'), breaks=c(0, 5000000, 10000000, 15000000, 20000000, 25000000, 30000000), labels = c(0, 5, 10, 15, 20, 25, 30)) +
+    scale_fill_manual(values=boreal_palette, name="Location", labels = c("Taiga", "Tundra")) +
   xlab('') +
   bar_theme +
   theme(legend.position = c(.7, .9), legend.title = element_blank(),       legend.key.height = unit(.1, 'in'), 
