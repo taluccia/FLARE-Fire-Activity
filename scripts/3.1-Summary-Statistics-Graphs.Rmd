@@ -310,6 +310,15 @@ data %>%
 
 ```
 
+## table 11 Class
+```{r}
+
+data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
+  group_by(FireYr, EcoName, Class, EcoCode) %>%
+  summarise(totha = sum(SizeHa)) %>%
+  as.data.frame(.) %>%
+  mutate(Mha = totha/1000000)
+```
 
 # Summary Data Figures
 ## Figure 1---Area burned by Year and Ecozone
