@@ -1,0 +1,76 @@
+---
+title: "Combine Monthly Weather"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+```
+
+# Data 
+
+```{r}
+mw01 = read.csv("../data/CleanWeather/2001_MeanMonth.csv") 
+mw02 = read.csv("../data/CleanWeather/2002_MeanMonth.csv") 
+mw03 = read.csv("../data/CleanWeather/2003_MeanMonth.csv") 
+mw04 = read.csv("../data/CleanWeather/2004_MeanMonth.csv") 
+mw05 = read.csv("../data/CleanWeather/2005_MeanMonth.csv") 
+```
+
+```{r}
+mw06 = read.csv("../data/CleanWeather/2006_MeanMonth.csv") 
+mw07 = read.csv("../data/CleanWeather/2007_MeanMonth.csv") 
+mw08 = read.csv("../data/CleanWeather/2008_MeanMonth.csv") 
+mw09 = read.csv("../data/CleanWeather/2009_MeanMonth.csv") 
+mw10 = read.csv("../data/CleanWeather/2010_MeanMonth.csv") 
+```
+
+```{r}
+mw11 = read.csv("../data/CleanWeather/2011_MeanMonth.csv") 
+mw12 = read.csv("../data/CleanWeather/2012_MeanMonth.csv") 
+mw13 = read.csv("../data/CleanWeather/2013_MeanMonth.csv") 
+mw14 = read.csv("../data/CleanWeather/2014_MeanMonth.csv") 
+mw15 = read.csv("../data/CleanWeather/2015_MeanMonth.csv") 
+```
+
+
+```{r}
+mw16 = read.csv("../data/CleanWeather/2016_MeanMonth.csv") 
+mw17 = read.csv("../data/CleanWeather/2017_MeanMonth.csv") 
+mw18 = read.csv("../data/CleanWeather/2018_MeanMonth.csv") 
+mw19 = read.csv("../data/CleanWeather/2019_MeanMonth.csv") 
+mw20 = read.csv("../data/CleanWeather/2020_MeanMonth.csv") 
+```
+
+
+# Combine
+```{r}
+data = bind_rows(mw01, mw02, mw03, mw04, mw05, mw06, mw07, mw08, mw09, mw10, mw11, mw12, mw13, mw14, mw15, mw16, mw17, mw18, mw19, mw20)
+
+data
+```
+
+
+
+```{r}
+write.csv(data, '../outputs/CombineWeather/MeanMonth2001-2020.csv',  row.names = FALSE)
+```
+**THE END**

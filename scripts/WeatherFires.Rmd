@@ -1,0 +1,110 @@
+---
+title: "WeatherFires"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+```
+
+# Define graph Theme and color Palette 
+
+##Themes
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+### No Legend
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+
+## Palettes
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
+```
+
+
+
+
+# Data 
+
+```{r}
+dfw = read.csv("../data/CombineWeather/MeanMonth2001-2020.csv") 
+```
+
+```{r}
+head(dfw)
+```
+
+```{r}
+dfw1 = dfw %>% filter(EcoCode != "SSFS")
+```
+
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = dfw1, aes(x = month, y = pr, color = EcoCode)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+**THE END**

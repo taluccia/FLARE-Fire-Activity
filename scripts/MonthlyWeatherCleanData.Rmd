@@ -1,0 +1,142 @@
+---
+title: "Monthly Weather"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+Name    |	Units   |	Min	  |  Max   |	Scale	    | Description
+def	    |   mm	  |   0*  |  4548* |	0.1	      | Climate water deficit, derived using a one-dimensional soil water balance model
+pdsi    |		       | -4317*	| 3418*	| 0.01	     |Palmer Drought Severity Index
+
+pr      |	mm	    |0*	      |7245*	|	         |Precipitation accumulation
+tmmx	 |  °C	    |-670*	  | 576*	| 0.1	     |Maximum temperature
+
+# Packages
+
+
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+```
+
+
+
+
+# Data 
+
+
+
+```{r}
+mw01 = read.csv("../data/MonthlyWeather/2020_meanMonth.csv") 
+```
+
+
+
+
+
+```{r}
+head(mw01)
+
+```
+
+
+
+
+
+```{r}
+data1 = mw01 %>% rename(def_01=X202001_def, 
+                pdsi_01=X202001_pdsi, 
+                pr_01=X202001_pr, 
+                tmmx_01=X202001_tmmx, 
+                def_02=X202002_def, 
+                pdsi_02=X202002_pdsi, 
+                pr_02=X202002_pr, 
+                tmmx_02=X202002_tmmx, 
+                def_03=X202003_def, 
+                pdsi_03=X202003_pdsi, 
+                pr_03=X202003_pr, 
+                tmmx_03=X202003_tmmx,
+                def_04=X202004_def, 
+                pdsi_04=X202004_pdsi, 
+                pr_04=X202004_pr, 
+                tmmx_04=X202004_tmmx,
+                def_05=X202005_def, 
+                pdsi_05=X202005_pdsi, 
+                pr_05=X202005_pr, 
+                tmmx_05=X202005_tmmx,
+                def_06=X202006_def, 
+                pdsi_06=X202006_pdsi, 
+                pr_06=X202006_pr, 
+                tmmx_06=X202006_tmmx,
+                def_07=X202007_def, 
+                pdsi_07=X202007_pdsi, 
+                pr_07=X202007_pr, 
+                tmmx_07=X202007_tmmx,
+                def_08=X202008_def, 
+                pdsi_08=X202008_pdsi, 
+                pr_08=X202008_pr, 
+                tmmx_08=X202008_tmmx,
+                def_09=X202009_def, 
+                pdsi_09=X202009_pdsi, 
+                pr_09=X202009_pr, 
+                tmmx_09=X202009_tmmx,
+                def_10=X202010_def, 
+                pdsi_10=X202010_pdsi, 
+                pr_10=X202010_pr, 
+                tmmx_10=X202010_tmmx,
+                def_11=X202011_def, 
+                pdsi_11=X202011_pdsi, 
+                pr_11=X202011_pr, 
+                tmmx_11=X202011_tmmx) 
+
+data1
+```
+
+```{r}
+data2 = data1 %>%
+ pivot_longer(
+   cols = c("def_01", "pdsi_01", "pr_01", "tmmx_01", "def_02",  "pdsi_02", "pr_02" ,"tmmx_02", "def_03", "pdsi_03", "pr_03", "tmmx_03","def_04", "pdsi_04",  "pr_04", "tmmx_04", "def_05",  "pdsi_05", "pr_05", "tmmx_05", "def_06", "pdsi_06", "pr_06",  "tmmx_06", "def_07", "pdsi_07", "pr_07", "tmmx_07", "def_08", "pdsi_08", "pr_08",  "tmmx_08", "def_09", "pdsi_09", "pr_09", "tmmx_09","def_10", "pdsi_10", "pr_10", "tmmx_10", "def_11", "pdsi_11",  "pr_11","tmmx_11")  ,
+   names_to = "wm",
+   values_to = "measures") %>%
+  dplyr::select(EcoCode:SIZEha, wm, measures) %>%
+  separate(wm, c("weather", "month")) %>%
+  pivot_wider(names_from = weather, values_from = measures)
+
+data2
+```
+
+```{r}
+data3 = data2 %>%
+  mutate(def1=round(def*0.1,3)) %>%
+  mutate(pdsi1=round(pdsi*0.01, 3)) %>%
+  mutate(tmmx1=round(tmmx*0.1,3)) %>%
+  dplyr::select(EcoCode:month, pr, def1, tmmx1) %>%
+  rename(def=def1, tmmx=tmmx1)
+
+data3
+  
+   
+```
+
+
+```{r}
+write.csv(data3, '../outputs/CleanWeather/2020_MeanMonth.csv',  row.names = FALSE)
+```
+
+
+**THE END**
