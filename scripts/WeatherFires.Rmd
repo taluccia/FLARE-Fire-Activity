@@ -15,13 +15,24 @@ rm(list=ls())
 # Overview
 [Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
 
+# Library
 ```{r include=FALSE}
 
 library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(cowplot)
-
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(magrittr)
+library(rcompanion)
+library(qpcR)
 ```
 
 # Define graph Theme and color Palette 
@@ -87,16 +98,44 @@ dfw = read.csv("../data/CombineWeather/MeanMonth2001-2020.csv")
 ```
 
 ```{r}
-head(dfw)
+dfw
+```
+
+# Visualize
+```{r}
+dfw1 = dfw %>% 
+  filter(EcoCode != "SSFS") 
+  
+```
+
+
+## CMD
+```{r fig.height=7, fig.width=6}
+ggplot(data = dfw1, aes(x = month, y = def, color = EcoCode)) + 
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
 ```
 
 ```{r}
-dfw1 = dfw %>% filter(EcoCode != "SSFS")
+dfw2 = dfw1 %>% 
+  filter(month %in% 4:9) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarise(mean_def = mean(def),
+            Mha = (sum(SIZEha))/1000000) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarise(tot_def = sum(mean_def),
+            Mha = min(Mha))  %>%
+  mutate(log_Mha = log(Mha))
+
+dfw2
 ```
 
-
 ```{r fig.height=7, fig.width=6}
-ggplot(data = dfw1, aes(x = month, y = pr, color = EcoCode)) + 
+ggplot(data = dfw2, aes(x = tot_def, y = log_Mha, color = EcoCode)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
@@ -105,6 +144,106 @@ ggplot(data = dfw1, aes(x = month, y = pr, color = EcoCode)) +
   theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
 
 ```
+
+
+## Max Temperature
+
+
+```{r}
+dfw4 = dfw1 %>% 
+  filter(month %in% 1:9) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarise(mean_tmmx = mean(tmmx),
+            Mha = (sum(SIZEha))/1000000) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarise(max_tmmx = max(mean_tmmx),
+            Mha = min(Mha))  %>%
+  mutate(log_Mha = log(Mha))
+
+dfw4
+```
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = dfw4, aes(x = max_tmmx, y = Mha, color = EcoCode)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+# Analysis
+## Model Climate Moisture Deficit
+```{r}
+fit1 = lm(log_Mha ~ tot_def + EcoCode, data = dfw2)
+```
+
+### Summary
+```{r}
+summary(fit1)
+```
+```{r}
+summary(fit1)$r.squared 
+```
+```{r}
+int_25cm = coef(fit2)[1]
+int_50cm = coef(fit2)[1] + coef(fit2)[3]
+int_1m = coef(fit2)[1] + coef(fit2)[4]
+int_3m = coef(fit2)[1] + coef(fit2)[5]
+int_5m = coef(fit2)[1] + coef(fit2)[6]
+int_10m = coef(fit2)[1] + coef(fit2)[7]
+
+int_25cm
+int_50cm
+int_1m
+int_3m
+int_5m
+int_10m
+
+slope_25cm = coef(fit2)[2]
+slope_50cm = coef(fit2)[2] + coef(fit2)[8]
+slope_1m = coef(fit2)[2] + coef(fit2)[9]
+slope_3m = coef(fit2)[2] + coef(fit2)[10]
+slope_5m = coef(fit2)[2] + coef(fit2)[11]
+slope_10m = coef(fit2)[2] + coef(fit2)[12]
+slope_25cm
+slope_50cm
+slope_1m
+slope_3m
+slope_5m
+slope_10m
+
+```
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ dfw2 %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(log_Mha ~ tot_def, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+ field_ndvi_long1 %>% 
+  nest(-buf_res) %>% 
+  mutate(fit = map(data, ~ lm(biomass_log ~ ndvi, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(buf_res), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Buffer Resolution", y = expression(R^{2}))
+```
+
+## Model Precip
 
 
 **THE END**

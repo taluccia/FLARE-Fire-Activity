@@ -145,13 +145,13 @@ data  = snow %>%
 
 data1 = data %>% group_by(EcoCode,  FireYr) %>%
   summarise(snowMean = mean(relDoy),
-            totalHa = sum(SIZEha))
+            Mha = (sum(SIZEha)/1000000))
 
 data1
 ```
 
 ```{r fig.height=7, fig.width=6}
-ggplot(data = data1, aes(x = totalHa, y = snowMean, color = EcoCode)) + 
+ggplot(data = data1, aes(x = snowMean, y = Mha, color = EcoCode)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
