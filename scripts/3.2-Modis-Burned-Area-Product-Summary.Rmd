@@ -187,6 +187,13 @@ by_year = all_data %>% group_by(fire_yr) %>%
 by_year
 ```
 
+##Table
+```{r}
+all_data %>% group_by(fire_yr) %>% 
+  summarise( . ,
+             MODIS_Total = sum(round(burn_ha,1)))%>%
+  write.csv(., '../outputs/3.2-Summary/Table1.csv',  row.names = FALSE)
+```
 ### Figure
 
 ```{r}
