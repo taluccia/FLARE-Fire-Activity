@@ -178,7 +178,7 @@ ggplot(data = dfw4, aes(x = max_tmmx, y = Mha, color = EcoCode)) +
 # Analysis
 ## Model Climate Moisture Deficit
 ```{r}
-fit1 = lm(log_Mha ~ tot_def + EcoCode, data = dfw2)
+fit1 = lm(log_Mha ~ tot_def + EcoCode +tot_def:EcoCode, data = dfw2)
 ```
 
 ### Summary
@@ -189,32 +189,41 @@ summary(fit1)
 summary(fit1)$r.squared 
 ```
 ```{r}
-int_25cm = coef(fit2)[1]
-int_50cm = coef(fit2)[1] + coef(fit2)[3]
-int_1m = coef(fit2)[1] + coef(fit2)[4]
-int_3m = coef(fit2)[1] + coef(fit2)[5]
-int_5m = coef(fit2)[1] + coef(fit2)[6]
-int_10m = coef(fit2)[1] + coef(fit2)[7]
+int_BT = coef(fit1)[1]
+int_CKMT = coef(fit1)[1] + coef(fit1)[3]
+int_CPT = coef(fit1)[1] + coef(fit1)[4]
+int_EST = coef(fit1)[1] + coef(fit1)[5]
+int_NSCT = coef(fit1)[1] + coef(fit1)[6]
+int_NST = coef(fit1)[1] + coef(fit1)[7]
+int_TBBMT = coef(fit1)[1] + coef(fit1)[8]
+int_TCST = coef(fit1)[1] + coef(fit1)[9]
 
-int_25cm
-int_50cm
-int_1m
-int_3m
-int_5m
-int_10m
+int_BT
+int_CKMT
+int_CPT
+int_EST
+int_NSCT
+int_NST
+int_TBBMT
+int_TCST
 
-slope_25cm = coef(fit2)[2]
-slope_50cm = coef(fit2)[2] + coef(fit2)[8]
-slope_1m = coef(fit2)[2] + coef(fit2)[9]
-slope_3m = coef(fit2)[2] + coef(fit2)[10]
-slope_5m = coef(fit2)[2] + coef(fit2)[11]
-slope_10m = coef(fit2)[2] + coef(fit2)[12]
-slope_25cm
-slope_50cm
-slope_1m
-slope_3m
-slope_5m
-slope_10m
+slope_BT = coef(fit1)[2]
+slope_CKMT = coef(fit1)[2] + coef(fit1)[10]
+slope_CPT = coef(fit1)[2] + coef(fit1)[11]
+slope_EST = coef(fit1)[2] + coef(fit1)[12]
+slope_NSCT = coef(fit1)[2] + coef(fit1)[13]
+slope_NST = coef(fit1)[2] + coef(fit1)[14]
+slope_TBBMT = coef(fit1)[2] + coef(fit1)[15]
+slope_TCST = coef(fit1)[2] + coef(fit1)[16]
+
+slope_BT
+slope_CKMT
+slope_CPT
+slope_EST
+slope_NSCT
+slope_NST
+slope_TBBMT
+slope_TCST
 
 ```
 
@@ -233,15 +242,84 @@ lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters,
 ```
 
 ```{r}
- field_ndvi_long1 %>% 
-  nest(-buf_res) %>% 
-  mutate(fit = map(data, ~ lm(biomass_log ~ ndvi, data = .)),
+ dfw2 %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(log_Mha ~ tot_def, data = .)),
          results = map(fit, glance)) %>% 
   unnest(results) %>% 
-  ggplot(aes(x = factor(buf_res), y = r.squared)) +
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
     geom_bar(stat = "identity") +
-    labs(x = "Buffer Resolution", y = expression(R^{2}))
+    labs(x = "Climate Moisture Deficit", y = expression(R^{2}))
 ```
+
+#### Residuals
+```{r}
+# Get the fitted value for each observation
+dfw2$fit1 = fitted(fit1)
+# Get the residuals of the model
+dfw2$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = dfw2,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = def, y = res1, data = dfw2,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = dfw2, geom = "boxplot")
+```
+
+```{r}
+qqnorm(dfw2$res1, main = "Normal QQ Plot of Residuals")
+qqline(dfw2$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+### Plot
+
+```{r fig.height=5, fig.width=6}
+plot_fit1 = ggplot(data = dfw2, aes(x = tot_def, y = log_Mha, color = EcoCode)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed Mha")), x= "Climate Moisture Deficit", color = "Buffer resolution") +
+  theme_bw() + 
+  theme(legend.position = "bottom") +
+  guides(colour = guide_legend(nrow = 1))
+
+plot_fit1
+  
+```
+
+```{r}
+plot_fit1.1 = ggplot(data = field_ndvi_long1, aes(x = ndvi, y = biomass_log, color = res_meters)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "NDVI", color = "Buffer resolution") +
+  reg_theme
+
+plot_fit1.1
+  
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/2020-08-19_ndvi-biomass-resolution.jpeg", plot = plot_fit1, width = 6, height = 5, units = c("in"), dpi=600 )
+```
+
 
 ## Model Precip
 
