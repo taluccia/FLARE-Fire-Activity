@@ -33,6 +33,7 @@ library(lsmeans)
 library(magrittr)
 library(rcompanion)
 library(qpcR)
+library(tibble)
 ```
 
 # Define graph Theme and color Palette 
@@ -93,6 +94,19 @@ ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32"
 
 # Data 
 
+## Ecozone
+```{r}
+ew = read.csv("../data/CombineWeatherEco/MeanMonth2001-2020.csv") 
+```
+
+```{r}
+ew %>% filter(EcoCode == "CPT") %>%
+  filter(FireYr == 2014)
+```
+```{r}
+unique(ew$EcoId)
+```
+## Fires
 ```{r}
 dfw = read.csv("../data/CombineWeather/MeanMonth2001-2020.csv") 
 ```
@@ -101,7 +115,7 @@ dfw = read.csv("../data/CombineWeather/MeanMonth2001-2020.csv")
 dfw
 ```
 
-# Visualize
+## Remove  SSFS Ecozone
 ```{r}
 dfw1 = dfw %>% 
   filter(EcoCode != "SSFS") 
@@ -109,33 +123,205 @@ dfw1 = dfw %>%
 ```
 
 
-## CMD
-```{r fig.height=7, fig.width=6}
-ggplot(data = dfw1, aes(x = month, y = def, color = EcoCode)) + 
-  geom_point(size = 1) +
-  scale_color_manual(values=cbbPalette) +
-  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
-  theme_bw() +
-  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+```{r}
+dfw %>% 
+  filter(EcoCode == "NSCT") 
+```
 
+# Summarise Fire data by Year
+
+## area burned
+```{r}
+
+df_Mha = dfw1 %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireHa = min(SIZEha)) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(MHa = (sum(fireHa))/1000000 )
+
+df_Mha
+```
+
+
+## DEF
+
+```{r}
+df_def = dfw1 %>% 
+  filter(month %in% 1:9) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanDef = mean(fireTotDef))
+
+
+df_def
+```
+
+## TMMX
+
+```{r}
+df_tmmx = dfw1 %>% 
+  filter(month %in% 6:8) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireMeanTmmx = mean(tmmx)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanTmmx = mean(fireMeanTmmx))
+
+
+df_tmmx
+```
+
+## Precip
+
+```{r}
+df_pr = dfw1 %>% 
+  filter(month %in% 1:9) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotPr = sum(pr)) %>%
+  drop_na(.) %>%
+  ungroup %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanPr = mean(fireTotPr))
+
+
+df_pr
+```
+
+## Combine Data
+```{r}
+fires = df_Mha %>% 
+  left_join(df_def) %>%
+  left_join(df_tmmx) %>%
+  left_join(df_pr)
+
+fires
+```
+
+# Summarise Ecozone data by Year
+
+## DEF
+
+```{r}
+eco_def = ew %>% 
+  filter(month %in% 1:9) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanDef = mean(fireTotDef))
+
+
+eco_def
+```
+
+## TMMX
+
+
+```{r}
+eco_tmmx = ew %>% 
+  filter(month %in% 6:8) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarize(mean_montmmx = mean(tmmx)) %>%
+  ungroup(.) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(EcoMeanTmmx = mean(mean_montmmx))
+
+
+eco_tmmx
+```
+%>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(AvgDef = mean(fireTotDef))
+## Precip
+
+```{r}
+eco_pr = ew %>% 
+  filter(month %in% 1:9) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(accumPr = sum(pr)) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanTotPr = mean(accumPr))
+
+
+eco_pr
+```
+
+## Combine Data
+```{r}
+ew1 = eco_pr %>% 
+  left_join(eco_def) %>%
+  left_join(eco_tmmx)
+
+ew1
+```
+
+# COmbine summarized data
+For ecozones that have years with no fire, we will use the climate values summarized by ecozone. So here we combine fire summarized data with ecozone summarized data, repalce NA with 0 for MHa. Than filter only years with 0 MHa burned.
+```{r}
+mha_0 = ew1 %>%
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa == 0)  %>%
+  mutate(FireMeanDef = EcoMeanDef) %>%
+  mutate(FireMeanTmmx = EcoMeanTmmx) %>%
+  mutate(FireMeanPr = EcoMeanTotPr) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+mha_0 
 ```
 
 ```{r}
-dfw2 = dfw1 %>% 
-  filter(month %in% 4:9) %>%
-  group_by(EcoCode, FireYr, month) %>%
-  summarise(mean_def = mean(def),
-            Mha = (sum(SIZEha))/1000000) %>%
-  group_by(EcoCode, FireYr) %>%
-  summarise(tot_def = sum(mean_def),
-            Mha = min(Mha))  %>%
-  mutate(log_Mha = log(Mha))
+ew1
 
-dfw2
+```
+```{r}
+rows_na = ew1 %>% 
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  filter_all(any_vars(is.na(.))) %>%
+  mutate(FireMeanDef = EcoMeanDef) %>%
+  mutate(FireMeanTmmx = EcoMeanTmmx) %>%
+  mutate(FireMeanPr = EcoMeanTotPr) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+
+rows_na
 ```
 
+```{r}
+mhanot0 = ew1 %>% 
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  drop_na(.) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+
+mhanot0
+```
+
+```{r}
+
+data1 = bind_rows(mha_0, mhanot0, rows_na) %>%
+  mutate(log_Mha = log(MHa + 1))
+
+data1
+```
+
+# Visualize
+
 ```{r fig.height=7, fig.width=6}
-ggplot(data = dfw2, aes(x = tot_def, y = log_Mha, color = EcoCode)) + 
+ggplot(data = data1, aes(x = FireMeanDef, y = MHa, color = EcoCode)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
@@ -146,25 +332,24 @@ ggplot(data = dfw2, aes(x = tot_def, y = log_Mha, color = EcoCode)) +
 ```
 
 
-## Max Temperature
 
 
-```{r}
-dfw4 = dfw1 %>% 
-  filter(month %in% 1:9) %>%
-  group_by(EcoCode, FireYr, month) %>%
-  summarise(mean_tmmx = mean(tmmx),
-            Mha = (sum(SIZEha))/1000000) %>%
-  group_by(EcoCode, FireYr) %>%
-  summarise(max_tmmx = max(mean_tmmx),
-            Mha = min(Mha))  %>%
-  mutate(log_Mha = log(Mha))
-
-dfw4
-```
 
 ```{r fig.height=7, fig.width=6}
-ggplot(data = dfw4, aes(x = max_tmmx, y = Mha, color = EcoCode)) + 
+ggplot(data = data1, aes(x = FireMeanTmmx, y = MHa, color = EcoCode)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = data1, aes(x = FireMeanPr, y = MHa, color = EcoCode)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
@@ -178,7 +363,47 @@ ggplot(data = dfw4, aes(x = max_tmmx, y = Mha, color = EcoCode)) +
 # Analysis
 ## Model Climate Moisture Deficit
 ```{r}
-fit1 = lm(log_Mha ~ tot_def + EcoCode +tot_def:EcoCode, data = dfw2)
+fit1 = lm(log_Mha ~ FireMeanDef + EcoCode + FireMeanDef:EcoCode, data = data1)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+data1$fit1 = fitted(fit1)
+```
+
+```{r}
+# Get the residuals of the model
+data1$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = data1,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = FireMeanDef, y = res1, data = data1,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = data1, geom = "boxplot")
+```
+
+```{r}
+qqnorm(data1$res1, main = "Normal QQ Plot of Residuals")
+qqline(data1$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
 ```
 
 ### Summary
@@ -234,17 +459,17 @@ reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
 lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
     data = field_ndvi_long1
 ```{r}
- dfw2 %>% 
+ data1 %>% 
   nest(-EcoCode) %>% 
-  mutate(fit = map(data, ~ lm(log_Mha ~ tot_def, data = .)),
+  mutate(fit = map(data, ~ lm(MHa ~ FireMeanDef, data = .)),
          results = map(fit, glance)) %>% 
   unnest(results)
 ```
 
 ```{r}
- dfw2 %>% 
+data1 %>% 
   nest(-EcoCode) %>% 
-  mutate(fit = map(data, ~ lm(log_Mha ~ tot_def, data = .)),
+  mutate(fit = map(data, ~ lm(MHa ~ FireMeanDef, data = .)),
          results = map(fit, glance)) %>% 
   unnest(results) %>% 
   ggplot(aes(x = factor(EcoCode), y = r.squared)) +
@@ -252,41 +477,6 @@ lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters,
     labs(x = "Climate Moisture Deficit", y = expression(R^{2}))
 ```
 
-#### Residuals
-```{r}
-# Get the fitted value for each observation
-dfw2$fit1 = fitted(fit1)
-# Get the residuals of the model
-dfw2$res1 = residuals(fit1)
-```
-
-```{r}
-qplot(x = fit1, y = res1, data = dfw2,
-main = "Residuals vs Fitted Values")
-```
-
-```{r}
-qplot(x = def, y = res1, data = dfw2,
-xlab = "CMD",
-ylab = "Residuals",
-main = "Residuals vs CMD")
-```
-```{r}
-qplot(x = factor(1), y = res1, data = dfw2, geom = "boxplot")
-```
-
-```{r}
-qqnorm(dfw2$res1, main = "Normal QQ Plot of Residuals")
-qqline(dfw2$res1) # add reference line to the qq plot
-```
-
-```{r}
-plot(fit1, which = 1) # residual vs fitted values
-```
-
-```{r}
-plot(fit1, which = 2) # qqnorm plot of residuals
-```
 
 ### Plot
 
@@ -304,16 +494,16 @@ plot_fit1
   
 ```
 
-```{r}
-plot_fit1.1 = ggplot(data = field_ndvi_long1, aes(x = ndvi, y = biomass_log, color = res_meters)) + 
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = dfw2, aes(x = tot_def, y = log_Mha, color = EcoCode)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
-    labs(y=expression(atop("Log-transformed C biomass", paste((g~C~m^-2)))), x= "NDVI", color = "Buffer resolution") +
-  reg_theme
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
 
-plot_fit1.1
-  
 ```
 
 ```{r eval=FALSE, include=FALSE}
