@@ -1,0 +1,89 @@
+---
+title: "Monthly Weather COmbine Ecozones"
+author: "Anna Talucci"
+date: "6/14/2021"
+output: html_document
+---
+---
+title: "Combine Monthly Weather"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+```
+
+# Data 
+
+```{r}
+mw01 = read.csv("../data/CleanWeatherEco/2001_MeanMonth.csv") 
+mw02 = read.csv("../data/CleanWeatherEco/2002_MeanMonth.csv") 
+mw03 = read.csv("../data/CleanWeatherEco/2003_MeanMonth.csv") 
+mw04 = read.csv("../data/CleanWeatherEco/2004_MeanMonth.csv") 
+mw05 = read.csv("../data/CleanWeatherEco/2005_MeanMonth.csv") 
+```
+
+```{r}
+mw06 = read.csv("../data/CleanWeatherEco/2006_MeanMonth.csv") 
+mw07 = read.csv("../data/CleanWeatherEco/2007_MeanMonth.csv") 
+mw08 = read.csv("../data/CleanWeatherEco/2008_MeanMonth.csv") 
+mw09 = read.csv("../data/CleanWeatherEco/2009_MeanMonth.csv") 
+mw10 = read.csv("../data/CleanWeatherEco/2010_MeanMonth.csv") 
+```
+
+```{r}
+mw11 = read.csv("../data/CleanWeatherEco/2011_MeanMonth.csv") 
+mw12 = read.csv("../data/CleanWeatherEco/2012_MeanMonth.csv") 
+mw13 = read.csv("../data/CleanWeatherEco/2013_MeanMonth.csv") 
+mw14 = read.csv("../data/CleanWeatherEco/2014_MeanMonth.csv") 
+mw15 = read.csv("../data/CleanWeatherEco/2015_MeanMonth.csv") 
+```
+
+
+```{r}
+mw16 = read.csv("../data/CleanWeatherEco/2016_MeanMonth.csv") 
+mw17 = read.csv("../data/CleanWeatherEco/2017_MeanMonth.csv") 
+mw18 = read.csv("../data/CleanWeatherEco/2018_MeanMonth.csv") 
+mw19 = read.csv("../data/CleanWeatherEco/2019_MeanMonth.csv") 
+mw20 = read.csv("../data/CleanWeatherEco/2020_MeanMonth.csv") 
+```
+
+
+# Combine
+```{r}
+data = bind_rows(mw01, mw02, mw03, mw04, mw05, mw06, mw07, mw08, mw09, mw10, mw11, mw12, mw13, mw14, mw15, mw16, mw17, mw18, mw19, mw20)
+
+data
+```
+
+```{r}
+data1 = data %>% 
+  rename(EcoCode=eco_code, EcoName=ECO_NAME, EcoId = OBJECTID) %>%
+  filter(EcoCode != "SSFS") 
+
+data1
+
+```
+
+```{r}
+write.csv(data1, '../outputs/CombineWeatherEco/MeanMonth2001-2020.csv',  row.names = FALSE)
+```
+**THE END**
