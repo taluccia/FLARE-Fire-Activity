@@ -144,6 +144,20 @@ Table1 = data %>% group_by(FireYr, EcoName) %>%
 Table1
 ```
 
+
+```{r}
+table1.1 = data %>% 
+  filter(EcoCode %in% c("BT", "CKMT", "NSCT", "NST", "CPT")) %>%
+  group_by(FireYr, EcoCode) %>%
+  summarise(TotHa = sum(SizeHa))%>% as.data.frame(.) %>%
+  pivot_wider(names_from = EcoCode, values_from = TotHa) %>%
+  replace(is.na(.), 0) %>%
+  mutate(total = rowSums(across(where(is.numeric)))) %>%
+   write.csv(., '../outputs/3.1-Summary/Table1-1.csv',  row.names = FALSE)
+   
+
+table1.1
+```
 ## Table 2
 By ecozone:Average HA/yr, Sd ha/yr, percent burned per year,  Fire return interval
 ```{r}
