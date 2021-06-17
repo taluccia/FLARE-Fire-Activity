@@ -1,10 +1,9 @@
 ---
-title: "Monthly weather by Eco"
+title: "Monthly Weather"
 author: "Anna Talucci"
-date: "6/14/2021"
+date: "6/8/2021"
 output: html_document
 ---
-
 
 # Clear workspace
 
@@ -37,103 +36,101 @@ library(cowplot)
 
 
 
-# By Ecozone
+
+# Data 
 
 ```{r}
-mw = read.csv("../data/MonthlyWeatherEco/2020_meanMonthEco.csv") 
+mw01 = read.csv("../data/MonthlyWeather/2020_meanMonth.csv") 
+```
+
+```{r}
+head(mw01)
+
 ```
 
 
-
-
-```{r}
-head(mw)
-
-```
-
-
-
-
+# Rename columns
 
 ```{r}
-data4 = mw %>% rename(def_01=X202001_def, 
-                pdsi_01=X202001_pdsi, 
+data1 = mw01 %>% rename(def_01=X202001_def, 
+           
                 pr_01=X202001_pr, 
                 tmmx_01=X202001_tmmx, 
                 def_02=X202002_def, 
-                pdsi_02=X202002_pdsi, 
+           
                 pr_02=X202002_pr, 
                 tmmx_02=X202002_tmmx, 
                 def_03=X202003_def, 
-                pdsi_03=X202003_pdsi, 
+            
                 pr_03=X202003_pr, 
                 tmmx_03=X202003_tmmx,
                 def_04=X202004_def, 
-                pdsi_04=X202004_pdsi, 
+          
                 pr_04=X202004_pr, 
                 tmmx_04=X202004_tmmx,
                 def_05=X202005_def, 
-                pdsi_05=X202005_pdsi, 
+       
                 pr_05=X202005_pr, 
                 tmmx_05=X202005_tmmx,
                 def_06=X202006_def, 
-                pdsi_06=X202006_pdsi, 
+         
                 pr_06=X202006_pr, 
                 tmmx_06=X202006_tmmx,
                 def_07=X202007_def, 
-                pdsi_07=X202007_pdsi, 
+             
                 pr_07=X202007_pr, 
                 tmmx_07=X202007_tmmx,
                 def_08=X202008_def, 
-                pdsi_08=X202008_pdsi, 
+               
                 pr_08=X202008_pr, 
                 tmmx_08=X202008_tmmx,
                 def_09=X202009_def, 
-                pdsi_09=X202009_pdsi, 
+               
                 pr_09=X202009_pr, 
                 tmmx_09=X202009_tmmx,
                 def_10=X202010_def, 
-                pdsi_10=X202010_pdsi, 
+                 
                 pr_10=X202010_pr, 
                 tmmx_10=X202010_tmmx,
                 def_11=X202011_def, 
-                pdsi_11=X202011_pdsi, 
+                 
                 pr_11=X202011_pr, 
-                tmmx_11=X202011_tmmx) 
+                tmmx_11=X202011_tmmx,
+                
+                def_12=X202012_def,
+                pr_12= X202012_pr,
+                tmmx_12 = X202012_tmmx) 
 
-data4
+data1
 ```
 
 ```{r}
-data5 = data4 %>%
- pivot_longer(
-   cols = c("def_01", "pdsi_01", "pr_01", "tmmx_01", "def_02",  "pdsi_02", "pr_02" ,"tmmx_02", "def_03", "pdsi_03", "pr_03", "tmmx_03","def_04", "pdsi_04",  "pr_04", "tmmx_04", "def_05",  "pdsi_05", "pr_05", "tmmx_05", "def_06", "pdsi_06", "pr_06",  "tmmx_06", "def_07", "pdsi_07", "pr_07", "tmmx_07", "def_08", "pdsi_08", "pr_08",  "tmmx_08", "def_09", "pdsi_09", "pr_09", "tmmx_09","def_10", "pdsi_10", "pr_10", "tmmx_10", "def_11", "pdsi_11",  "pr_11","tmmx_11")  ,
+data2 = data1 %>%
+ pivot_longer(cols = c("def_01", "pr_01", "tmmx_01", "def_02",  "pr_02" ,"tmmx_02", "def_03",  "pr_03", "tmmx_03","def_04",  "pr_04", "tmmx_04", "def_05", "pr_05", "tmmx_05", "def_06", "pr_06",  "tmmx_06", "def_07", "pr_07", "tmmx_07", "def_08", "pr_08",  "tmmx_08", "def_09", "pr_09", "tmmx_09","def_10", "pr_10", "tmmx_10", "def_11",  "pr_11","tmmx_11", "def_12",  "pr_12","tmmx_12")  ,
    names_to = "wm",
    values_to = "measures") %>%
-  dplyr::select(ECO_NAME, eco_code, OBJECTID, wm, measures) %>%
+  dplyr::select(EcoCode:SIZEha, wm, measures) %>%
   separate(wm, c("weather", "month")) %>%
   pivot_wider(names_from = weather, values_from = measures)
 
-data5
+data2
 ```
 
 ```{r}
-data6 = data5 %>%
+data3 = data2 %>%
   mutate(def1=round(def*0.1,3)) %>%
-  mutate(pdsi1=round(pdsi*0.01, 3)) %>%
   mutate(tmmx1=round(tmmx*0.1,3)) %>%
-  dplyr::select(ECO_NAME, eco_code, OBJECTID, month, pr, def1, tmmx1) %>%
-  rename(def=def1, tmmx=tmmx1) %>%
-  mutate(FireYr = "2020")
+  dplyr::select(EcoCode:month, pr, def1, tmmx1) %>%
+  rename(def=def1, tmmx=tmmx1)
 
-data6
+data3
   
    
 ```
 
 
 ```{r}
-write.csv(data6, '../outputs/CleanWeatherEco/2020_MeanMonth.csv',  row.names = FALSE)
+write.csv(data3, '../outputs/CleanWeather/2020_MeanMonth.csv',  row.names = FALSE)
 ```
 
 

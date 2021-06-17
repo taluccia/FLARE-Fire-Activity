@@ -1,0 +1,293 @@
+---
+title: "Season Length Analysis"
+author: "Anna Talucci"
+date: "6/17/2021"
+output: html_document
+---
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+
+# Overview
+
+
+# Packages
+
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(RColorBrewer)
+library(patchwork)
+```
+
+# Define graph Theme and color Palette 
+
+##Themes
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+### No Legend
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+
+## Palettes
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
+```
+
+
+```{r}
+arctic_palette2 = c("#80cdc1", "#dfc27d")
+```
+"#66A61E" "#E6AB02" "#A6761D"
+```{r}
+boreal_palette = c("#66A61E", "#A6761D")
+```
+# Data 
+
+```{r}
+data = read.csv("../data/2.5-AllFires/SiberiaFires_v2_2001-2020.csv") 
+```
+
+```{r}
+data
+```
+## Adjust data
+Convert class to factor
+```{r}
+data = data %>% 
+  mutate_at(vars(Class), list(factor)) %>% 
+  mutate_at(vars(EcoBiom), list(factor)) %>% 
+  filter(EcoBiom!="8")
+```
+
+```{r}
+unique(data$EcoBiom)
+```
+```{r}
+class(data$Class)
+levels(data$Class)
+```
+
+```{r}
+class(data$EcoBiom)
+levels(data$EcoBiom)
+```
+
+```{r}
+head(data)
+```
+
+
+
+
+
+```{r}
+data1 = data %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  summarise(start = round(min(MinDay), 0),
+            end = round(max(MaxDay), 0),
+            MHa = (sum(SizeHa))/1000000) %>%
+  mutate(season = end-start)
+
+
+data1
+   
+```
+
+
+# Analysis
+## Model Climate Moisture Deficit
+```{r}
+fit1 = lm(MHa ~ season + EcoCode + season:EcoCode, data = data1)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+data1$fit1 = fitted(fit1)
+```
+
+```{r}
+# Get the residuals of the model
+data1$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = data1,
+main = "Residuals vs Fitted Values")
+```
+
+
+```{r}
+qplot(x = season, y = res1, data = data1,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = data1, geom = "boxplot")
+```
+
+```{r}
+qqnorm(data1$res1, main = "Normal QQ Plot of Residuals")
+qqline(data1$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+### Summary
+```{r}
+summary(fit1)
+```
+```{r}
+summary(fit1)$r.squared 
+```
+```{r}
+int_BT = coef(fit1)[1]
+int_CKMT = coef(fit1)[1] + coef(fit1)[3]
+int_CPT = coef(fit1)[1] + coef(fit1)[4]
+int_EST = coef(fit1)[1] + coef(fit1)[5]
+int_NSCT = coef(fit1)[1] + coef(fit1)[6]
+int_NST = coef(fit1)[1] + coef(fit1)[7]
+int_TBBMT = coef(fit1)[1] + coef(fit1)[8]
+int_TCST = coef(fit1)[1] + coef(fit1)[9]
+
+int_BT
+int_CKMT
+int_CPT
+int_EST
+int_NSCT
+int_NST
+int_TBBMT
+int_TCST
+
+slope_BT = coef(fit1)[2]
+slope_CKMT = coef(fit1)[2] + coef(fit1)[10]
+slope_CPT = coef(fit1)[2] + coef(fit1)[11]
+slope_EST = coef(fit1)[2] + coef(fit1)[12]
+slope_NSCT = coef(fit1)[2] + coef(fit1)[13]
+slope_NST = coef(fit1)[2] + coef(fit1)[14]
+slope_TBBMT = coef(fit1)[2] + coef(fit1)[15]
+slope_TCST = coef(fit1)[2] + coef(fit1)[16]
+
+slope_BT
+slope_CKMT
+slope_CPT
+slope_EST
+slope_NSCT
+slope_NST
+slope_TBBMT
+slope_TCST
+
+```
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ data1 %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ season, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+data1 %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ season, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Climate Moisture Deficit", y = expression(R^{2}))
+```
+
+
+### Plot
+
+```{r fig.height=7, fig.width=6}
+plot_fit1 = ggplot(data = data1, aes(x = season, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_jitter(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    labs(y=expression(atop("Mha")), x= "Season length (days)") +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() + 
+  guides(colour = guide_legend(nrow = 1)) + 
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+plot_fit1
+  
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/AnalysisSeasonAreaBurned.jpeg", plot = plot_fit1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+
+**THE END**

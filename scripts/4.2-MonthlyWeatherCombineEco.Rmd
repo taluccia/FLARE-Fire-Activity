@@ -4,12 +4,7 @@ author: "Anna Talucci"
 date: "6/14/2021"
 output: html_document
 ---
----
-title: "Combine Monthly Weather"
-author: "Anna Talucci"
-date: "6/8/2021"
-output: html_document
----
+
 
 
 # Clear workspace
