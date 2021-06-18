@@ -1,0 +1,626 @@
+---
+title: "WeatherFires"
+author: "Anna Talucci"
+date: "6/8/2021"
+output: html_document
+---
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+# Library
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(magrittr)
+library(rcompanion)
+library(qpcR)
+library(tibble)
+```
+
+# Define graph Theme and color Palette 
+
+##Themes
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+### No Legend
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+
+## Palettes
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
+```
+
+
+
+
+# Data 
+
+## Ecozone
+```{r}
+ecow = read.csv("../data/CombineWeatherEco/MeanMonth2001-2020.csv") 
+```
+
+```{r}
+ecow %>% filter(EcoCode == "CPT") %>%
+  filter(FireYr == 2014)
+```
+```{r}
+unique(ecow$EcoId)
+```
+## Fires
+```{r}
+firew = read.csv("../data/CombineWeather/MeanMonth2001-2020.csv") 
+```
+
+```{r}
+firew
+```
+
+## Remove  SSFS Ecozone
+```{r}
+firew1 = firew %>% 
+  filter(EcoCode != "SSFS") 
+  
+```
+
+
+```{r}
+firew %>% 
+  filter(EcoCode == "NSCT") 
+```
+
+# Summarise Fire Annual Variables
+
+## By Fire
+
+###  area burned
+```{r}
+
+fire_Mha = firew1 %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireHa = min(SIZEha)) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(MHa = (sum(fireHa))/1000000)
+
+fire_Mha
+```
+
+
+### DEF
+
+```{r}
+fire_def = firew1 %>% 
+  filter(month %in% 1:12) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanDef = mean(fireTotDef))
+
+
+fire_def
+```
+
+### TMMX
+
+```{r}
+fire_tmmx = firew1 %>% 
+  filter(month %in% 1:12) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireMeanTmmx = mean(tmmx)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanTmmx = mean(fireMeanTmmx))
+
+
+fire_tmmx
+```
+
+### Precip
+
+```{r}
+fire_pr = firew1 %>% 
+  filter(month %in% 1:12) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotPr = sum(pr)) %>%
+  drop_na(.) %>%
+  ungroup %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanPr = mean(fireTotPr))
+
+
+fire_pr
+```
+
+### Combine Data
+
+```{r}
+fires = fire_Mha %>% 
+  left_join(fire_def) %>%
+  left_join(fire_tmmx) %>%
+  left_join(fire_pr)
+
+fires
+```
+
+## by Ecozone
+
+### DEF
+
+```{r}
+eco_def = ecow %>% 
+  filter(month %in% 1:12) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanDef = mean(fireTotDef))
+
+
+eco_def
+```
+
+### TMMX
+
+
+```{r}
+eco_tmmx = ecow %>% 
+  filter(month %in% 1:12) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarize(mean_montmmx = mean(tmmx)) %>%
+  ungroup(.) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(EcoMeanTmmx = mean(mean_montmmx))
+
+
+eco_tmmx
+```
+
+### Precip
+
+```{r}
+eco_pr = ecow %>% 
+  filter(month %in% 1:12) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(accumPr = sum(pr)) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanTotPr = mean(accumPr))
+
+
+eco_pr
+```
+
+### Combine Data
+```{r}
+ecow1 = eco_pr %>% 
+  left_join(eco_def) %>%
+  left_join(eco_tmmx)
+
+ecow1
+```
+
+# Combine Annual data
+For ecozones that have years with no fire, we will use the climate values summarized by ecozone. So here we combine fire summarized data with ecozone summarized data, repalce NA with 0 for MHa. Than filter only years with 0 MHa burned.
+```{r}
+mha_0 = ecow1 %>%
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa == 0)  %>%
+  mutate(FireMeanDef = EcoMeanDef) %>%
+  mutate(FireMeanTmmx = EcoMeanTmmx) %>%
+  mutate(FireMeanPr = EcoMeanTotPr) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+mha_0 
+```
+
+```{r}
+ecow1
+
+```
+```{r}
+rows_na = ecow1 %>% 
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  filter_all(any_vars(is.na(.))) %>%
+  mutate(FireMeanDef = EcoMeanDef) %>%
+  mutate(FireMeanTmmx = EcoMeanTmmx) %>%
+  mutate(FireMeanPr = EcoMeanTotPr) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+
+rows_na
+```
+
+```{r}
+mhanot0 = ecow1 %>% 
+  left_join(fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  drop_na(.) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanTmmx, FireMeanPr)
+
+
+mhanot0
+```
+
+```{r}
+
+data1 = bind_rows(mha_0, mhanot0, rows_na) %>%
+  rename(AnnualDef=FireMeanDef, AnnualTmmx=FireMeanTmmx, AnnualPr=FireMeanPr)
+
+data1
+```
+
+#  June & July  Values
+## By Fire
+
+###  area burned
+```{r}
+
+jn_fire_Mha = firew1 %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireHa = min(SIZEha)) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(MHa = (sum(fireHa))/1000000)
+
+jn_fire_Mha
+```
+
+
+### DEF
+
+```{r}
+jn_fire_def = firew1 %>% 
+  filter(month %in% 1:6) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JuneDef = mean(fireTotDef))
+
+
+jn_fire_def
+```
+```{r}
+jy_fire_def = firew1 %>% 
+  filter(month %in% 1:7) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JulyDef = mean(fireTotDef))
+
+
+jy_fire_def
+```
+### TMMX
+
+```{r}
+jj_fire_tmmx = firew1 %>% 
+  filter(month %in% 6:7) %>%
+  group_by(EcoCode, FireYr, IDobj, month) %>%
+  summarize(fireMeanTmmx = mean(tmmx)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr, month) %>%
+  summarise(FireMeanTmmx = mean(fireMeanTmmx)) %>%
+  pivot_wider(names_from = month, values_from = FireMeanTmmx) %>%
+  rename(JuneTmmx = "6", JulyTmmx = "7")
+
+
+jj_fire_tmmx
+```
+
+### Precip
+
+```{r}
+jn_fire_pr = firew1 %>% 
+  filter(month %in% 1:6) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotPr = sum(pr)) %>%
+  drop_na(.) %>%
+  ungroup %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JunePr = mean(fireTotPr))
+
+
+jn_fire_pr
+```
+
+
+```{r}
+jy_fire_pr = firew1 %>% 
+  filter(month %in% 1:7) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotPr = sum(pr)) %>%
+  drop_na(.) %>%
+  ungroup %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JulyPr = mean(fireTotPr))
+
+
+jy_fire_pr
+```
+### Combine Data
+
+```{r}
+jj_fires = fire_Mha %>% 
+  left_join(jn_fire_def) %>%
+  left_join(jy_fire_def) %>%
+  left_join(jj_fire_tmmx) %>%
+  left_join(jn_fire_pr) %>%
+  left_join(jy_fire_pr)
+
+
+jj_fires
+```
+
+## by Ecozone
+
+### DEF
+
+```{r}
+jn_eco_def = ecow %>% 
+  filter(month %in% 1:6) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JuneEcoDef = mean(fireTotDef))
+
+
+jn_eco_def
+```
+
+```{r}
+jy_eco_def = ecow %>% 
+  filter(month %in% 1:7) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JulyEcoDef = mean(fireTotDef))
+
+
+jy_eco_def
+```
+### TMMX
+
+
+```{r}
+jj_eco_tmmx = ecow %>% 
+  filter(month %in% 6:7) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarize(mean_montmmx = mean(tmmx)) %>%
+  ungroup(.) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarize(EcoMeanTmmx = mean(mean_montmmx)) %>%
+  pivot_wider(names_from = month, values_from = EcoMeanTmmx) %>%
+  rename(JuneEcoTmmx = "6", JulyEcoTmmx = "7")
+
+
+jj_eco_tmmx
+```
+
+### Precip
+
+```{r}
+jn_eco_pr = ecow %>% 
+  filter(month %in% 1:6) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(accumPr = sum(pr)) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JuneEcoPr = mean(accumPr))
+
+
+jn_eco_pr
+```
+
+```{r}
+jy_eco_pr = ecow %>% 
+  filter(month %in% 1:7) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(accumPr = sum(pr)) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(JulyEcoPr = mean(accumPr))
+
+
+jy_eco_pr
+```
+
+### Combine Data
+```{r}
+jj_ecow1 = jn_eco_def  %>% 
+  left_join(jy_eco_def ) %>%
+  left_join(jj_eco_tmmx) %>%
+  left_join(jn_eco_pr) %>%
+  left_join(jy_eco_pr)
+  
+
+jj_ecow1
+```
+# Combine June/July data
+For ecozones that have years with no fire, we will use the climate values summarized by ecozone. So here we combine fire summarized data with ecozone summarized data, repalce NA with 0 for MHa. Than filter only years with 0 MHa burned.
+
+```{r}
+jj_ecow1 
+jj_fires
+```
+```{r}
+jj_mha_0 = jj_ecow1 %>%
+  left_join(jj_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa == 0)  %>%
+  dplyr::select(EcoCode:MHa) %>%
+  rename(JuneDef = JuneEcoDef, JulyDef = JulyEcoDef, JuneTmmx = JuneEcoTmmx, JulyTmmx = JulyEcoTmmx, JunePr = JuneEcoPr, JulyPr = JulyEcoPr) 
+  
+
+jj_mha_0 
+```
+
+
+```{r}
+jj_rows_na = jj_ecow1 %>% 
+  left_join(jj_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  filter_all(any_vars(is.na(.))) %>%
+  dplyr::select(EcoCode:MHa) %>%
+  rename(JuneDef = JuneEcoDef, JulyDef = JulyEcoDef, JuneTmmx = JuneEcoTmmx, JulyTmmx = JulyEcoTmmx, JunePr = JuneEcoPr, JulyPr = JulyEcoPr) 
+
+
+jj_rows_na
+```
+
+```{r}
+jj_mhanot0 = jj_ecow1 %>% 
+  left_join(jj_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  drop_na(.) %>%
+  dplyr::select(EcoCode, FireYr, MHa, JuneDef, JulyDef, JuneTmmx, JulyTmmx, JunePr, JulyPr)
+
+
+jj_mhanot0
+```
+
+```{r}
+
+data2 = bind_rows(jj_mha_0, jj_mhanot0, jj_rows_na) 
+
+data2
+```
+
+# Combine Annual with June/july
+```{r}
+climate1 = data1 %>% left_join(data2)
+```
+
+```{r}
+
+write.csv(climate1, '../outputs/4.3-ClimateFire/ClimateFire2001-2020.csv',  row.names = FALSE)
+
+```
+
+
+
+# Visualize
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = climate1, aes(x = AnnualDef, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+
+
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = climate1, aes(x = AnnualTmmx, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+
+```{r fig.height=7, fig.width=6}
+ggplot(data = climate1, aes(x = AnnualPr, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+
+
+**THE END**
