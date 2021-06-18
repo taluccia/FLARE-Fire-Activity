@@ -1,0 +1,255 @@
+---
+title: "Snow analysis"
+author: "Anna Talucci"
+date: "6/17/2021"
+output: html_document
+---
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+Snow data from MODIS
+
+# Library
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(magrittr)
+library(rcompanion)
+library(qpcR)
+library(tibble)
+```
+
+# Define graph Theme and color Palette 
+
+##Themes
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+### No Legend
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+
+## Palettes
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
+```
+
+
+
+
+# Data 
+
+## Ecozone
+```{r}
+snow = read.csv("../data/SnowData/SnowOff2001-2020.csv") 
+```
+
+```{r}
+snow
+```
+
+# Analysis  Annual Variables
+## Model snow Moisture Deficit
+```{r}
+fit1 = lm(Mha ~ MeanCalDoY + EcoCode + MeanCalDoY:EcoCode, data = snow)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+snow$fit1 = fitted(fit1)
+```
+
+```{r}
+# Get the residuals of the model
+snow$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = snow,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = MeanCalDoY, y = res1, data = snow,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = snow, geom = "boxplot")
+```
+
+```{r}
+qqnorm(snow$res1, main = "Normal QQ Plot of Residuals")
+qqline(snow$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+### Summary
+```{r}
+summary(fit1)
+```
+```{r}
+summary(fit1)$r.squared 
+```
+```{r}
+int_BT = coef(fit1)[1]
+int_CKMT = coef(fit1)[1] + coef(fit1)[3]
+int_CPT = coef(fit1)[1] + coef(fit1)[4]
+int_EST = coef(fit1)[1] + coef(fit1)[5]
+int_NSCT = coef(fit1)[1] + coef(fit1)[6]
+int_NST = coef(fit1)[1] + coef(fit1)[7]
+int_TBBMT = coef(fit1)[1] + coef(fit1)[8]
+int_TCST = coef(fit1)[1] + coef(fit1)[9]
+
+int_BT
+int_CKMT
+int_CPT
+int_EST
+int_NSCT
+int_NST
+int_TBBMT
+int_TCST
+
+slope_BT = coef(fit1)[2]
+slope_CKMT = coef(fit1)[2] + coef(fit1)[10]
+slope_CPT = coef(fit1)[2] + coef(fit1)[11]
+slope_EST = coef(fit1)[2] + coef(fit1)[12]
+slope_NSCT = coef(fit1)[2] + coef(fit1)[13]
+slope_NST = coef(fit1)[2] + coef(fit1)[14]
+slope_TBBMT = coef(fit1)[2] + coef(fit1)[15]
+slope_TCST = coef(fit1)[2] + coef(fit1)[16]
+
+slope_BT
+slope_CKMT
+slope_CPT
+slope_EST
+slope_NSCT
+slope_NST
+slope_TBBMT
+slope_TCST
+
+```
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ snow %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(Mha ~ MeanCalDoY, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+snow %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(Mha ~ MeanCalDoY, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "snow Moisture Deficit", y = expression(R^{2}))
+```
+
+
+### Plot
+
+```{r fig.height=3, fig.width=6}
+plot_fit1 = ggplot(data = snow, aes(x = MeanCalDoY, y = Mha)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    ylab("") +
+    xlab("Mean Snow off Julian date") +
+
+  facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  
+  scale_x_continuous(guide = guide_axis(check.overlap = TRUE)) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+plot_fit1
+  
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Analysis/AnalysisSnowAreaBurned.jpeg", plot = plot_fit1, width = 6, height = 3, units = c("in"), dpi=600 )
+```
+
+# Correlation
+```{r}
+snow %>%
+  group_by(EcoCode) %>%
+  summarize(COR=cor( MeanCalDoY, Mha))
+
+```
