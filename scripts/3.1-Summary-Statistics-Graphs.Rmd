@@ -324,6 +324,43 @@ data %>%
 
 ```
 
+### Rotation first decade
+```{r}
+data %>% 
+  filter(FireYr %in% 2001:2010) %>%
+  dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
+  group_by(FireYr, EcoName) %>% 
+  summarise(burnkm2 = sum(SizeKm2), 
+            EcoKm2 = min(Ecokm2)) %>%
+  mutate(propAnBurn = round(burnkm2/EcoKm2,10)) %>%
+  dplyr::select(FireYr, EcoName, propAnBurn)%>%
+  as.data.frame(.)  %>%
+  group_by(EcoName) %>%
+  summarise(propFire = sum(propAnBurn)) %>%
+  mutate(years=10) %>%
+  mutate(rotation=round(years/propFire, 0)) %>%
+  write.csv(., '../outputs/3.1-Summary/Table10-1.csv',  row.names = FALSE)
+
+```
+
+```{r}
+data %>% 
+  filter(FireYr %in% 2011:2020) %>%
+  dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
+  group_by(FireYr, EcoName) %>% 
+  summarise(burnkm2 = sum(SizeKm2), 
+            EcoKm2 = min(Ecokm2)) %>%
+  mutate(propAnBurn = round(burnkm2/EcoKm2,10)) %>%
+  dplyr::select(FireYr, EcoName, propAnBurn)%>%
+  as.data.frame(.)  %>%
+  group_by(EcoName) %>%
+  summarise(propFire = sum(propAnBurn)) %>%
+  mutate(years=10) %>%
+  mutate(rotation=round(years/propFire, 0)) %>%
+  write.csv(., '../outputs/3.1-Summary/Table10-2.csv',  row.names = FALSE)
+
+```
+
 ## table 11 Class
 ```{r}
 
@@ -333,6 +370,16 @@ data %>% dplyr::select(FireYr, SizeHa, EcoName, EcoCode, Class) %>%
   as.data.frame(.) %>%
   mutate(Mha = totha/1000000)
 ```
+
+## table 12 Frequency
+```{r}
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.) %>%
+  write.csv(., '../outputs/3.1-Summary/Table12.csv',  row.names = FALSE)
+```
+
 
 # Summary Data Figures
 ## Figure 1---Area burned by Year and Ecozone
@@ -521,9 +568,8 @@ fig4.1
 ```{r}
 ggsave("../figures/3.1-Summary/Figure4.1.png", plot = fig4.1, width = 6, height = 7, units = c("in"), dpi = 600)
 ```
+
 ## Figure 5---Start/End
-
-
 
 ```{r}
 data5 = data %>%

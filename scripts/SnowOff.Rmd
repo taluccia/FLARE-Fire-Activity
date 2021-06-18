@@ -5,7 +5,11 @@ date: "6/8/2021"
 output: html_document
 ---
 
+# Clear workspace
 
+```{r}
+rm(list=ls()) 
+```
 
 # Overview
 
@@ -158,6 +162,108 @@ ggplot(data = data1, aes(x = snowMean, y = Mha, color = EcoCode)) +
   facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
   theme_bw() +
   theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+```
+
+# Data by Ecozone
+```{r}
+e01 = read.csv("../data/SnowOffEco/2001_SnowOffEco.csv") 
+e02 = read.csv("../data/SnowOffEco/2002_SnowOffEco.csv") 
+e03 = read.csv("../data/SnowOffEco/2003_SnowOffEco.csv") 
+e04 = read.csv("../data/SnowOffEco/2004_SnowOffEco.csv") 
+e05 = read.csv("../data/SnowOffEco/2005_SnowOffEco.csv") 
+```
+
+```{r}
+e06 = read.csv("../data/SnowOffEco/2006_SnowOffEco.csv") 
+e07 = read.csv("../data/SnowOffEco/2007_SnowOffEco.csv") 
+e08 = read.csv("../data/SnowOffEco/2008_SnowOffEco.csv") 
+e09 = read.csv("../data/SnowOffEco/2009_SnowOffEco.csv") 
+e10 = read.csv("../data/SnowOffEco/2010_SnowOffEco.csv") 
+```
+
+```{r}
+e11 = read.csv("../data/SnowOffEco/2011_SnowOffEco.csv") 
+e12 = read.csv("../data/SnowOffEco/2012_SnowOffEco.csv") 
+e13 = read.csv("../data/SnowOffEco/2013_SnowOffEco.csv") 
+e14 = read.csv("../data/SnowOffEco/2014_SnowOffEco.csv") 
+e15 = read.csv("../data/SnowOffEco/2015_SnowOffEco.csv") 
+```
+
+```{r}
+e16 = read.csv("../data/SnowOffEco/2016_SnowOffEco.csv") 
+e17 = read.csv("../data/SnowOffEco/2017_SnowOffEco.csv") 
+e18 = read.csv("../data/SnowOffEco/2018_SnowOffEco.csv") 
+e19 = read.csv("../data/SnowOffEco/2019_SnowOffEco.csv") 
+e20 = read.csv("../data/SnowOffEco/2020_SnowOffEco.csv") 
+```
+
+
+```{r}
+
+eco = bind_rows(e01, e02, e03, e04, e05, e06, e07, e08, e09, e10, e11, e12,  e13, e14, e15, e16, e17, e18, e19, e20)
+```
+
+```{r}
+eco
+```
+```{r}
+eco1 = eco %>% 
+  dplyr::select(ECO_NAME, OBJECTID, eco_code, calDoy, millis,  relDoy, year) %>% 
+  rename(EcoCode=eco_code, EcoName=ECO_NAME, EcoId = OBJECTID, FireYr=year) %>%
+  filter(EcoCode != "SSFS") %>%
+  group_by(EcoCode, FireYr) %>%
+  summarise(snowMeanEco = mean(relDoy)) %>%
+  drop_na(.)
+
+eco1
+```
+
+
+# Combine Fires and  Eco
+```{r}
+str(data1)
+str(eco1)
+```
+
+```{r}
+fill_zero = eco1 %>% 
+  left_join(data1) %>%
+  dplyr::mutate(Mha = replace_na(Mha, 0)) %>%
+  drop_na(.) %>%
+  dplyr::select(EcoCode, FireYr, snowMean, Mha)
+  
+
+
+fill_zero
+```
+
+
+
+
+```{r}
+fillNa = eco1 %>% 
+  left_join(data1) %>%
+  dplyr::mutate(Mha = replace_na(Mha, 0)) %>%
+  filter_all(any_vars(is.na(.))) %>%
+  mutate(snowMean = snowMeanEco) %>%
+  dplyr::select(EcoCode, FireYr, snowMean, Mha)
+
+
+fillNa
+```
+
+```{r}
+
+snowdata = bind_rows(fill_zero, fillNa) %>%
+  rename(MeanCalDoY=snowMean)
+
+snowdata
+```
+
+```{r}
+
+write.csv(snowdata, '../outputs/SnowData/SnowOff2001-2020.csv',  row.names = FALSE)
 
 ```
 

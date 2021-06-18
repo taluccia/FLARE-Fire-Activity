@@ -262,19 +262,21 @@ data1 %>%
   unnest(results) %>% 
   ggplot(aes(x = factor(EcoCode), y = r.squared)) +
     geom_bar(stat = "identity") +
-    labs(x = "Climate Moisture Deficit", y = expression(R^{2}))
+    labs(x = "Ecocode", y = expression(R^{2}))
 ```
 
 
 ### Plot
 
-```{r fig.height=7, fig.width=6}
+```{r fig.height=3, fig.width=6}
 plot_fit1 = ggplot(data = data1, aes(x = season, y = MHa)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_jitter(size = 1) +
   scale_color_manual(values=cbbPalette) +
-    labs(y=expression(atop("Mha")), x= "Season length (days)") +
-  facet_wrap(~EcoCode, scales = "free", ncol=2 ) +
+    labs(y="Millions of hectares (Mha)", x= "Season length (days)") +
+  facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  
+  scale_x_continuous(guide = guide_axis(check.overlap = TRUE)) +
   theme_bw() + 
   guides(colour = guide_legend(nrow = 1)) + 
   theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
@@ -286,7 +288,7 @@ plot_fit1
 
 
 ```{r eval=FALSE, include=FALSE}
-ggsave("../figures/AnalysisSeasonAreaBurned.jpeg", plot = plot_fit1, width = 6, height = 7, units = c("in"), dpi=600 )
+ggsave("../figures/Analysis/AnalysisSeasonAreaBurned.jpeg", plot = plot_fit1, width = 6, height = 3, units = c("in"), dpi=600 )
 ```
 
 
