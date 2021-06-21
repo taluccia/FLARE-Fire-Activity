@@ -567,9 +567,197 @@ data2 = bind_rows(jj_mha_0, jj_mhanot0, jj_rows_na)
 data2
 ```
 
+
+
+# Summarise Fire summer Variables
+
+## By Fire
+
+
+### DEF
+
+```{r}
+s_fire_def = firew1 %>% 
+  filter(month %in% 1:9) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanDef = mean(fireTotDef))
+
+
+s_fire_def
+```
+
+### TMMX
+
+```{r}
+s_fire_tmmx = firew1 %>% 
+  filter(month %in% 4:9) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireMeanTmmx = mean(tmmx)) %>%
+  drop_na(.) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanTmmx = mean(fireMeanTmmx))
+
+
+s_fire_tmmx
+```
+
+### Precip
+
+```{r}
+s_fire_pr = firew1 %>% 
+  filter(month %in% 4:9) %>%
+  group_by(EcoCode, FireYr, IDobj) %>%
+  summarize(fireTotPr = sum(pr)) %>%
+  drop_na(.) %>%
+  ungroup %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(FireMeanPr = mean(fireTotPr))
+
+
+s_fire_pr
+```
+
+### Combine Data
+
+```{r}
+s_fires = fire_Mha %>% 
+  left_join(s_fire_def) %>%
+  left_join(s_fire_tmmx) %>%
+  left_join(s_fire_pr)
+
+s_fires
+```
+
+## by Ecozone
+
+### DEF
+
+```{r}
+s_eco_def = ecow %>% 
+  filter(month %in% 1:9) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(fireTotDef = sum(def)) %>%
+  drop_na(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanDef = mean(fireTotDef))
+
+
+s_eco_def
+```
+
+### TMMX
+
+
+```{r}
+s_eco_tmmx = ecow %>% 
+  filter(month %in% 4:9) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, month) %>%
+  summarize(mean_montmmx = mean(tmmx)) %>%
+  ungroup(.) %>%
+  group_by(EcoCode, FireYr) %>%
+  summarize(EcoMeanTmmx = mean(mean_montmmx))
+
+
+s_eco_tmmx
+```
+
+### Precip
+
+```{r}
+s_eco_pr = ecow %>% 
+  filter(month %in% 4:9) %>%
+  drop_na(.) %>%
+  group_by(EcoCode, FireYr, EcoId) %>%
+  summarize(accumPr = sum(pr)) %>%
+  ungroup(.) %>%
+    group_by(EcoCode, FireYr) %>%
+  summarise(EcoMeanTotPr = mean(accumPr))
+
+
+s_eco_pr
+```
+
+### Combine Data
+```{r}
+s_ecow1 = s_eco_pr %>% 
+  left_join(s_eco_def) %>%
+  left_join(s_eco_tmmx)
+
+s_ecow1
+```
+
+# Combine summer data
+For ecozones that have years with no fire, we will use the climate values summarized by ecozone. So here we combine fire summarized data with ecozone summarized data, repalce NA with 0 for MHa. Than filter only years with 0 MHa burned.
+
+```{r}
+s_ecow1 
+s_fires
+```
+```{r}
+s_mha_0 = s_ecow1 %>%
+  left_join(s_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa == 0)  %>%
+  dplyr::select(EcoCode:MHa) %>%
+  rename(SummerDef = EcoMeanDef, SummerPr = EcoMeanTotPr, SummerTmmx =EcoMeanTmmx) 
+  
+
+s_mha_0 
+```
+
+
+```{r}
+s_rows_na = s_ecow1 %>% 
+  left_join(s_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  filter_all(any_vars(is.na(.))) %>%
+  dplyr::select(EcoCode:MHa) %>%
+  rename(SummerDef = EcoMeanDef, SummerPr = EcoMeanTotPr, SummerTmmx =EcoMeanTmmx) 
+  
+
+
+
+s_rows_na
+```
+
+```{r}
+s_mhanot0 = s_ecow1 %>% 
+  left_join(s_fires) %>%
+  dplyr::mutate(MHa = replace_na(MHa, 0)) %>%
+  filter(MHa != 0)  %>%
+  drop_na(.) %>%
+  dplyr::select(EcoCode, FireYr, MHa, FireMeanDef, FireMeanPr, FireMeanTmmx) %>%
+  rename(SummerDef = FireMeanDef, SummerPr = FireMeanPr, SummerTmmx = FireMeanTmmx) 
+  
+
+
+s_mhanot0
+```
+
+```{r}
+
+data3 = bind_rows(s_mha_0, s_mhanot0, s_rows_na) 
+
+data3
+```
+
+
+
+
+
 # Combine Annual with June/july
 ```{r}
-climate1 = data1 %>% left_join(data2)
+climate1 = data1 %>% left_join(data2) %>% left_join(data3)
+
+climate1
 ```
 
 ```{r}
@@ -577,7 +765,6 @@ climate1 = data1 %>% left_join(data2)
 write.csv(climate1, '../outputs/4.3-ClimateFire/ClimateFire2001-2020.csv',  row.names = FALSE)
 
 ```
-
 
 
 # Visualize
