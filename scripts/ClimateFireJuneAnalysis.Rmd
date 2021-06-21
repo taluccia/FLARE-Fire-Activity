@@ -1,0 +1,531 @@
+---
+title: "Climate Fire June/july Analysis"
+author: "Anna Talucci"
+date: "6/20/2021"
+output: html_document
+---
+
+
+
+# Clear workspace
+
+```{r}
+rm(list=ls()) 
+```
+
+
+# Overview
+[Terra Climate](https://developers.google.com/earth-engine/datasets/catalog/IDAHO_EPSCOR_TERRACLIMATE#bands)
+
+# Library
+```{r include=FALSE}
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(tidyverse)
+library(broom)
+library(ggplot2)
+library(stringr)
+library(lme4)
+library(cowplot)
+library(lme4)
+library(lsmeans)
+library(magrittr)
+library(rcompanion)
+library(qpcR)
+library(tibble)
+```
+
+# Define graph Theme and color Palette 
+
+##Themes
+```{r}
+lb_theme = theme_bw() + theme(legend.position = "bottom") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+```{r}
+comp_theme = theme_bw() + theme(legend.position = "none") +  
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black"))
+```
+
+### No Legend
+```{r}
+bar_theme = theme_bw() + 
+  theme(legend.position = "none", legend.title = element_blank()) +
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+```{r}
+bar2_theme = theme_bw() + 
+  theme(panel.grid.major = element_blank()) +
+    theme(axis.title.y = element_text(size = 11, hjust = 0.5, vjust = 1.1),
+        axis.text.x = element_text(size = 10, color = "black"),
+        axis.text.y = element_text(size = 10, color = "black"),
+        axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(angle=65, vjust=0.6)) 
+```
+
+
+## Palettes
+```{r}
+cbbPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r}
+ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32", "#AE3D5F", "#2DC086", "#3261A1")
+```
+
+
+
+
+# Data 
+
+## Ecozone
+```{r}
+climate = read.csv("../data/4.3-ClimateFire/ClimateFire2001-2020.csv") 
+```
+
+```{r}
+climate
+```
+# Analysis  June Variables
+## Model Climate Moisture Deficit
+```{r}
+fit1 = lm(MHa ~ JuneDef + EcoCode + JuneDef:EcoCode, data = climate)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+climate$fit1 = fitted(fit1)
+```
+
+```{r}
+# Get the residuals of the model
+climate$res1 = residuals(fit1)
+```
+
+```{r}
+qplot(x = fit1, y = res1, data = climate,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = JuneDef, y = res1, data = climate,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = climate, geom = "boxplot")
+```
+
+```{r}
+qqnorm(climate$res1, main = "Normal QQ Plot of Residuals")
+qqline(climate$res1) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit1, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit1, which = 2) # qqnorm plot of residuals
+```
+
+### Summary
+```{r}
+summary(fit1)
+```
+```{r}
+summary(fit1)$r.squared 
+```
+```{r}
+int_BT = coef(fit1)[1]
+int_CKMT = coef(fit1)[1] + coef(fit1)[3]
+int_CPT = coef(fit1)[1] + coef(fit1)[4]
+int_EST = coef(fit1)[1] + coef(fit1)[5]
+int_NSCT = coef(fit1)[1] + coef(fit1)[6]
+int_NST = coef(fit1)[1] + coef(fit1)[7]
+int_TBBMT = coef(fit1)[1] + coef(fit1)[8]
+int_TCST = coef(fit1)[1] + coef(fit1)[9]
+
+int_BT
+int_CKMT
+int_CPT
+int_EST
+int_NSCT
+int_NST
+int_TBBMT
+int_TCST
+
+slope_BT = coef(fit1)[2]
+slope_CKMT = coef(fit1)[2] + coef(fit1)[10]
+slope_CPT = coef(fit1)[2] + coef(fit1)[11]
+slope_EST = coef(fit1)[2] + coef(fit1)[12]
+slope_NSCT = coef(fit1)[2] + coef(fit1)[13]
+slope_NST = coef(fit1)[2] + coef(fit1)[14]
+slope_TBBMT = coef(fit1)[2] + coef(fit1)[15]
+slope_TCST = coef(fit1)[2] + coef(fit1)[16]
+
+slope_BT
+slope_CKMT
+slope_CPT
+slope_EST
+slope_NSCT
+slope_NST
+slope_TBBMT
+slope_TCST
+
+```
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JuneDef, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JuneDef, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Climate Moisture Deficit", y = expression(R^{2}))
+```
+
+
+### Plot
+
+```{r fig.height=3, fig.width=6}
+plot_fit1 = ggplot(data = climate, aes(x = JuneDef, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    ylab("") +
+    xlab("June Climate Moisture Deficit (mm)") +
+
+  facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+plot_fit1
+  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Analysis/JuneDefAnalysis.png", plot = plot_fit1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+
+## Model Precipitation
+
+```{r}
+fit2 = lm(MHa ~ JunePr + EcoCode + JunePr:EcoCode, data = climate)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+climate$fit2 = fitted(fit2)
+```
+
+```{r}
+# Get the residuals of the model
+climate$res2 = residuals(fit2)
+```
+
+```{r}
+qplot(x = fit2, y = res2, data = climate,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = JunePr, y = res2, data = climate,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = climate, geom = "boxplot")
+```
+
+```{r}
+qqnorm(climate$res2, main = "Normal QQ Plot of Residuals")
+qqline(climate$res2) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit2, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit2, which = 2) # qqnorm plot of residuals
+```
+
+### Summary
+```{r}
+summary(fit2)
+```
+```{r}
+summary(fit2)$r.squared 
+```
+```{r}
+int_BT = coef(fit2)[1]
+int_CKMT = coef(fit2)[1] + coef(fit2)[3]
+int_CPT = coef(fit2)[1] + coef(fit2)[4]
+int_EST = coef(fit2)[1] + coef(fit2)[5]
+int_NSCT = coef(fit2)[1] + coef(fit2)[6]
+int_NST = coef(fit2)[1] + coef(fit2)[7]
+int_TBBMT = coef(fit2)[1] + coef(fit2)[8]
+int_TCST = coef(fit2)[1] + coef(fit2)[9]
+
+int_BT
+int_CKMT
+int_CPT
+int_EST
+int_NSCT
+int_NST
+int_TBBMT
+int_TCST
+
+slope_BT = coef(fit2)[2]
+slope_CKMT = coef(fit2)[2] + coef(fit2)[10]
+slope_CPT = coef(fit2)[2] + coef(fit2)[11]
+slope_EST = coef(fit2)[2] + coef(fit2)[12]
+slope_NSCT = coef(fit2)[2] + coef(fit2)[13]
+slope_NST = coef(fit2)[2] + coef(fit2)[14]
+slope_TBBMT = coef(fit2)[2] + coef(fit2)[15]
+slope_TCST = coef(fit2)[2] + coef(fit2)[16]
+
+slope_BT
+slope_CKMT
+slope_CPT
+slope_EST
+slope_NSCT
+slope_NST
+slope_TBBMT
+slope_TCST
+
+```
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JunePr, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JunePr, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Precipitation", y = expression(R^{2}))
+```
+
+
+### Plot
+
+```{r fig.height=3, fig.width=6}
+plot_fit2 = ggplot(data = climate, aes(x = JunePr, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+    ylab(("Millions of hectares (MHa)")) +
+    xlab("June Precipitation (mm)") +
+
+  facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  scale_x_continuous(guide = guide_axis(check.overlap = TRUE))+
+
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid"))
+
+plot_fit2
+  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Analysis/JunePrAnalysis.png", plot = plot_fit2, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+## Model Max Temperature
+
+
+```{r}
+fit3 = lm(MHa ~ JuneTmmx + EcoCode + JuneTmmx:EcoCode, data = climate)
+```
+#### Residuals
+
+
+```{r}
+# Get the fitted value for each observation
+climate$fit3 = fitted(fit3)
+```
+
+```{r}
+# Get the residuals of the model
+climate$res2 = residuals(fit3)
+```
+
+```{r}
+qplot(x = fit3, y = res2, data = climate,
+main = "Residuals vs Fitted Values")
+```
+
+```{r}
+qplot(x = JuneTmmx, y = res2, data = climate,
+xlab = "CMD",
+ylab = "Residuals",
+main = "Residuals vs CMD")
+```
+```{r}
+qplot(x = factor(1), y = res1, data = climate, geom = "boxplot")
+```
+
+```{r}
+qqnorm(climate$res2, main = "Normal QQ Plot of Residuals")
+qqline(climate$res2) # add reference line to the qq plot
+```
+
+```{r}
+plot(fit3, which = 1) # residual vs fitted values
+```
+
+```{r}
+plot(fit3, which = 2) # qqnorm plot of residuals
+```
+
+### Summary
+```{r}
+summary(fit3)
+```
+```{r}
+summary(fit3)$r.squared 
+```
+```{r}
+int_BT = coef(fit3)[1]
+int_CKMT = coef(fit3)[1] + coef(fit3)[3]
+int_CPT = coef(fit3)[1] + coef(fit3)[4]
+int_EST = coef(fit3)[1] + coef(fit3)[5]
+int_NSCT = coef(fit3)[1] + coef(fit3)[6]
+int_NST = coef(fit3)[1] + coef(fit3)[7]
+int_TBBMT = coef(fit3)[1] + coef(fit3)[8]
+int_TCST = coef(fit3)[1] + coef(fit3)[9]
+
+
+
+slope_BT = coef(fit3)[2]
+slope_CKMT = coef(fit3)[2] + coef(fit3)[10]
+slope_CPT = coef(fit3)[2] + coef(fit3)[11]
+slope_EST = coef(fit3)[2] + coef(fit3)[12]
+slope_NSCT = coef(fit3)[2] + coef(fit3)[13]
+slope_NST = coef(fit3)[2] + coef(fit3)[14]
+slope_TBBMT = coef(fit3)[2] + coef(fit3)[15]
+slope_TCST = coef(fit3)[2] + coef(fit3)[16]
+
+
+```
+
+
+
+### Pulling out r-squared for each group
+reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
+
+lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
+    data = field_ndvi_long1
+```{r}
+ climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JuneTmmx, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results)
+```
+
+```{r}
+climate %>% 
+  nest(-EcoCode) %>% 
+  mutate(fit = map(data, ~ lm(MHa ~ JuneTmmx, data = .)),
+         results = map(fit, glance)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = factor(EcoCode), y = r.squared)) +
+    geom_bar(stat = "identity") +
+    labs(x = "Max Temp", y = expression(R^{2}))
+```
+
+
+### Plot
+
+```{r fig.height=3, fig.width=6}
+plot_fit3 = ggplot(data = climate, aes(x = JuneTmmx, y = MHa)) + 
+  geom_smooth(method="lm", se=TRUE, alpha=0.1) +
+  geom_point(size = 1) +
+  scale_color_manual(values=cbbPalette) +
+  ylab("") +
+  xlab(expression(atop(paste("June mean maximum temperature (", degree,"C)")))) +
+  facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  theme_bw() +
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+
+plot_fit3
+  
+```
+
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Analysis/JuneTmmxAnalysis.png", plot = plot_fit3, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+
+
+#  Combine plots
+
+```{r fig.height=7, fig.width=6}
+comboplot1 = cowplot::plot_grid(plot_fit1, plot_fit2, plot_fit3, ncol=1)
+
+comboplot1
+```
+
+```{r eval=FALSE, include=FALSE}
+ggsave("../figures/Analysis/JuneClimateTrends.png", plot = comboplot1, width = 6, height = 7, units = c("in"), dpi=600 )
+```
+**THE END**
