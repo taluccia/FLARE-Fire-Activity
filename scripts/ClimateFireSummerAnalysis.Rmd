@@ -378,7 +378,7 @@ plot_fit2 = ggplot(data = climate, aes(x = SummerPr, y = MHa)) +
 
   facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
   scale_x_continuous(guide = guide_axis(check.overlap = TRUE))+
-
+scale_y_continuous(guide = guide_axis(check.overlap = TRUE))+
   theme_bw() +
   theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid"))
 

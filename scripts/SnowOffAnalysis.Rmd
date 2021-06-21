@@ -167,15 +167,6 @@ int_NST = coef(fit1)[1] + coef(fit1)[7]
 int_TBBMT = coef(fit1)[1] + coef(fit1)[8]
 int_TCST = coef(fit1)[1] + coef(fit1)[9]
 
-int_BT
-int_CKMT
-int_CPT
-int_EST
-int_NSCT
-int_NST
-int_TBBMT
-int_TCST
-
 slope_BT = coef(fit1)[2]
 slope_CKMT = coef(fit1)[2] + coef(fit1)[10]
 slope_CPT = coef(fit1)[2] + coef(fit1)[11]
@@ -185,17 +176,18 @@ slope_NST = coef(fit1)[2] + coef(fit1)[14]
 slope_TBBMT = coef(fit1)[2] + coef(fit1)[15]
 slope_TCST = coef(fit1)[2] + coef(fit1)[16]
 
-slope_BT
-slope_CKMT
-slope_CPT
-slope_EST
-slope_NSCT
-slope_NST
-slope_TBBMT
-slope_TCST
-
 ```
 
+# Create Dataframe with summry output
+
+```{r}
+EcoCode = c("BT", "CKMT", "CPT", "EST", "NSCT", "NST", "TBBMT", "TCST")
+intercept = c(int_BT, int_CKMT, int_CPT, int_EST, int_NSCT, int_NST, int_TBBMT, int_TCST)
+slope = c(slope_BT, slope_CKMT, slope_CPT, slope_EST, slope_NSCT, slope_NST, slope_TBBMT, slope_TCST)
+
+sum_Tmmx =data.frame(EcoCode,intercept, slope)
+sum_Tmmx
+```
 
 ### Pulling out r-squared for each group
 reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
@@ -203,11 +195,20 @@ reference: https://drsimonj.svbtle.com/running-a-model-on-separate-groups
 lm(formula = biomass_log ~ ndvi + res_meters + ndvi:res_meters, 
     data = field_ndvi_long1
 ```{r}
- snow %>% 
+snow1 =  snow %>% 
   nest(-EcoCode) %>% 
   mutate(fit = map(data, ~ lm(Mha ~ MeanCalDoY, data = .)),
          results = map(fit, glance)) %>% 
-  unnest(results)
+  unnest(results) %>%
+  mutate(variable="SnowOff") %>%
+  left_join(sum_Tmmx) %>%
+  dplyr::select(variable, EcoCode, intercept, slope, r.squared:nobs)
+
+snow1
+```
+
+```{r}
+write.csv(snow1, '../outputs/4.4ClimateFireAnalysis/TableSnowOffAnalysis.csv',  row.names = FALSE)
 ```
 
 ```{r}
