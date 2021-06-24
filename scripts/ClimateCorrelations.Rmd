@@ -1,0 +1,101 @@
+---
+title: "Climate Correlations"
+author: "Anna Talucci"
+date: "6/22/2021"
+output: html_document
+---
+
+# Overview
+
+
+# Packages
+
+
+```{r include=FALSE}
+library(sp)
+library(sf)
+library(rgdal) # geospatial data
+library(raster)
+library(rgeos) # GIS Geometry
+library(foreign) # deals with dbf files
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+library(RColorBrewer)
+library(patchwork)
+```
+
+
+
+
+
+# Data 
+
+
+```{r}
+snow = read.csv("../data/SnowData/SnowOff2001-2020.csv") 
+```
+
+```{r}
+snow
+```
+
+```{r}
+climate = read.csv("../data/4.3-ClimateFire/ClimateFire2001-2020.csv") 
+```
+
+```{r}
+climate
+```
+
+
+
+
+```{r}
+season = read.csv("../data/2.5-AllFires/SiberiaFires_v2_2001-2020.csv") 
+```
+```{r}
+season1 = data %>%
+  group_by(FireYr, EcoCode) %>%
+  summarise(start = round(min(MinDay), 0),
+            end = round(max(MaxDay), 0),
+            MHa = (sum(SizeHa))/1000000) %>%
+  mutate(season = end-start) %>%
+  dplyr::select(EcoCode, FireYr, start, end, season, MHa)
+
+
+season1
+   
+```
+# Corelations
+
+```{r}
+snow %>%
+  group_by(EcoCode) %>%
+  dplyr::select(-FireYr) %>%
+  do(data.frame(Cor=t(cor(.[,2:3], .[,3])))) %>%
+  write.csv(., '../outputs/ClimateCorrelations/Snow.csv',  row.names = FALSE)
+
+
+```
+
+```{r}
+climate %>%
+  group_by(EcoCode) %>%
+  dplyr::select(-FireYr) %>%
+  do(data.frame(Cor=t(cor(.[,2:14], .[,2])))) %>%
+  write.csv(., '../outputs/ClimateCorrelations/Climate.csv',  row.names = FALSE)
+
+
+```
+
+```{r}
+season1 %>%
+  group_by(EcoCode) %>%
+  dplyr::select(-FireYr, -start, -end) %>%
+  do(data.frame(Cor=t(cor(.[,2:3], .[,3])))) %>%
+  write.csv(., '../outputs/ClimateCorrelations/Season.csv',  row.names = FALSE)
+
+
+```
