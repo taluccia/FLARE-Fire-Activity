@@ -95,7 +95,7 @@ ecoPalette <- c("#CB453D", "#44CB30", "#2E41C3", "#36A4B4", "#B83491", "#B09C32"
 
 # Data 
 
-## Ecozone
+
 ```{r}
 snow = read.csv("../data/SnowData/SnowOff2001-2020.csv") 
 ```
