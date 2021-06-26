@@ -444,7 +444,7 @@ data %>%
   write.csv(., '../outputs/3.1-Summary/Table14-ArcticSub.csv',  row.names = FALSE)
 ```
 
-## Table 15
+## Table 15 Taiga/tundra area burned
 ```{r}
 data %>% 
   group_by(FireYr, EcoBiom) %>%
@@ -453,6 +453,34 @@ data %>%
   write.csv(., '../outputs/3.1-Summary/Table15-TaigaTundra.csv',  row.names = FALSE)
 ```
 
+## Table 16
+
+```{r} 
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.) %>%
+  ungroup() %>%
+  group_by(EcoCode) %>%
+  summarise(meanFrequency = mean(count)) %>%
+  write.csv(., '../outputs/3.1-Summary/Table16-MeanFrequency.csv',  row.names = FALSE)
+
+```
+
+## Table 17
+
+```{r} 
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoName, EcoCode) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.) %>%
+  ungroup() %>%
+  group_by(EcoCode) %>%
+  summarise(meanFrequency = mean(count)) 
+
+```
 
 # Summary Data Figures
 ## Figure 1---Area burned by Year and Ecozone

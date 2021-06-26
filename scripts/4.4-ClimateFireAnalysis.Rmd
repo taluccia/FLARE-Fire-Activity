@@ -517,6 +517,7 @@ plot_fit3 = ggplot(data = climate, aes(x = AnnualTmmx, y = MHa)) +
   ylab("") +
   xlab(expression(atop(paste("Mean annual maximum temperature (", degree,"C)")))) +
   facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+   scale_x_continuous(guide = guide_axis(check.overlap = TRUE))+
   theme_bw() +
   theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
 
@@ -533,7 +534,7 @@ ggsave("../figures/Analysis/AnnualTmmxAnalysis.png", plot = plot_fit3, width = 6
 #  Combine plots
 
 ```{r fig.height=7, fig.width=6}
-comboplot1 = cowplot::plot_grid(plot_fit1, plot_fit2, plot_fit3, ncol=1)
+comboplot1 = cowplot::plot_grid(plot_fit1, plot_fit2, plot_fit3, ncol=1, rel_heights = c(.3, .3, .3))
 
 comboplot1
 ```
