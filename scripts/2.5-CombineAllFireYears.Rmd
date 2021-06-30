@@ -175,5 +175,117 @@ data1 %>%
   
 ```
 
+```{r}
+all_fires = dplyr::bind_rows(f01, f02, f03, f04, f05, f06, f07, f08, f09, f10, f11, f12, f13, f14, f15, f16, f17, f18, f19, f20)
+```
+
+```{r}
+head(all_fires)
+```
+
+```{r}
+tail(all_fires)
+```
+
+
+
+
+
+
+
+```{r}
+all_fires
+```
+
+```{r}
+remove_large_triangles = all_fires %>% filter(!(FireYr == "2020" & IDobj=="3532")) %>% filter(!(FireYr == "2014" & IDobj=="2147"))
+```
+
+
+
+
+
+# Add fire size class
+
+
+Fire Size classes in hectares (from stocks 2002)
+1.  200-500
+2.  500-999
+3.  1,000 - 1,999
+4.  2,000 - 4,999
+5.  5,000 - 9,999
+6.  10,000 - 19,999
+7.  20,000 - 49,999
+8.  50,000 - 99,999
+9.  100,000 +
+
+```{r}
+head(remove_large_triangles)
+```
+
+
+
+```{r}
+
+fire_class = remove_large_triangles  %>% 
+  mutate(SizeHa = round(SIZEha, 0)) %>% 
+  mutate(SizeKm2 = round(SIZEha/100, 1)) %>%
+  mutate(Class = ifelse(SizeHa %in% 200:499, "1",
+                  ifelse(SizeHa %in% 500:999, "2",
+                   ifelse(SizeHa %in% 1000:1999, "3",
+                       ifelse(SizeHa %in% 2000:4999, "4",
+                         ifelse(SizeHa %in% 5000:9999, "5",
+                            ifelse(SizeHa %in% 10000:19999, "6",
+                              ifelse(SizeHa %in% 20000:49999, "7",
+                                ifelse(SizeHa %in% 50000:99999, "8", "9")))))))))
+
+fire_class
+```
+
+# Addition Modifications to the data
+fires smaller than 200 ha (Based on Stocks, 2002)
+Remove perimeters with 0 confidence (based on [FIRMS](https://earthdata.nasa.gov/faq/firms-faq) and the dataset)
+Add 1 to total days to acount for fires that burn only during a single day (start and end on same date)
+```{r}
+fire_class %>% filter(SizeHa<200 | AvgConf==0) 
+```
+
+```{r}
+fire_class %>% filter(AvgConf==0) 
+```
+
+
+```{r}
+data1 = fire_class %>% 
+  filter(SizeHa >= 200) %>%
+  filter(AvgConf > 0) %>%
+  mutate(BurnDays = TotDays +1)
+
+data1
+```
+
+# Write to shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(data1, "../outputs/2.5-AllFires/SiberiaFires_v2_2001-2020.shp", driver="ESRI Shapefile") 
+```
+
+# Remove geometry and write attributes to CSV
+```{r eval=FALSE, include=FALSE}
+data1 %>% 
+  st_set_geometry(NULL) %>% 
+        write.csv(., '../outputs/2.5-AllFires/SiberiaFires_v2_2001-2020.csv',  row.names = FALSE)
+  
+```
+
+# Data 2001-2019
+```{r}
+data2 = data1 %>% filter(FireYr != 2020)
+data2
+```
+
+# Write to shapefile
+```{r eval=FALSE, include=FALSE}
+st_write(data2, "../outputs/2.5-AllFires/SiberiaFires_2001-2019.shp", driver="ESRI Shapefile") 
+```
 # References
 Stocks, B. J., J. A. Mason, J. B. Todd, E. M. Bosch, B. M. Wotton, B. D. Amiro, M. D. Flannigan, K. G. Hirsch, K. A. Logan, D. L. Martell, and W. R. Skinner. 2002. Large forest fires in Canada, 1959–1997. Journal of Geophysical Research 108:8149.
