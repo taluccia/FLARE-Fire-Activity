@@ -319,6 +319,21 @@ data %>%
   group_by(EcoName) %>%
   summarise(propFire = sum(propAnBurn)) %>%
   mutate(years=20) %>%
+  mutate(rotation=round(years/propFire, 0)) 
+
+```
+```{r}
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, Ecokm2) %>%
+  group_by(FireYr, EcoName) %>% 
+  summarise(burnkm2 = sum(SizeKm2), 
+            EcoKm2 = min(Ecokm2)) %>%
+  mutate(propAnBurn = round(burnkm2/EcoKm2,10)) %>%
+  dplyr::select(FireYr, EcoName, propAnBurn)%>%
+  as.data.frame(.)  %>%
+  group_by(EcoName) %>%
+  summarise(propFire = sum(propAnBurn)) %>%
+  mutate(years=20) %>%
   mutate(rotation=round(years/propFire, 0)) %>%
   write.csv(., '../outputs/3.1-Summary/Table10.csv',  row.names = FALSE)
 
@@ -412,6 +427,7 @@ data %>%
   summarise(n = n(),
             EcoKm2 = min(Ecokm2))%>%
   mutate(density = n/EcoKm2) %>%
+  mutate(den10000km = ((n*10000)/EcoKm2)) %>%
   as.data.frame(.) %>%
   write.csv(., '../outputs/3.1-Summary/Table13.csv',  row.names = FALSE)
 ```
@@ -422,12 +438,29 @@ data %>%
   group_by(FireYr, EcoCode) %>%
   summarise(n = n(),
             EcoKm2 = min(Ecokm2))%>%
-  mutate(density = n/EcoKm2) %>%
+  mutate(density = ((n*10000)/EcoKm2)) %>%
   ungroup %>%
   group_by(EcoCode) %>%
   summarise(meanDensity = mean(density)) %>%
-  as.data.frame(.) 
+  as.data.frame(.) %>%
+  write.csv(., '../outputs/3.1-Summary/Table13.1.csv',  row.names = FALSE)
   
+```
+
+```{r}
+data %>% 
+  dplyr::select(FireYr, SizeKm2, EcoName, EcoCode, Ecokm2) %>%
+  group_by(FireYr, EcoCode) %>%
+  summarise(n = n(),
+            EcoKm2 = min(Ecokm2))%>%
+  mutate(density = n/EcoKm2) %>%
+  mutate(den10000km = ((n*10000)/EcoKm2)) %>%
+  ungroup() %>%
+  group_by(EcoCode) %>%
+  summarise(mindensity = min(den10000km),
+            maxdennsity = max(den10000km)) %>%
+  as.data.frame(.) %>%
+  write.csv(., '../outputs/3.1-Summary/Table13.2.csv',  row.names = FALSE)
 ```
 
 ## Table 14 Arctic Sub artic 2020
@@ -479,6 +512,19 @@ data %>%
   ungroup() %>%
   group_by(EcoCode) %>%
   summarise(meanFrequency = mean(count)) 
+
+```
+#Table 18 Class Frequency area
+```{r}
+data
+```
+
+```{r} 
+data %>% 
+  dplyr::select(FireYr, EcoName, EcoCode, SizeHa, Class) %>%
+  group_by(FireYr, EcoName, EcoCode, Class) %>%
+  count(FireYr, name='count') %>%
+  as.data.frame(.) 
 
 ```
 
@@ -1020,7 +1066,7 @@ data15
 fig15 = ggplot(data15, aes(x=FireYr, y=count, fill=Class)) +
   geom_bar(stat="identity", width = 0.5, position = position_stack(reverse = FALSE)) +
   facet_wrap(~EcoCode, scales = "free_y", ncol=4) +
-scale_y_continuous(name = ('Frequency (count)')) +
+scale_y_continuous(name = ('Number of fires')) +
 
   scale_fill_brewer(palette = "Spectral",  name="Size class (ha)", labels = c("200-499", "500-999", "1,000-1,999", "2,000-4,999", "5,000-9,999", "10,000-19,999", "20,000-49,999", "50,000-99,999", ">100,000")) +
   xlab('') +

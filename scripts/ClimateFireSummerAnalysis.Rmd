@@ -227,17 +227,20 @@ climate %>%
 
 ### Plot
 
-```{r fig.height=3, fig.width=6}
+```{r fig.height=2.3, fig.width=6}
 plot_fit1 = ggplot(data = climate, aes(x = SummerDef, y = MHa)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
-    ylab("") +
-    xlab("Summer Climate Moisture Deficit (mm)") +
+    ylab(("Millions of hectares\n(Mha)")) +
+    xlab("Climate Water Deficit (mm)") +
 
   facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  scale_x_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=3))+
+ scale_y_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=2))+
   theme_bw() +
-  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
+  theme(plot.margin = unit(c(.1,.1,.1,.1), "cm"))
 
 plot_fit1
   
@@ -368,19 +371,21 @@ climate %>%
 
 ### Plot
 
-```{r fig.height=3, fig.width=6}
+```{r fig.height=2.3, fig.width=6}
 plot_fit2 = ggplot(data = climate, aes(x = SummerPr, y = MHa)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
-    ylab(("Millions of hectares (MHa)")) +
-    xlab("Summer Precipitation (mm)") +
+    ylab(("Millions of hectares\n(Mha)")) +
+    xlab("Precipitation (mm)") +
 
   facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
-  scale_x_continuous(guide = guide_axis(check.overlap = TRUE))+
-scale_y_continuous(guide = guide_axis(check.overlap = TRUE))+
+   scale_x_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=3))+
+ scale_y_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=2))+
   theme_bw() +
-  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid"))
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
+  theme(plot.margin = unit(c(.1,.1,.1,.1), "cm"))
+
 
 plot_fit2
   
@@ -514,16 +519,20 @@ climate %>%
 
 ### Plot
 
-```{r fig.height=3, fig.width=6}
+```{r fig.height=2.3, fig.width=6}
 plot_fit3 = ggplot(data = climate, aes(x = SummerTmmx, y = MHa)) + 
   geom_smooth(method="lm", se=TRUE, alpha=0.1) +
   geom_point(size = 1) +
   scale_color_manual(values=cbbPalette) +
-  ylab("") +
-  xlab(expression(atop(paste("Summer mean maximum temperature (", degree,"C)")))) +
+  ylab(("Millions of hectares\n(Mha)")) +
+  xlab(expression(atop(paste("Temperature (", degree,"C)")))) +
   facet_wrap(~EcoCode, scales = "free", ncol=4 ) +
+  scale_x_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=3))+
+ scale_y_continuous(guide = guide_axis(check.overlap = TRUE), breaks = scales::pretty_breaks(n=2))+
   theme_bw() +
-  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) 
+  theme(strip.background = element_rect(color=NA, fill="white", size=1.5, linetype="solid")) +
+  theme(plot.margin = unit(c(.1,.1,.1,.1), "cm"))
+
 
 plot_fit3
   
@@ -549,10 +558,14 @@ write.csv(summer_climate, '../outputs/4.4ClimateFireAnalysis/TableSummerAnalysis
 #  Combine plots
 
 ```{r fig.height=7, fig.width=6}
-comboplot1 = cowplot::plot_grid(plot_fit1, plot_fit2, plot_fit3, ncol=1)
+comboplot1 = cowplot::plot_grid(plot_fit1, plot_fit2, plot_fit3, ncol=1, rel_heights = c(1, 1, 1), align = "hv", labels = c('(a)', '(b)', '(c)'), label_size = 12, label_fontface = "plain") 
+   
 
 comboplot1
 ```
+
+
+
 
 ```{r eval=FALSE, include=FALSE}
 ggsave("../figures/Analysis/SummerClimateTrends.png", plot = comboplot1, width = 6, height = 7, units = c("in"), dpi=600 )
