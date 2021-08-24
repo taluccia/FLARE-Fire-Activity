@@ -355,7 +355,10 @@ data11
 ```
 
 
+```{r}
+data11 %>% filter(ID_obj ==1451)
 
+```
 
 # Write to shapefile
 ```{r}

@@ -42,7 +42,15 @@ library(lubridate)
 fires = st_read("../data/2.3-GEE-Attribute-Shapefiles-EqualArea/SiberiaFires_v2_2020.shp", "SiberiaFires_v2_2020") 
 ```
 
-# 
+```{r}
+head(fires)
+```
+
+```{r}
+fires %>% filter(ID_obj == 1451)
+
+```
+
 ```{r}
 head(fires)
 ```
@@ -121,6 +129,11 @@ fires_rename = fires %>%
          PermExt =  EXTENT,
          PermCon = CONTENT,
          PermLan = LANDFOR)
+
+```
+
+```{r}
+fires_rename %>% filter(IDobj ==1451)
 
 ```
 
